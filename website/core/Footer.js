@@ -39,49 +39,42 @@ class Footer extends React.Component {
             <h5>Community</h5>
             <a href={`${this.props.config.baseUrl}users`}>User Showcase</a>
 
-            <a href="https://discordapp.com/">P' Nos Discord</a>
-            <a href="https://stackoverflow.com/questions/tagged/" target="_blank" rel="noreferrer noopener">
-              Facebook
+            <a href="https://discordapp.com/" target="_blank" rel="noreferrer noopener">
+              Acoshift's Discord
             </a>
-            <a href="https://twitter.com/" target="_blank" rel="noreferrer noopener">
-              Twitter
+            <a href="https://groups.google.com/u/1/a/deploys.app/g/community" target="_blank" rel="noreferrer noopener">
+              Google Group
             </a>
           </div>
           <div>
-            <h5>Open Source tools</h5>
-            <a href={`${this.props.config.baseUrl}blog`}>Blog</a>
-            <a href="https://github.com/">Moonrhythm Github</a>
-            <a
-              className="github-button"
-              href={this.props.config.repoUrl}
-              data-icon="octicon-star"
-              data-count-href="/facebook/docusaurus/stargazers"
-              data-show-count="true"
-              data-count-aria-label="# stargazers on GitHub"
-              aria-label="Star this project on GitHub"
-            >
-              Star
+            <h5>Learn &amp; Explore</h5>
+            <a href="https://acoshift.me" target="_blank" rel="noreferrer noopener">
+              Acoshift's Blog
             </a>
-            {this.props.config.twitterUsername && (
-              <div className="social">
-                <a href={`https://twitter.com/${this.props.config.twitterUsername}`} className="twitter-follow-button">
-                  Follow @{this.props.config.twitterUsername}
-                </a>
-              </div>
-            )}
-            {this.props.config.facebookAppId && (
-              <div className="social">
-                <div
-                  className="fb-like"
-                  data-href={this.props.config.url}
-                  data-colorscheme="dark"
-                  data-layout="standard"
-                  data-share="true"
-                  data-width="225"
-                  data-show-faces="false"
-                />
-              </div>
-            )}
+            <a href="https://github.com/moonrhythm" target="_blank" rel="noreferrer noopener">
+              Moonrhythm Github
+            </a>
+            <a
+              href={`https://twitter.com/acoshift`}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="twitter-follow-button"
+            >
+              Follow @acoshft
+            </a>
+            <div className="social">
+              <a
+                className="github-button"
+                href="https://github.com/moonrhythm/hime"
+                data-icon="octicon-star"
+                data-count-href="/moonrhythm/hime/stargazers"
+                data-show-count="true"
+                data-count-aria-label="# stargazers on GitHub"
+                aria-label="Star this project on GitHub"
+              >
+                Star
+              </a>
+            </div>
           </div>
         </section>
 

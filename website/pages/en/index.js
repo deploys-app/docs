@@ -64,7 +64,7 @@ class HomeSplash extends React.Component {
         <div className="inner">
           <ProjectTitle tagline={siteConfig.tagline} title={siteConfig.title} />
           <PromoSection>
-            <Button href="https://deploys.app/">Go to Console</Button>
+            <Button href="https://deploys.app/">Visit Console</Button>
             <Button href={docUrl('doc1.html')}>Get Started</Button>
           </PromoSection>
         </div>
@@ -80,14 +80,13 @@ class Index extends React.Component {
 
     const Block = (props) => (
       <Container padding={['bottom', 'top']} id={props.id} background={props.background}>
-        <GridBlock align="center" contents={props.children} layout={props.layout} />
+        <GridBlock className="feature-item" align="center" contents={props.children} layout={props.layout} />
       </Container>
     )
 
     const FeatureCallout = () => (
       <div className="productShowcaseSection paddingBottom" style={{ textAlign: 'center' }}>
-        <h2>Cron Job</h2>
-        <MarkdownBlock>Running service with start scheduler.</MarkdownBlock>
+        <h2>Better than CloudRun ⚡️</h2>
       </div>
     )
 
@@ -134,7 +133,7 @@ class Index extends React.Component {
     )
 
     const Features = () => (
-      <Block layout="fourColumn">
+      <Block layout="threeColumn">
         {[
           {
             content: 'For service that expose HTTP(S) to the internet.',
@@ -154,6 +153,24 @@ class Index extends React.Component {
             imageAlign: 'top',
             title: 'Worker',
           },
+          {
+            content: 'Running service with start scheduler.',
+            image: `${baseUrl}img/undraw_react.svg`,
+            imageAlign: 'top',
+            title: 'Cronjob',
+          },
+          {
+            content: 'Support both stateless and stateful service with SSD.',
+            image: `${baseUrl}img/undraw_operating_system.svg`,
+            imageAlign: 'top',
+            title: 'Stateful and Stateless',
+          },
+          {
+            content: 'CockroachDB, Redis and more',
+            image: `${baseUrl}img/undraw_operating_system.svg`,
+            imageAlign: 'top',
+            title: 'Database',
+          },
         ]}
       </Block>
     )
@@ -167,7 +184,7 @@ class Index extends React.Component {
         .filter((user) => user.pinned)
         .map((user) => (
           <a href={user.infoLink} key={user.infoLink}>
-            <img src={user.image} alt={user.caption} title={user.caption} />
+            <img src={`${baseUrl}${user.image}`} alt={user.caption} title={user.caption} />
           </a>
         ))
 

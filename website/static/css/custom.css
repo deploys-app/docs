@@ -11,6 +11,10 @@
   margin-top: 4rem;
 }
 
+.feature-item {
+  margin-bottom: 2rem;
+}
+
 .buttonWrapper a {
   margin-right: 1rem;
 }
