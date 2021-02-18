@@ -86,7 +86,7 @@ class Index extends React.Component {
 
     const FeatureCallout = () => (
       <div className="productShowcaseSection paddingBottom" style={{ textAlign: 'center' }}>
-        <h2>Better than CloudRun ⚡️</h2>
+        <h2 className="paddingBottom">Better than CloudRun ⚡️</h2>
         <Button href="https://medium.com/@taforyou/deploys-app-is-better-than-cloud-run-workshop-c44a06b6dee5">
           Read why?
         </Button>
