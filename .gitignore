@@ -8,3 +8,4 @@ lib/core/MetadataBlog.js
 website/translated_docs
 website/node_modules
 website/i18n/*
+website/build
