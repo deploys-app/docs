@@ -1,0 +1,16 @@
+{{- $current := . -}}
+<aside class="sidebar" id="sidebar" aria-label="Documentation">
+	<nav class="sidebar-mobile-nav" aria-label="Primary">
+		{{- range .Site.Menus.primary }}
+		<a class="sidebar-link" href="{{ .URL }}"{{ if .Params.external }} target="_blank" rel="noopener"{{ end }}>{{ .Name }}</a>
+		{{- end }}
+	</nav>
+	{{- range .Site.Home.Sections.ByWeight }}
+	<div class="sidebar-group">
+		<div class="sidebar-group-label">{{ .Title }}</div>
+		{{- range .RegularPages.ByWeight }}
+		<a class="sidebar-link{{ if eq .RelPermalink $current.RelPermalink }} is-active{{ end }}" href="{{ .RelPermalink }}">{{ .LinkTitle }}</a>
+		{{- end }}
+	</div>
+	{{- end }}
+</aside>

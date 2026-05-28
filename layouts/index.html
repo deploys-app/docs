@@ -1,0 +1,66 @@
+{{ define "main" }}
+<main class="home" id="main">
+	<section class="home-hero u-grid-ink">
+		<div class="home-hero-inner">
+			<span class="home-kicker">Deploys.app Documentation</span>
+			<h1 class="home-title">Ship containers.<br><span class="signal">Skip the cluster.</span></h1>
+			<p class="home-lead">
+				Deploys.app runs your web services, workers, scheduled jobs, and TCP apps on
+				managed Kubernetes — no nodes to babysit, no YAML to hand-roll. These docs take you
+				from your first deploy to the full REST API.
+			</p>
+			<div class="home-actions">
+				<a class="button -primary" href="/getting-started/quickstart/">Start deploying {{ partial "icon" "arrow-right" }}</a>
+				<a class="button -ghost" href="/getting-started/concepts/">Core concepts</a>
+				<a class="button -ink" href="{{ .Site.Params.consoleURL }}" target="_blank" rel="noopener">Open console {{ partial "icon" "external" }}</a>
+			</div>
+		</div>
+	</section>
+
+	<section class="home-section">
+		<div class="home-section-head">
+			<span class="home-section-kicker">From zero to live</span>
+			<h2 class="home-section-title">One command to production</h2>
+			<p class="home-section-lead">Push an image, point the CLI at a project and location, and Deploys handles the rollout, routing, and TLS.</p>
+		</div>
+		<div class="home-terminal" aria-hidden="true">
+<pre><span class="cmt"># authenticate once with a service-account key</span>
+<span class="pmpt">$</span> export DEPLOYS_AUTH_USER=<span class="arg">ci@acme.iam.deploys.app</span>
+<span class="pmpt">$</span> export DEPLOYS_AUTH_PASS=<span class="arg">$DEPLOYS_KEY</span>
+
+<span class="cmt"># build, push, and roll out a web service</span>
+<span class="pmpt">$</span> deploys deployment deploy \
+    --project <span class="arg">acme</span> --location <span class="arg">gke.cluster-rcf2</span> \
+    --name <span class="arg">web</span> --image <span class="arg">nginx:1.27</span> --port <span class="arg">80</span>
+
+<span class="cmt"># → live at https://web.acme.rcf2.deploys.app</span></pre>
+		</div>
+	</section>
+
+	<section class="home-section">
+		<div class="home-section-head">
+			<span class="home-section-kicker">Browse the docs</span>
+			<h2 class="home-section-title">Everything in the platform</h2>
+		</div>
+		<div class="card-grid">
+			{{- range .Site.Home.Sections.ByWeight }}
+			<a class="card" href="{{ .RelPermalink }}">
+				<span class="card-icon">{{ partial "icon" (.Params.icon | default "book") }}</span>
+				<span class="card-title">{{ .Title }}</span>
+				<span class="card-desc">{{ with .Description }}{{ . }}{{ else }}{{ .Params.lead }}{{ end }}</span>
+				<span class="card-meta">{{ len .RegularPages }} pages {{ partial "icon" "arrow-right" }}</span>
+			</a>
+			{{- end }}
+		</div>
+	</section>
+
+	<footer class="home-foot">
+		<p>
+			Built for developers who'd rather ship than operate clusters.
+			· <a href="{{ .Site.Params.websiteURL }}">deploys.app</a>
+			· <a href="{{ .Site.Params.consoleURL }}">Console</a>
+			· <a href="{{ .Site.Params.githubURL }}">GitHub</a>
+		</p>
+	</footer>
+</main>
+{{ end }}

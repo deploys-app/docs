@@ -1,0 +1,106 @@
+/* =========================================================================
+ * Code — inline chips on Paper, fenced blocks on Ink with a Chroma theme.
+ * ========================================================================= */
+
+.prose :not(pre) > code {
+	font-family: var(--font-family-mono);
+	font-size: 0.86em;
+	padding: 0.12em 0.4em;
+	border-radius: 5px;
+	background: var(--color-base-sink);
+	border: 1px solid var(--color-line);
+	color: var(--color-primary-700);
+	word-break: break-word;
+}
+.prose a:not(.button) code { color: inherit; }
+
+/* fenced blocks */
+.chroma-wrap {
+	margin-top: 1.4rem;
+	background: hsl(230, 28%, 8%);
+	border: 1px solid var(--color-ink-line);
+	border-radius: var(--radius-md);
+	box-shadow: var(--shadow-panel);
+	overflow: hidden;
+}
+.chroma-wrap pre {
+	margin: 0;
+	padding: 1rem 1.15rem;
+	overflow-x: auto;
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-300);
+	line-height: 1.65;
+	color: hsl(220, 26%, 84%);
+	tab-size: 2;
+}
+.chroma-wrap pre::-webkit-scrollbar { height: 8px; }
+.chroma-wrap pre::-webkit-scrollbar-thumb { background: var(--color-ink-line); border-radius: 999px; }
+
+/* optional filename header via the `code` shortcode */
+.code-block { margin-top: 1.4rem; }
+.code-block .chroma-wrap { margin-top: 0; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+.code-head {
+	display: flex;
+	align-items: center;
+	gap: 0.55rem;
+	padding: 0.55rem 0.9rem;
+	background: hsl(230, 24%, 11%);
+	border: 1px solid var(--color-ink-line);
+	border-bottom: 0;
+	border-radius: var(--radius-md) var(--radius-md) 0 0;
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-200);
+	color: var(--color-content-inv-muted);
+}
+.code-head .dot { width: 0.5rem; height: 0.5rem; border-radius: 999px; background: var(--color-primary-500); }
+.code-head .lang {
+	margin-left: auto;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--color-content-inv-faint);
+	font-size: var(--font-size-100);
+}
+
+.copy-btn {
+	position: absolute;
+	top: 0.55rem;
+	right: 0.55rem;
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-100);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--color-content-inv-muted);
+	background: hsl(230, 22%, 14%);
+	border: 1px solid var(--color-ink-line);
+	border-radius: 5px;
+	padding: 0.25rem 0.55rem;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity var(--timing-fast), color var(--timing-fast), border-color var(--timing-fast);
+}
+.chroma-wrap:hover .copy-btn, .copy-btn:focus-visible { opacity: 1; }
+.copy-btn:hover { color: var(--color-content-inv); border-color: hsl(230, 16%, 28%); }
+.copy-btn.is-done { color: var(--color-positive-400); border-color: var(--color-positive-600); }
+
+/* ---- Chroma token palette (Ink) ---- */
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs { color: hsl(230, 12%, 50%); font-style: italic; }
+.chroma .cp, .chroma .cpf { color: hsl(230, 12%, 55%); }
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn, .chroma .kp, .chroma .kr { color: hsl(335, 85%, 72%); }
+.chroma .kt { color: hsl(189, 80%, 68%); }
+.chroma .o, .chroma .ow { color: hsl(220, 16%, 62%); }
+.chroma .p { color: hsl(220, 16%, 64%); }
+.chroma .nb, .chroma .bp { color: hsl(189, 80%, 70%); }
+.chroma .nf, .chroma .fm { color: hsl(189, 82%, 66%); }
+.chroma .nc, .chroma .nn { color: hsl(48, 78%, 70%); }
+.chroma .nt { color: hsl(335, 80%, 72%); }
+.chroma .na { color: hsl(48, 78%, 70%); }
+.chroma .nv, .chroma .vc, .chroma .vg, .chroma .vi { color: hsl(220, 30%, 84%); }
+.chroma .s, .chroma .s1, .chroma .s2, .chroma .sb, .chroma .sc, .chroma .sd,
+.chroma .sh, .chroma .sx, .chroma .sr, .chroma .ss { color: hsl(150, 58%, 64%); }
+.chroma .se, .chroma .si { color: hsl(48, 80%, 70%); }
+.chroma .m, .chroma .mi, .chroma .mf, .chroma .mh, .chroma .mo, .chroma .il { color: hsl(28, 90%, 68%); }
+.chroma .l, .chroma .ld { color: hsl(150, 58%, 64%); }
+.chroma .gp { color: hsl(335, 70%, 64%); user-select: none; }
+.chroma .gi { color: hsl(150, 58%, 60%); }
+.chroma .gd { color: hsl(355, 70%, 68%); }
+.chroma .err { color: hsl(355, 79%, 70%); }

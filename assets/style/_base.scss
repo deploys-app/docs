@@ -1,0 +1,50 @@
+body {
+	font-family: var(--font-family-primary);
+	font-size: var(--font-size-400);
+	font-weight: var(--font-weight-default);
+	background-color: var(--color-base);
+	color: var(--color-content);
+}
+
+/* Faint "blueprint" grid texture for Ink surfaces — mirrors the console shell. */
+.u-grid-ink {
+	background-color: var(--color-ink);
+	background-image:
+		linear-gradient(to right, hsla(220, 40%, 92%, 0.04) 1px, transparent 1px),
+		linear-gradient(to bottom, hsla(220, 40%, 92%, 0.04) 1px, transparent 1px);
+	background-size: 40px 40px;
+}
+
+.icon {
+	width: 1em;
+	height: 1em;
+	display: inline-block;
+	vertical-align: -0.125em;
+	flex: none;
+}
+
+/* Mono "machine label" — section kickers, eyebrows, metadata. */
+.u-mono-label {
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-200);
+	font-weight: var(--font-weight-medium);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.u-signal {
+	color: var(--color-primary-500);
+}
+
+/* Skip link for keyboard users. */
+.skip-link {
+	position: absolute;
+	left: -999px;
+	top: 0.5rem;
+	z-index: 100;
+	background: var(--color-primary-600);
+	color: #fff;
+	padding: 0.5rem 1rem;
+	border-radius: var(--radius-sm);
+}
+.skip-link:focus { left: 0.5rem; }

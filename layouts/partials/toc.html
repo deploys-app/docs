@@ -1,0 +1,9 @@
+{{- $headings := findRE `(?s)<h[23].*?</h[23]>` .Content -}}
+{{- if .Params.toc | default true -}}
+{{- if gt (len $headings) 1 -}}
+<div class="doc-toc" aria-label="On this page">
+	<div class="doc-toc-label">On this page</div>
+	<nav>{{ .TableOfContents }}</nav>
+</div>
+{{- end -}}
+{{- end -}}

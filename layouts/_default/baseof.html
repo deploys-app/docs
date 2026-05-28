@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	{{- $title := .Title -}}
+	{{- if .IsHome }}<title>{{ .Site.Title }} — Deploy and run containers</title>
+	{{- else }}<title>{{ $title }} · {{ .Site.Title }}</title>{{ end }}
+	<meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300..800&family=JetBrains+Mono:wght@400..600&display=swap">
+	{{- $style := resources.Get "style/main.scss" | css.Sass (dict "outputStyle" "compressed") | resources.Fingerprint -}}
+	<link rel="stylesheet" href="{{ $style.RelPermalink }}">
+	<meta property="og:title" content="{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ $title }}{{ end }}">
+	<meta property="og:description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
+	<meta property="og:type" content="website">
+</head>
+<body>
+	<a class="skip-link" href="#main">Skip to content</a>
+	<input id="nav-toggle" type="checkbox" hidden>
+	{{ partial "navbar.html" . }}
+	{{ block "main" . }}{{ end }}
+	{{ partial "scripts.html" . }}
+</body>
+</html>

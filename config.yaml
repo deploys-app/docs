@@ -1,0 +1,48 @@
+baseURL: 'https://docs.deploys.app/'
+languageCode: 'en-us'
+title: 'Deploys.app Docs'
+enableInlineShortcodes: true
+
+disableKinds:
+  - taxonomy
+  - term
+ignoreErrors:
+  - error-disable-taxonomy
+
+markup:
+  goldmark:
+    renderer:
+      unsafe: true
+    parser:
+      attribute:
+        block: true
+  highlight:
+    noClasses: false
+    lineNos: false
+    tabWidth: 2
+    wrapperClass: 'chroma-wrap'
+  tableOfContents:
+    startLevel: 2
+    endLevel: 3
+    ordered: false
+
+params:
+  description: 'Documentation for Deploys.app — deploy and run containerized workloads without managing infrastructure.'
+  consoleURL: 'https://console.deploys.app'
+  apiBase: 'https://api.deploys.app'
+  websiteURL: 'https://www.deploys.app'
+  githubURL: 'https://github.com/deploys-app'
+
+menu:
+  primary:
+    - name: 'Docs'
+      url: '/getting-started/introduction/'
+      weight: 1
+    - name: 'API Reference'
+      url: '/api/overview/'
+      weight: 2
+    - name: 'Console'
+      url: 'https://console.deploys.app'
+      weight: 3
+      params:
+        external: true

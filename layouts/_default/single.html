@@ -1,0 +1,19 @@
+{{ define "main" }}
+<div class="layout">
+	{{ partial "sidebar.html" . }}
+	<main class="doc" id="main">
+		<article class="doc-article">
+			{{ partial "breadcrumb.html" . }}
+			<header class="doc-header">
+				<h1 class="doc-title">{{ .Title }}</h1>
+				{{ with .Params.lead }}<p class="doc-lead">{{ . | markdownify }}</p>{{ end }}
+			</header>
+			<div class="prose">
+				{{ .Content }}
+			</div>
+			{{ partial "pager.html" . }}
+		</article>
+		{{ partial "toc.html" . }}
+	</main>
+</div>
+{{ end }}

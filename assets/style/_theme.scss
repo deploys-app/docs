@@ -1,0 +1,98 @@
+/* Design tokens — aligned to the Deploys.app console design system.
+ * Magenta "signal" primary, console "Ink" (dark) + "Paper" (light) surfaces,
+ * Hanken Grotesk (UI/display) + JetBrains Mono (machine data).
+ *********************************************/
+:root {
+	/* Primary — console "signal" magenta */
+	--color-primary-100: hsl(335, 80%, 96%);
+	--color-primary-200: hsl(335, 80%, 92%);
+	--color-primary-300: hsl(335, 76%, 85%);
+	--color-primary-400: hsl(335, 85%, 64%);
+	--color-primary-500: hsl(335, 80%, 53%);
+	--color-primary-600: hsl(335, 80%, 46%);
+	--color-primary-700: hsl(335, 72%, 38%);
+	--color-primary-800: hsl(335, 72%, 31%);
+	--color-primary-900: hsl(335, 72%, 25%);
+
+	/* Secondary — console accent cyan */
+	--color-secondary-300: hsl(190, 80%, 80%);
+	--color-secondary-400: hsl(189, 86%, 50%);
+	--color-secondary-500: hsl(189, 88%, 42%);
+	--color-secondary-600: hsl(189, 88%, 35%);
+
+	--color-positive-400: hsl(163, 100%, 34%);
+	--color-positive-500: hsl(163, 100%, 31%);
+	--color-positive-600: hsl(163, 100%, 27%);
+	--color-negative-400: hsl(355, 79%, 70%);
+	--color-negative-500: hsl(353, 79%, 63%);
+	--color-negative-600: hsl(355, 79%, 58%);
+	--color-warning-400: hsl(48, 70%, 55%);
+	--color-warning-600: hsl(48, 70%, 45%);
+	--color-info-400: hsl(200, 83%, 60%);
+	--color-info-600: hsl(200, 83%, 45%);
+
+	/* Semantic tokens — Paper (light) + Ink (dark) surfaces. */
+	--color-content: hsl(230, 26%, 14%);            /* primary text on Paper */
+	--color-content-muted: hsl(230, 12%, 45%);      /* secondary text on Paper */
+	--color-content-faint: hsl(230, 12%, 58%);      /* tertiary text on Paper */
+	--color-content-inv: hsl(220, 40%, 94%);        /* primary text on Ink */
+	--color-content-inv-muted: hsl(220, 18%, 68%);  /* secondary text on Ink */
+	--color-content-inv-faint: hsl(220, 14%, 50%);  /* tertiary text on Ink */
+
+	--color-base: hsl(0, 0%, 100%);                 /* Paper surface */
+	--color-base-soft: hsl(240, 24%, 98%);          /* Paper, recessed */
+	--color-base-sink: hsl(240, 20%, 96%);          /* Paper, hover/active */
+	--color-ink: hsl(230, 28%, 7%);                 /* Ink surface */
+	--color-ink-soft: hsl(230, 22%, 11%);           /* Ink, raised panel */
+	--color-ink-line: hsl(230, 16%, 18%);           /* hairline on Ink */
+
+	--color-line: hsl(240, 16%, 90%);               /* hairline on Paper */
+	--color-line-strong: hsl(240, 16%, 84%);
+
+	--color-shadow: 230 28% 7%;
+
+	/* Font family */
+	--font-family-primary: 'Hanken Grotesk', -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+	--font-family-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'SFMono-Regular', Menlo, monospace;
+
+	/* Typescale */
+	--font-size-1200: 3rem;     /* 48px */
+	--font-size-1100: 2.5rem;   /* 40px */
+	--font-size-1000: 2.25rem;  /* 36px */
+	--font-size-900: 2rem;      /* 32px */
+	--font-size-800: 1.75rem;   /* 28px */
+	--font-size-700: 1.5rem;    /* 24px */
+	--font-size-600: 1.25rem;   /* 20px */
+	--font-size-500: 1.125rem;  /* 18px */
+	--font-size-400: 1rem;      /* 16px */
+	--font-size-300: 0.875rem;  /* 14px */
+	--font-size-200: 0.75rem;   /* 12px */
+	--font-size-100: 0.6875rem; /* 11px */
+
+	--line-height-ui: 1.2;
+	--line-height-default: 1.4;
+	--line-height-paragraph: 1.7;
+
+	--font-weight-default: 400;
+	--font-weight-medium: 500;
+	--font-weight-strong: 600;
+	--font-weight-heading: 700;
+
+	--timing-fast: 120ms;
+	--timing-normal: 240ms;
+
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 14px;
+
+	/* Layout metrics */
+	--navbar-height: 4rem;
+	--sidebar-width: 17rem;
+	--toc-width: 15rem;
+	--content-max: 50rem;
+	--breakpoint-md: 1024px;
+	--breakpoint-lg: 1280px;
+
+	--shadow-panel: 0 1px 2px hsl(var(--color-shadow) / 0.06), 0 8px 24px -12px hsl(var(--color-shadow) / 0.18);
+	--shadow-float: 0 2px 4px hsl(var(--color-shadow) / 0.08), 0 16px 40px -16px hsl(var(--color-shadow) / 0.28);
+}

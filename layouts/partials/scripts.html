@@ -1,0 +1,45 @@
+<script>
+(function () {
+	// Copy buttons on code blocks.
+	document.querySelectorAll('.chroma-wrap').forEach(function (wrap) {
+		var pre = wrap.querySelector('pre');
+		if (!pre) return;
+		var btn = document.createElement('button');
+		btn.className = 'copy-btn';
+		btn.type = 'button';
+		btn.setAttribute('aria-label', 'Copy code');
+		btn.textContent = 'Copy';
+		wrap.style.position = 'relative';
+		wrap.appendChild(btn);
+		btn.addEventListener('click', function () {
+			navigator.clipboard.writeText(pre.innerText).then(function () {
+				btn.textContent = 'Copied';
+				btn.classList.add('is-done');
+				setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('is-done'); }, 1600);
+			});
+		});
+	});
+
+	// TOC scroll-spy.
+	var tocLinks = Array.from(document.querySelectorAll('.doc-toc a'));
+	if (tocLinks.length) {
+		var map = {};
+		var targets = [];
+		tocLinks.forEach(function (a) {
+			var id = decodeURIComponent((a.getAttribute('href') || '').replace(/^#/, ''));
+			var el = id && document.getElementById(id);
+			if (el) { map[id] = a; targets.push(el); }
+		});
+		var spy = new IntersectionObserver(function (entries) {
+			entries.forEach(function (e) {
+				if (e.isIntersecting) {
+					tocLinks.forEach(function (l) { l.classList.remove('is-active'); });
+					var a = map[e.target.id];
+					if (a) a.classList.add('is-active');
+				}
+			});
+		}, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+		targets.forEach(function (t) { spy.observe(t); });
+	}
+})();
+</script>

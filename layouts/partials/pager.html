@@ -1,0 +1,28 @@
+{{- $ordered := slice -}}
+{{- range .Site.Home.Sections.ByWeight -}}
+	{{- range .RegularPages.ByWeight -}}
+		{{- $ordered = $ordered | append . -}}
+	{{- end -}}
+{{- end -}}
+{{- $cur := .RelPermalink -}}
+{{- $idx := -1 -}}
+{{- range $i, $p := $ordered }}{{ if eq $p.RelPermalink $cur }}{{ $idx = $i }}{{ end }}{{ end -}}
+{{- $prev := false -}}{{- $next := false -}}
+{{- if gt $idx 0 }}{{ $prev = index $ordered (sub $idx 1) }}{{ end -}}
+{{- if and (ge $idx 0) (lt $idx (sub (len $ordered) 1)) }}{{ $next = index $ordered (add $idx 1) }}{{ end -}}
+{{- if or $prev $next }}
+<nav class="doc-pager" aria-label="Pagination">
+	{{- if $prev }}
+	<a class="doc-pager-link -prev" href="{{ $prev.RelPermalink }}">
+		<span class="doc-pager-dir">← Previous</span>
+		<span class="doc-pager-title">{{ $prev.LinkTitle }}</span>
+	</a>
+	{{- else }}<span></span>{{ end }}
+	{{- if $next }}
+	<a class="doc-pager-link -next" href="{{ $next.RelPermalink }}">
+		<span class="doc-pager-dir">Next →</span>
+		<span class="doc-pager-title">{{ $next.LinkTitle }}</span>
+	</a>
+	{{- else }}<span></span>{{ end }}
+</nav>
+{{- end }}

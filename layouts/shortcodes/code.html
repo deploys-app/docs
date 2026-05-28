@@ -1,0 +1,7 @@
+{{- /* Fenced code with a filename header.
+       {{< code file="deploy.sh" lang="bash" >}} … {{< /code >}} */ -}}
+{{- $lang := .Get "lang" | default "text" -}}
+{{- $file := .Get "file" -}}
+{{- $code := trim .Inner "\n" -}}
+{{- $rendered := highlight $code $lang "" -}}
+<div class="code-block"><div class="code-head"><span class="dot"></span>{{ with $file }}<span class="file">{{ . }}</span>{{ end }}<span class="lang">{{ $lang }}</span></div>{{ $rendered }}</div>

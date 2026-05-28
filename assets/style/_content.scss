@@ -1,0 +1,144 @@
+/* =========================================================================
+ * Article header + prose
+ * ========================================================================= */
+
+.doc-breadcrumb {
+	@extend .u-mono-label;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.45rem;
+	color: var(--color-content-faint);
+	margin-bottom: 1.1rem;
+}
+.doc-breadcrumb a { color: var(--color-content-faint); transition: color var(--timing-fast); }
+.doc-breadcrumb a:hover { color: var(--color-primary-600); }
+.doc-breadcrumb .sep { opacity: 0.5; }
+.doc-breadcrumb .current { color: var(--color-content-muted); }
+
+.doc-title {
+	font-size: clamp(2rem, 4vw, var(--font-size-1100));
+	letter-spacing: -0.02em;
+	line-height: 1.1;
+	margin-bottom: 0.7rem;
+}
+.doc-lead {
+	font-size: var(--font-size-500);
+	color: var(--color-content-muted);
+	line-height: var(--line-height-paragraph);
+	max-width: 44rem;
+}
+.doc-header {
+	padding-bottom: 1.5rem;
+	margin-bottom: 2rem;
+	border-bottom: 1px solid var(--color-line);
+}
+
+/* ---- prose ---- */
+.prose { font-size: var(--font-size-400); color: var(--color-content); }
+
+.prose > * + * { margin-top: 1.1rem; }
+
+.prose h2 {
+	font-size: var(--font-size-800);
+	letter-spacing: -0.015em;
+	margin-top: 3rem;
+	padding-top: 0.4rem;
+	scroll-margin-top: calc(var(--navbar-height) + 1.5rem);
+}
+.prose h3 {
+	font-size: var(--font-size-600);
+	margin-top: 2.2rem;
+	scroll-margin-top: calc(var(--navbar-height) + 1.5rem);
+}
+.prose h4 {
+	font-size: var(--font-size-500);
+	margin-top: 1.8rem;
+	scroll-margin-top: calc(var(--navbar-height) + 1.5rem);
+}
+
+.prose h2 + p, .prose h3 + p, .prose h4 + p { margin-top: 0.6rem; }
+
+.prose p { line-height: var(--line-height-paragraph); }
+.prose a:not(.button) {
+	color: var(--color-primary-600);
+	font-weight: var(--font-weight-medium);
+	text-decoration: underline;
+	text-decoration-color: var(--color-primary-200);
+	text-underline-offset: 2px;
+	transition: text-decoration-color var(--timing-fast);
+}
+.prose a:not(.button):hover { text-decoration-color: var(--color-primary-500); }
+
+.prose strong { font-weight: var(--font-weight-strong); }
+
+.prose ul, .prose ol { padding-left: 1.3rem; line-height: var(--line-height-paragraph); }
+.prose ul { list-style: none; }
+.prose ul > li { position: relative; }
+.prose ul > li::before {
+	content: '';
+	position: absolute;
+	left: -1.05rem;
+	top: 0.72em;
+	width: 5px; height: 5px;
+	border-radius: 1px;
+	background: var(--color-primary-400);
+	transform: rotate(45deg);
+}
+.prose ol { list-style: decimal; }
+.prose ol::marker { color: var(--color-content-faint); }
+.prose li + li { margin-top: 0.35rem; }
+.prose li > ul, .prose li > ol { margin-top: 0.35rem; }
+
+.prose blockquote {
+	padding: 0.25rem 0 0.25rem 1.1rem;
+	border-left: 2px solid var(--color-line-strong);
+	color: var(--color-content-muted);
+	font-style: italic;
+}
+
+.prose hr { border: 0; border-top: 1px solid var(--color-line); margin: 2.5rem 0; }
+
+/* heading anchor */
+.heading-anchor {
+	color: var(--color-content-faint);
+	opacity: 0;
+	margin-left: 0.5rem;
+	font-weight: 400;
+	text-decoration: none;
+	transition: opacity var(--timing-fast), color var(--timing-fast);
+}
+.prose h2:hover .heading-anchor,
+.prose h3:hover .heading-anchor,
+.prose h4:hover .heading-anchor { opacity: 1; }
+.heading-anchor:hover { color: var(--color-primary-500); }
+
+/* ---- prev/next pager ---- */
+.doc-pager {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 1rem;
+	margin-top: 4rem;
+	padding-top: 2rem;
+	border-top: 1px solid var(--color-line);
+}
+.doc-pager-link {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	padding: 0.9rem 1.1rem;
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-md);
+	transition: border-color var(--timing-fast), background-color var(--timing-fast);
+}
+.doc-pager-link:hover { border-color: var(--color-primary-300); background: var(--color-primary-100); }
+.doc-pager-link.-next { text-align: right; }
+.doc-pager-dir {
+	@extend .u-mono-label;
+	color: var(--color-content-faint);
+}
+.doc-pager-title { font-weight: var(--font-weight-strong); color: var(--color-content); }
+
+@media (max-width: 560px) {
+	.doc-pager { grid-template-columns: 1fr; }
+}

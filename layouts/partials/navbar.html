@@ -1,0 +1,29 @@
+<header class="navbar u-grid-ink">
+	{{- if not .IsHome }}
+	<label class="navbar-burger" for="nav-toggle" aria-label="Toggle navigation">{{ partial "icon" "menu" }}</label>
+	{{- end }}
+	<a class="navbar-brand" href="/">
+		<span class="mark">{{ partial "icon" "rocket" }}</span>
+		Deploys.app
+		<span class="tag">Docs</span>
+	</a>
+	{{- $inAPI := hasPrefix .RelPermalink "/api/" -}}
+	<nav class="navbar-nav" aria-label="Primary">
+		{{- range .Site.Menus.primary }}
+		{{- $active := false -}}
+		{{- if eq .Name "API Reference" }}{{ $active = $inAPI }}{{ end -}}
+		{{- if eq .Name "Docs" }}{{ $active = (and (not $inAPI) (not $.IsHome)) }}{{ end -}}
+		<a class="navbar-link{{ if $active }} is-active{{ end }}"
+		   href="{{ .URL }}"{{ if .Params.external }} target="_blank" rel="noopener"{{ end }}>
+			{{ .Name }}{{ if .Params.external }}{{ partial "icon" "external" }}{{ end }}
+		</a>
+		{{- end }}
+	</nav>
+	<div class="navbar-spacer"></div>
+	<a class="navbar-search" href="{{ .Site.Params.consoleURL }}" aria-label="Open console">
+		{{ partial "icon" "search" }}
+		<span>Search the docs…</span>
+		<span class="kbd">⌘K</span>
+	</a>
+</header>
+<label class="sidebar-scrim" for="nav-toggle" aria-hidden="true"></label>

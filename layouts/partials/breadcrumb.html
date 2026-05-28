@@ -1,0 +1,10 @@
+<nav class="doc-breadcrumb" aria-label="Breadcrumb">
+	<a href="/">Docs</a>
+	{{- $section := .CurrentSection -}}
+	{{- if and $section (ne $section .) }}
+	<span class="sep">/</span>
+	<a href="{{ $section.RelPermalink }}">{{ $section.Title }}</a>
+	{{- end }}
+	<span class="sep">/</span>
+	<span class="current">{{ .Title }}</span>
+</nav>
