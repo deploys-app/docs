@@ -225,7 +225,7 @@ kbd {
 }
 
 /* numbered steps */
-.steps { counter-reset: step; margin-top: 1.5rem; padding-left: 0; list-style: none; }
+ol.steps { counter-reset: step; margin-top: 1.5rem; padding-left: 0; list-style: none; }
 .steps > li {
 	position: relative;
 	padding-left: 2.6rem;
