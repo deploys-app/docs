@@ -9,6 +9,13 @@ disableKinds:
 ignoreErrors:
   - error-disable-taxonomy
 
+# Emit /search-index.json from the home page for the in-page search modal.
+outputs:
+  home: [HTML, JSON]
+outputFormats:
+  JSON:
+    baseName: search-index
+
 markup:
   goldmark:
     renderer:

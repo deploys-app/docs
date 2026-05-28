@@ -1,0 +1,25 @@
+{{- /* Search index consumed by the in-page search modal.
+       Indexes every regular page plus the section landings — the only kinds
+       you'd realistically want to navigate to. */ -}}
+{{- $idx := slice -}}
+{{- range .Site.RegularPages -}}
+{{- $section := "" -}}
+{{- with .CurrentSection }}{{- $section = .Title -}}{{- end -}}
+{{- $idx = $idx | append (dict
+	"title" .Title
+	"section" $section
+	"url" .RelPermalink
+	"description" (or .Description .Params.lead "")
+	"content" (.Plain | truncate 800 "")
+) -}}
+{{- end -}}
+{{- range .Site.Sections -}}
+{{- $idx = $idx | append (dict
+	"title" .Title
+	"section" "Section"
+	"url" .RelPermalink
+	"description" (or .Description .Params.lead "")
+	"content" ""
+) -}}
+{{- end -}}
+{{ $idx | jsonify }}

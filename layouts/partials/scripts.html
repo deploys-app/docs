@@ -2,44 +2,236 @@
 (function () {
 	// Copy buttons on code blocks.
 	document.querySelectorAll('.chroma-wrap').forEach(function (wrap) {
-		var pre = wrap.querySelector('pre');
-		if (!pre) return;
-		var btn = document.createElement('button');
-		btn.className = 'copy-btn';
-		btn.type = 'button';
-		btn.setAttribute('aria-label', 'Copy code');
-		btn.textContent = 'Copy';
-		wrap.style.position = 'relative';
-		wrap.appendChild(btn);
+		var pre = wrap.querySelector('pre')
+		if (!pre) return
+		var btn = document.createElement('button')
+		btn.className = 'copy-btn'
+		btn.type = 'button'
+		btn.setAttribute('aria-label', 'Copy code')
+		btn.textContent = 'Copy'
+		wrap.style.position = 'relative'
+		wrap.appendChild(btn)
 		btn.addEventListener('click', function () {
 			navigator.clipboard.writeText(pre.innerText).then(function () {
-				btn.textContent = 'Copied';
-				btn.classList.add('is-done');
-				setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('is-done'); }, 1600);
-			});
-		});
-	});
+				btn.textContent = 'Copied'
+				btn.classList.add('is-done')
+				setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('is-done') }, 1600)
+			})
+		})
+	})
 
 	// TOC scroll-spy.
-	var tocLinks = Array.from(document.querySelectorAll('.doc-toc a'));
+	var tocLinks = Array.from(document.querySelectorAll('.doc-toc a'))
 	if (tocLinks.length) {
-		var map = {};
-		var targets = [];
+		var map = {}
+		var targets = []
 		tocLinks.forEach(function (a) {
-			var id = decodeURIComponent((a.getAttribute('href') || '').replace(/^#/, ''));
-			var el = id && document.getElementById(id);
-			if (el) { map[id] = a; targets.push(el); }
-		});
+			var id = decodeURIComponent((a.getAttribute('href') || '').replace(/^#/, ''))
+			var el = id && document.getElementById(id)
+			if (el) { map[id] = a; targets.push(el) }
+		})
 		var spy = new IntersectionObserver(function (entries) {
 			entries.forEach(function (e) {
 				if (e.isIntersecting) {
-					tocLinks.forEach(function (l) { l.classList.remove('is-active'); });
-					var a = map[e.target.id];
-					if (a) a.classList.add('is-active');
+					tocLinks.forEach(function (l) { l.classList.remove('is-active') })
+					var a = map[e.target.id]
+					if (a) a.classList.add('is-active')
 				}
-			});
-		}, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
-		targets.forEach(function (t) { spy.observe(t); });
+			})
+		}, { rootMargin: '-80px 0px -70% 0px', threshold: 0 })
+		targets.forEach(function (t) { spy.observe(t) })
 	}
-})();
+})()
+</script>
+
+<script>
+// In-page search modal. Loads /search-index.json lazily on first open.
+(function () {
+	var trigger = document.querySelector('[data-search-trigger]')
+	if (!trigger) return
+
+	var isMac = /Mac|iPhone|iPad/.test(navigator.platform)
+	document.querySelectorAll('[data-search-kbd]').forEach(function (el) {
+		el.textContent = isMac ? '⌘K' : 'Ctrl K'
+	})
+
+	var modal = document.createElement('div')
+	modal.className = 'search-modal'
+	modal.hidden = true
+	modal.innerHTML =
+		'<div class="search-backdrop" data-search-close></div>' +
+		'<div class="search-panel" role="dialog" aria-label="Search the docs" aria-modal="true">' +
+			'<div class="search-input-row">' +
+				'<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' +
+				'<input class="search-input" type="text" placeholder="Search the docs…" autocomplete="off" spellcheck="false" aria-label="Search">' +
+				'<span class="kbd">ESC</span>' +
+			'</div>' +
+			'<div class="search-results" role="listbox"></div>' +
+			'<div class="search-foot"><span><span class="key">↑</span><span class="key">↓</span> Navigate</span><span><span class="key">↵</span> Open</span><span><span class="key">esc</span> Close</span></div>' +
+		'</div>'
+	document.body.appendChild(modal)
+
+	var input = modal.querySelector('.search-input')
+	var results = modal.querySelector('.search-results')
+	var index = null
+	var indexLoading = null
+	var hits = []
+	var active = 0
+	var lastQuery = ''
+
+	function loadIndex () {
+		if (index || indexLoading) return indexLoading || Promise.resolve(index)
+		indexLoading = fetch('/search-index.json')
+			.then(function (r) { return r.json() })
+			.then(function (data) { index = data; return data })
+			.catch(function () { return [] })
+		return indexLoading
+	}
+
+	function open () {
+		modal.hidden = false
+		document.documentElement.classList.add('is-search-open')
+		loadIndex().then(function () { if (lastQuery) runSearch(lastQuery) })
+		setTimeout(function () { input.focus(); input.select() }, 0)
+	}
+	function close () {
+		modal.hidden = true
+		document.documentElement.classList.remove('is-search-open')
+	}
+
+	function escapeHTML (s) {
+		var d = document.createElement('div')
+		d.textContent = s == null ? '' : String(s)
+		return d.innerHTML
+	}
+
+	function highlight (text, terms) {
+		var esc = escapeHTML(text)
+		if (!terms.length) return esc
+		var pat = terms
+			.filter(function (t) { return t.length > 0 })
+			.map(function (t) { return t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') })
+			.join('|')
+		if (!pat) return esc
+		return esc.replace(new RegExp('(' + pat + ')', 'gi'), '<mark>$1</mark>')
+	}
+
+	function snippet (content, terms) {
+		if (!content) return ''
+		var lower = content.toLowerCase()
+		for (var i = 0; i < terms.length; i++) {
+			var t = terms[i]
+			var p = lower.indexOf(t)
+			if (p >= 0) {
+				var start = Math.max(0, p - 40)
+				var end = Math.min(content.length, p + 120)
+				var slice = (start > 0 ? '… ' : '') + content.slice(start, end) + (end < content.length ? ' …' : '')
+				return slice
+			}
+		}
+		return content.slice(0, 140) + (content.length > 140 ? ' …' : '')
+	}
+
+	function runSearch (q) {
+		lastQuery = q
+		var query = q.trim().toLowerCase()
+		if (!query || !index) {
+			hits = []
+			renderHits('')
+			return
+		}
+		var terms = query.split(/\s+/).filter(Boolean)
+		var scored = []
+		for (var i = 0; i < index.length; i++) {
+			var item = index[i]
+			var title = (item.title || '').toLowerCase()
+			var desc = (item.description || '').toLowerCase()
+			var section = (item.section || '').toLowerCase()
+			var content = (item.content || '').toLowerCase()
+			var hay = title + ' \x01 ' + section + ' \x01 ' + desc + ' \x01 ' + content
+			var ok = true
+			var score = 0
+			for (var j = 0; j < terms.length; j++) {
+				var t = terms[j]
+				if (hay.indexOf(t) < 0) { ok = false; break }
+				if (title.indexOf(t) >= 0) score += 12
+				if (title === t) score += 30
+				if (section.indexOf(t) >= 0) score += 4
+				if (desc.indexOf(t) >= 0) score += 3
+				score += 1
+			}
+			if (ok) scored.push({ item: item, score: score, terms: terms })
+		}
+		scored.sort(function (a, b) { return b.score - a.score })
+		hits = scored.slice(0, 12).map(function (s) { return s.item })
+		active = 0
+		renderHits(query, terms)
+	}
+
+	function renderHits (query, terms) {
+		if (!hits.length) {
+			if (!query) { results.innerHTML = ''; return }
+			results.innerHTML = '<div class="search-empty">No matches for <strong>' + escapeHTML(query) + '</strong></div>'
+			return
+		}
+		terms = terms || []
+		var html = ''
+		for (var i = 0; i < hits.length; i++) {
+			var h = hits[i]
+			var desc = snippet(h.description || h.content || '', terms)
+			html += '<a class="search-hit' + (i === active ? ' is-active' : '') + '" href="' + escapeHTML(h.url) + '" role="option" data-i="' + i + '">' +
+				'<span class="search-hit-section">' + escapeHTML(h.section || '') + '</span>' +
+				'<span class="search-hit-title">' + highlight(h.title, terms) + '</span>' +
+				(desc ? '<span class="search-hit-desc">' + highlight(desc, terms) + '</span>' : '') +
+			'</a>'
+		}
+		results.innerHTML = html
+	}
+
+	function moveActive (delta) {
+		if (!hits.length) return
+		active = (active + delta + hits.length) % hits.length
+		var nodes = results.querySelectorAll('.search-hit')
+		nodes.forEach(function (n, i) { n.classList.toggle('is-active', i === active) })
+		if (nodes[active]) nodes[active].scrollIntoView({ block: 'nearest' })
+	}
+
+	trigger.addEventListener('click', function (e) { e.preventDefault(); open() })
+
+	modal.addEventListener('click', function (e) {
+		if (e.target.closest('[data-search-close]')) { e.preventDefault(); close() }
+	})
+
+	input.addEventListener('input', function (e) { runSearch(e.target.value) })
+
+	results.addEventListener('mousemove', function (e) {
+		var hit = e.target.closest('.search-hit')
+		if (!hit) return
+		var i = +hit.getAttribute('data-i')
+		if (i === active) return
+		active = i
+		results.querySelectorAll('.search-hit').forEach(function (n, idx) {
+			n.classList.toggle('is-active', idx === active)
+		})
+	})
+
+	document.addEventListener('keydown', function (e) {
+		var open_ = !modal.hidden
+		var mod = e.metaKey || e.ctrlKey
+		if (mod && (e.key === 'k' || e.key === 'K')) {
+			e.preventDefault()
+			open_ ? close() : open()
+			return
+		}
+		if (!open_) return
+		if (e.key === 'Escape') { e.preventDefault(); close(); return }
+		if (e.key === 'ArrowDown') { e.preventDefault(); moveActive(1); return }
+		if (e.key === 'ArrowUp') { e.preventDefault(); moveActive(-1); return }
+		if (e.key === 'Enter') {
+			e.preventDefault()
+			var h = hits[active]
+			if (h) location.href = h.url
+		}
+	})
+})()
 </script>

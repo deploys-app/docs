@@ -20,10 +20,10 @@
 		{{- end }}
 	</nav>
 	<div class="navbar-spacer"></div>
-	<a class="navbar-search" href="{{ .Site.Params.consoleURL }}" aria-label="Open console">
+	<button class="navbar-search" type="button" data-search-trigger aria-label="Search the docs">
 		{{ partial "icon" "search" }}
 		<span>Search the docs…</span>
-		<span class="kbd">⌘K</span>
-	</a>
+		<span class="kbd" data-search-kbd>⌘K</span>
+	</button>
 </header>
 <label class="sidebar-scrim" for="nav-toggle" aria-hidden="true"></label>

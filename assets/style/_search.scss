@@ -1,0 +1,164 @@
+/* =========================================================================
+ * Search modal — opened from the navbar search "input" or with ⌘K / Ctrl+K.
+ * Indexes /search-index.json (emitted by layouts/index.json).
+ * ========================================================================= */
+
+/* The navbar trigger element is reused — it's a <button> styled to look like
+   an input. The base styles live in _layout.scss; these reset button defaults
+   so it sits flush with the rest of the navbar. */
+button.navbar-search {
+	appearance: none;
+	text-align: left;
+	font: inherit;
+	color: var(--color-content-inv-faint);
+}
+
+.search-modal[hidden] { display: none; }
+
+.search-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 100;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: clamp(2rem, 10vh, 6rem) 1rem 1rem;
+}
+
+.search-backdrop {
+	position: absolute;
+	inset: 0;
+	background: hsla(230, 28%, 7%, 0.55);
+	backdrop-filter: saturate(120%) blur(6px);
+}
+
+.search-panel {
+	position: relative;
+	width: 100%;
+	max-width: 36rem;
+	background: var(--color-base);
+	border: 1px solid var(--color-line);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-float);
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	max-height: calc(100vh - 6rem);
+}
+
+.search-input-row {
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	padding: 0.85rem 1rem;
+	border-bottom: 1px solid var(--color-line);
+}
+.search-input-row .icon { width: 1.1rem; height: 1.1rem; color: var(--color-content-muted); }
+.search-input {
+	flex: 1;
+	min-width: 0;
+	border: 0;
+	outline: 0;
+	background: transparent;
+	font-size: var(--font-size-500);
+	color: var(--color-content);
+}
+.search-input::placeholder { color: var(--color-content-faint); }
+.search-input-row .kbd {
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-100);
+	padding: 0.12rem 0.4rem;
+	border: 1px solid var(--color-line-strong);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	color: var(--color-content-muted);
+}
+
+.search-results {
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 0.4rem;
+}
+.search-empty {
+	padding: 1.8rem 1rem;
+	text-align: center;
+	color: var(--color-content-muted);
+	font-size: var(--font-size-300);
+}
+.search-empty strong { color: var(--color-content); font-weight: var(--font-weight-strong); }
+
+.search-hit {
+	display: block;
+	padding: 0.65rem 0.8rem;
+	border-radius: var(--radius-sm);
+	color: var(--color-content);
+	border-left: 2px solid transparent;
+	transition: background-color var(--timing-fast);
+}
+.search-hit:hover { background: var(--color-base-soft); }
+.search-hit.is-active {
+	background: var(--color-primary-100);
+	border-left-color: var(--color-primary-500);
+}
+.search-hit-section {
+	display: block;
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-100);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--color-content-faint);
+	margin-bottom: 0.1rem;
+}
+.search-hit.is-active .search-hit-section { color: var(--color-primary-700); }
+.search-hit-title {
+	display: block;
+	font-size: var(--font-size-400);
+	font-weight: var(--font-weight-strong);
+	color: var(--color-content);
+}
+.search-hit.is-active .search-hit-title { color: var(--color-primary-700); }
+.search-hit-desc {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+	font-size: var(--font-size-300);
+	color: var(--color-content-muted);
+	margin-top: 0.1rem;
+	line-height: var(--line-height-default);
+}
+.search-hit mark {
+	background: transparent;
+	color: var(--color-primary-600);
+	font-weight: var(--font-weight-strong);
+}
+.search-hit.is-active mark { color: var(--color-primary-700); }
+
+.search-foot {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 0.5rem 0.9rem;
+	border-top: 1px solid var(--color-line);
+	font-family: var(--font-family-mono);
+	font-size: var(--font-size-100);
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	color: var(--color-content-faint);
+	background: var(--color-base-soft);
+}
+.search-foot .key {
+	display: inline-block;
+	padding: 0 0.4rem;
+	margin-right: 0.3rem;
+	border: 1px solid var(--color-line-strong);
+	border-radius: 3px;
+	color: var(--color-content-muted);
+}
+
+html.is-search-open { overflow: hidden; }
+
+@media (max-width: 640px) {
+	.search-modal { padding: 0; }
+	.search-panel { max-width: 100%; max-height: 100vh; border-radius: 0; border-width: 0; }
+}
