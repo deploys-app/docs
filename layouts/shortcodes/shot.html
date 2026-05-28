@@ -1,6 +1,11 @@
 {{- /* Console screenshot framed as an app panel.
-       {{< shot src="/img/foo.png" url="console.deploys.app/…" alt="…" caption="…" >}} */ -}}
+       {{< shot src="/img/foo.png" url="console.deploys.app/…" alt="…" caption="…" >}}
+       When /img/foo-dark.png exists in static/, both light and dark images are
+       emitted and CSS swaps them based on the current theme. */ -}}
 {{- $src := .Get "src" -}}
 {{- $url := .Get "url" | default "console.deploys.app" -}}
+{{- $alt := .Get "alt" -}}
 {{- $cap := .Get "caption" -}}
-<figure class="shot"><div class="shot-frame"><div class="shot-chrome"><span class="shot-dots"><i></i><i></i><i></i></span><span class="shot-url">{{ $url }}</span></div><img src="{{ $src }}" alt="{{ .Get `alt` }}" loading="lazy"></div>{{ with $cap }}<figcaption class="shot-caption">{{ . | markdownify }}</figcaption>{{ end }}</figure>
+{{- $darkSrc := replace $src ".png" "-dark.png" -}}
+{{- $hasDark := and (ne $darkSrc $src) (fileExists (printf "static%s" $darkSrc)) -}}
+<figure class="shot"><div class="shot-frame"><div class="shot-chrome"><span class="shot-dots"><i></i><i></i><i></i></span><span class="shot-url">{{ $url }}</span></div><img class="shot-light" src="{{ $src }}" alt="{{ $alt }}" loading="lazy">{{ if $hasDark }}<img class="shot-dark" src="{{ $darkSrc }}" alt="{{ $alt }}" loading="lazy">{{ end }}</div>{{ with $cap }}<figcaption class="shot-caption">{{ . | markdownify }}</figcaption>{{ end }}</figure>

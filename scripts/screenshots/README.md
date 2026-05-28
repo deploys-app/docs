@@ -1,18 +1,21 @@
 # Console screenshots
 
-The console screenshots in `static/img/` (`deployment-list.png`,
-`deploy-form.png`, …) are captured locally from the console's mock server.
-They reference real, branded fixtures, not the spartan defaults `bun dev:mock`
-ships with — so the screenshots look like a real production project rather
-than an empty-state demo.
+The console screenshots in `static/img/` are captured locally from the
+console's mock server in **both themes** — every screen produces a
+`<name>.png` (light) and a `<name>-dark.png` (dark). The docs `shot`
+shortcode emits both `<img>` tags and CSS swaps which one is visible
+depending on the reader's current theme.
+
+The fixtures are enriched first so lists look like a real production project,
+not the spartan defaults `bun dev:mock` ships with.
 
 ## What's here
 
 | File | Purpose |
 |---|---|
 | `mock-enrichment.patch` | Diff against `console/src/lib/server/mock.js` that adds the richer fixtures: 5 deployments, 4 domains, 3 disks, 4 routes, 5 registry repos, 4 roles, 2 service accounts; also fixes the cosmetic `https://https://` URL doubling. |
-| `capture.mjs` | Playwright script that drives the console at light-theme and writes PNGs into `../../static/img/`. Handles the deploy form's location → fill interaction. |
-| `refresh.sh` | End-to-end helper: applies the patch, starts the mock server, runs `capture.mjs`, then reverts the patch and stops the server (even on interrupt). |
+| `capture.mjs` | Playwright script that drives the console at both light and dark themes and writes PNGs into `../../static/img/`. Handles the deploy form's location → fill interaction. Honors `SHOT_OUT` to override the output dir. |
+| `refresh.sh` | End-to-end helper: applies the patch, starts the mock server, copies `capture.mjs` into the console repo (so node resolves `@playwright/test`), runs it, then cleans up — reverts the patch, stops the server, removes the runner (even on interrupt). |
 
 ## Refresh the screenshots
 

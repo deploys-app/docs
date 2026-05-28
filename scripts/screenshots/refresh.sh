@@ -28,8 +28,10 @@ if ! git diff --quiet -- src/lib/server/mock.js; then
 	exit 1
 fi
 
+runner=""
 cleanup () {
 	[[ -n "${mock_pid:-}" ]] && kill "$mock_pid" 2>/dev/null || true
+	[[ -n "$runner" ]] && rm -f "$runner" || true
 	git checkout -- src/lib/server/mock.js 2>/dev/null || true
 }
 trap cleanup EXIT
@@ -48,6 +50,11 @@ for _ in $(seq 1 30); do
 done
 
 echo "==> capturing screenshots into $docs/static/img/"
-node "$here/capture.mjs"
+# ESM resolves @playwright/test relative to the source file's location, not
+# cwd. Drop capture.mjs into the console repo (which has node_modules) for
+# the run; the cleanup trap removes it.
+runner="$console/.shot-runner.mjs"
+cp "$here/capture.mjs" "$runner"
+SHOT_OUT="$docs/static/img" node "$runner"
 
 echo "==> done"
