@@ -96,3 +96,47 @@
 	--shadow-panel: 0 1px 2px hsl(var(--color-shadow) / 0.06), 0 8px 24px -12px hsl(var(--color-shadow) / 0.18);
 	--shadow-float: 0 2px 4px hsl(var(--color-shadow) / 0.08), 0 16px 40px -16px hsl(var(--color-shadow) / 0.28);
 }
+
+/* Dark mode — `<html class="dark">` swaps the semantic Paper-surface tokens
+ * to console "Ink" equivalents and the primary-tint scale to dark-appropriate
+ * values. Components don't need their own `.dark` rules; they keep reading the
+ * same token names. */
+html.dark {
+	/* Semantic surface — flip Paper → Ink. */
+	--color-content: hsl(220, 40%, 94%);
+	--color-content-muted: hsl(220, 18%, 68%);
+	--color-content-faint: hsl(220, 14%, 50%);
+	--color-base: hsl(230, 28%, 7%);
+	--color-base-soft: hsl(230, 22%, 11%);
+	--color-base-sink: hsl(230, 20%, 14%);
+	--color-line: hsl(230, 16%, 18%);
+	--color-line-strong: hsl(230, 16%, 24%);
+
+	/* Primary-tint scale — re-tuned so existing component refs Just Work on Ink.
+	 * The 100/200/300 tier becomes translucent magenta; the 600/700 tier (used
+	 * for text and emphasized text on light surfaces) flips brighter so it
+	 * reads as a foreground colour on the dark background. */
+	--color-primary-100: hsla(335, 80%, 50%, 0.14);
+	--color-primary-200: hsla(335, 80%, 55%, 0.22);
+	--color-primary-300: hsla(335, 80%, 55%, 0.36);
+	--color-primary-600: hsl(335, 85%, 72%);
+	--color-primary-700: hsl(335, 80%, 78%);
+
+	/* Shadow on Ink reads more as a glow than a drop. */
+	--color-shadow: 230 60% 2%;
+	--shadow-panel: 0 1px 2px hsl(var(--color-shadow) / 0.4), 0 8px 24px -12px hsl(var(--color-shadow) / 0.6);
+	--shadow-float: 0 2px 4px hsl(var(--color-shadow) / 0.4), 0 16px 40px -16px hsl(var(--color-shadow) / 0.7);
+}
+
+/* Smooth the swap so the eye doesn't get whipped. Only colour-bearing
+ * properties — leave layout, transforms, and opacity alone. */
+html.theme-ready body,
+html.theme-ready .sidebar,
+html.theme-ready .card,
+html.theme-ready .doc-pager-link,
+html.theme-ready .callout,
+html.theme-ready .search-panel,
+html.theme-ready .prose code,
+html.theme-ready .navbar-theme-toggle {
+	transition: background-color var(--timing-normal), color var(--timing-normal), border-color var(--timing-normal);
+}

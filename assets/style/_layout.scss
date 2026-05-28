@@ -95,6 +95,28 @@
 	border-radius: 4px;
 }
 
+.navbar-theme-toggle {
+	display: inline-grid;
+	place-items: center;
+	width: 2.2rem;
+	height: 2.2rem;
+	border-radius: var(--radius-sm);
+	border: 1px solid var(--color-ink-line);
+	background: transparent;
+	color: var(--color-content-inv-muted);
+	cursor: pointer;
+	transition: color var(--timing-fast), border-color var(--timing-fast), background-color var(--timing-fast);
+}
+.navbar-theme-toggle:hover {
+	color: var(--color-content-inv);
+	border-color: hsl(230, 16%, 28%);
+	background-color: hsla(230, 22%, 14%, 0.8);
+}
+.navbar-theme-toggle .icon { width: 1.05rem; height: 1.05rem; }
+.navbar-theme-toggle .icon-moon { display: none; }
+html.dark .navbar-theme-toggle .icon-sun { display: none; }
+html.dark .navbar-theme-toggle .icon-moon { display: inline-block; }
+
 .navbar-burger {
 	display: none;
 	width: 2.2rem; height: 2.2rem;

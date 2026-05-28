@@ -102,6 +102,9 @@
 	text-overflow: ellipsis;
 }
 .shot-frame img { display: block; width: 100%; height: auto; background: var(--color-base); }
+.shot-frame .shot-dark { display: none; }
+html.dark .shot-frame .shot-light { display: none; }
+html.dark .shot-frame .shot-dark { display: block; }
 .shot-caption {
 	display: flex;
 	gap: 0.5rem;
