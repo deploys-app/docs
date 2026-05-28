@@ -1,0 +1,312 @@
+diff --git a/src/lib/server/mock.js b/src/lib/server/mock.js
+index 9cc0235..9072bb5 100644
+--- a/src/lib/server/mock.js
++++ b/src/lib/server/mock.js
+@@ -127,8 +127,8 @@ function deployment (project = 'acme') {
+ 		location: LOCATION_ID,
+ 		name: 'web',
+ 		type: 'WebService',
+-		revision: 7,
+-		image: 'registry.deploys.app/acme/web:latest',
++		revision: 24,
++		image: 'registry.deploys.app/acme/web:v2.4.1',
+ 		env: { NODE_ENV: 'production', PORT: '8080' },
+ 		envGroups: ['shared'],
+ 		command: [],
+@@ -136,8 +136,8 @@ function deployment (project = 'acme') {
+ 		workloadIdentity: '',
+ 		pullSecret: '',
+ 		mountData: {},
+-		minReplicas: 1,
+-		maxReplicas: 3,
++		minReplicas: 2,
++		maxReplicas: 6,
+ 		schedule: '',
+ 		port: 8080,
+ 		protocol: 'http',
+@@ -145,12 +145,12 @@ function deployment (project = 'acme') {
+ 		nodePort: 0,
+ 		annotations: {},
+ 		resources: {
+-			requests: { cpu: '100m', memory: '128Mi' },
+-			limits: { cpu: '500m', memory: '512Mi' }
++			requests: { cpu: '250m', memory: '256Mi' },
++			limits: { cpu: '1000m', memory: '512Mi' }
+ 		},
+ 		sidecars: [],
+-		url: 'https://web.acme.rcf2.deploys.app',
+-		internalUrl: 'http://web.acme.svc.cluster.local',
++		url: 'web.acme.rcf2.deploys.app',
++		internalUrl: 'web.acme.svc.cluster.local',
+ 		logUrl: '',
+ 		eventUrl: '',
+ 		podsUrl: '',
+@@ -159,7 +159,7 @@ function deployment (project = 'acme') {
+ 		internalAddress: '10.0.0.10',
+ 		status: 'success',
+ 		action: 'deploy',
+-		allocatedPrice: 120.5,
++		allocatedPrice: 142.8,
+ 		createdAt: CREATED_AT,
+ 		createdBy: USER_EMAIL,
+ 		successAt: CREATED_AT,
+@@ -168,85 +168,155 @@ function deployment (project = 'acme') {
+ }
+ 
+ const deployments = [
+-	deployment('acme'),
+ 	{
+ 		...deployment('acme'),
+-		name: 'cron-cleanup',
+-		type: 'CronJob',
+-		schedule: '0 * * * *',
++		name: 'web',
++		image: 'registry.deploys.app/acme/web:v2.4.1',
++		revision: 24,
++		minReplicas: 2,
++		maxReplicas: 6,
++		resources: { requests: { cpu: '250m', memory: '256Mi' }, limits: { cpu: '1000m', memory: '512Mi' } },
++		url: 'web.acme.rcf2.deploys.app',
++		allocatedPrice: 142.8,
++		successAt: '2026-05-27T09:12:00Z'
++	},
++	{
++		...deployment('acme'),
++		name: 'api',
++		image: 'registry.deploys.app/acme/api:v1.8.0',
++		revision: 31,
++		minReplicas: 3,
++		maxReplicas: 10,
++		port: 8080,
++		env: { NODE_ENV: 'production', PORT: '8080', DATABASE_URL: 'postgres://…' },
++		envGroups: ['shared'],
++		resources: { requests: { cpu: '500m', memory: '512Mi' }, limits: { cpu: '2000m', memory: '1Gi' } },
++		url: 'api.acme.rcf2.deploys.app',
++		allocatedPrice: 318.4,
++		successAt: '2026-05-28T01:30:00Z'
++	},
++	{
++		...deployment('acme'),
++		name: 'worker',
++		type: 'Worker',
++		image: 'registry.deploys.app/acme/worker:v1.8.0',
++		revision: 18,
++		minReplicas: 1,
++		maxReplicas: 2,
+ 		port: 0,
++		resources: { requests: { cpu: '250m', memory: '256Mi' }, limits: { cpu: '1000m', memory: '512Mi' } },
+ 		url: '',
+ 		internalUrl: '',
+ 		address: '',
+ 		status: 'success',
+-		action: 'pause'
++		allocatedPrice: 64,
++		successAt: '2026-05-26T18:05:00Z'
+ 	},
+ 	{
+ 		...deployment('acme'),
+-		name: 'worker',
++		name: 'image-resizer',
+ 		type: 'Worker',
++		image: 'registry.deploys.app/acme/image-resizer:v0.9.2',
++		revision: 6,
++		minReplicas: 1,
++		maxReplicas: 4,
+ 		port: 0,
++		resources: { requests: { cpu: '500m', memory: '1Gi' }, limits: { cpu: '2000m', memory: '2Gi' } },
+ 		url: '',
+ 		internalUrl: '',
+ 		address: '',
+-		status: 'pending',
+-		allocatedPrice: 60
++		status: 'success',
++		allocatedPrice: 96,
++		successAt: '2026-05-25T11:45:00Z'
++	},
++	{
++		...deployment('acme'),
++		name: 'cron-cleanup',
++		type: 'CronJob',
++		image: 'registry.deploys.app/acme/cron-cleanup:v3.0.0',
++		revision: 4,
++		schedule: '0 3 * * *',
++		minReplicas: 0,
++		maxReplicas: 0,
++		port: 0,
++		resources: { requests: { cpu: '100m', memory: '128Mi' }, limits: { cpu: '500m', memory: '256Mi' } },
++		url: '',
++		internalUrl: '',
++		address: '',
++		status: 'success',
++		action: 'deploy',
++		allocatedPrice: 4.2,
++		successAt: '2026-05-20T03:00:00Z'
+ 	}
+ ]
+ 
++const diskBase = {
++	project: 'acme',
++	location: LOCATION_ID,
++	name: 'data',
++	size: 10,
++	status: 'success',
++	action: 'create',
++	createdAt: CREATED_AT,
++	createdBy: USER_EMAIL,
++	successAt: CREATED_AT
++}
++
+ const disks = [
+-	{
+-		project: 'acme',
+-		location: LOCATION_ID,
+-		name: 'data',
+-		size: 10,
+-		status: 'success',
+-		action: 'create',
+-		createdAt: CREATED_AT,
+-		createdBy: USER_EMAIL,
+-		successAt: CREATED_AT
+-	}
++	{ ...diskBase, name: 'postgres-data', size: 50 },
++	{ ...diskBase, name: 'uploads', size: 100 },
++	{ ...diskBase, name: 'redis-data', size: 10 }
+ ]
+ 
+-const domains = [
+-	{
+-		project: 'acme',
+-		location: LOCATION_ID,
+-		domain: 'acme.example.com',
+-		wildcard: false,
+-		cdn: true,
+-		verification: {
+-			ownership: { type: 'TXT', name: '_deploys.acme.example.com', value: 'verify=mock', errors: [] },
+-			ssl: {
+-				pending: false,
+-				dcv: { name: '_acme-challenge.acme.example.com', value: 'mock-dcv' },
+-				records: [],
+-				errors: []
+-			},
+-			dns: { verifiedAt: CREATED_AT, lastCheckedAt: CREATED_AT, errors: [] }
+-		},
+-		dnsConfig: {
+-			ipv4: ['203.0.113.10'],
+-			ipv6: ['2001:db8::10'],
+-			cname: ['rcf2.deploys.app.']
++const domainBase = {
++	project: 'acme',
++	location: LOCATION_ID,
++	domain: 'acme.example.com',
++	wildcard: false,
++	cdn: true,
++	verification: {
++		ownership: { type: 'TXT', name: '_deploys.acme.example.com', value: 'verify=mock', errors: [] },
++		ssl: {
++			pending: false,
++			dcv: { name: '_acme-challenge.acme.example.com', value: 'mock-dcv' },
++			records: [],
++			errors: []
+ 		},
+-		status: 'success',
+-		createdAt: CREATED_AT,
+-		createdBy: USER_EMAIL
+-	}
++		dns: { verifiedAt: CREATED_AT, lastCheckedAt: CREATED_AT, errors: [] }
++	},
++	dnsConfig: {
++		ipv4: ['203.0.113.10'],
++		ipv6: ['2001:db8::10'],
++		cname: ['rcf2.deploys.app.']
++	},
++	status: 'success',
++	createdAt: CREATED_AT,
++	createdBy: USER_EMAIL
++}
++
++const domains = [
++	{ ...domainBase, domain: 'acme.example.com', cdn: true },
++	{ ...domainBase, domain: 'www.acme.example.com', cdn: true },
++	{ ...domainBase, domain: 'api.acme.example.com', cdn: false },
++	{ ...domainBase, domain: 'acme.dev', wildcard: true, cdn: true }
+ ]
+ 
++const routeBase = {
++	location: LOCATION_ID,
++	domain: 'acme.example.com',
++	path: '/',
++	target: 'deployment://web',
++	deployment: 'web',
++	config: {},
++	createdAt: CREATED_AT,
++	createdBy: USER_EMAIL
++}
++
+ const routes = [
+-	{
+-		location: LOCATION_ID,
+-		domain: 'acme.example.com',
+-		path: '/',
+-		target: 'deployment://web',
+-		deployment: 'web',
+-		config: {},
+-		createdAt: CREATED_AT,
+-		createdBy: USER_EMAIL
+-	}
++	{ ...routeBase, domain: 'acme.example.com', path: '/', target: 'deployment://web', deployment: 'web' },
++	{ ...routeBase, domain: 'acme.example.com', path: '/api', target: 'deployment://api', deployment: 'api' },
++	{ ...routeBase, domain: 'www.acme.example.com', path: '/', target: 'deployment://web', deployment: 'web' },
++	{ ...routeBase, domain: 'api.acme.example.com', path: '/', target: 'deployment://api', deployment: 'api' }
+ ]
+ 
+ const wafZone = {
+@@ -404,6 +474,20 @@ const roles = [
+ 		createdAt: CREATED_AT,
+ 		createdBy: USER_EMAIL
+ 	},
++	{
++		role: 'deployer',
++		name: 'Deployer',
++		permissions: ['project.get', 'deployment.list', 'deployment.get', 'deployment.deploy', 'registry.list'],
++		createdAt: CREATED_AT,
++		createdBy: USER_EMAIL
++	},
++	{
++		role: 'billing',
++		name: 'Billing Manager',
++		permissions: ['project.get', 'billing.get', 'billing.report'],
++		createdAt: CREATED_AT,
++		createdBy: USER_EMAIL
++	},
+ 	{
+ 		role: 'admin',
+ 		name: 'Administrator',
+@@ -427,7 +511,15 @@ const serviceAccounts = [
+ 		sid: 'sa_mock_ci',
+ 		email: 'ci@acme.deploys.app',
+ 		name: 'CI Deployer',
+-		description: 'Used by CI to deploy services',
++		description: 'Used by GitHub Actions to deploy services',
++		createdAt: CREATED_AT,
++		createdBy: USER_EMAIL
++	},
++	{
++		sid: 'sa_mock_metrics',
++		email: 'metrics-reader@acme.deploys.app',
++		name: 'Metrics Reader',
++		description: 'Read-only access for the status dashboard',
+ 		createdAt: CREATED_AT,
+ 		createdBy: USER_EMAIL
+ 	}
+@@ -456,7 +548,10 @@ const auditLogItems = [
+ 
+ const repositories = [
+ 	{ name: 'acme/web', size: 184320000, createdAt: CREATED_AT },
+-	{ name: 'acme/worker', size: 92160000, createdAt: CREATED_AT }
++	{ name: 'acme/api', size: 251658240, createdAt: CREATED_AT },
++	{ name: 'acme/worker', size: 92160000, createdAt: CREATED_AT },
++	{ name: 'acme/image-resizer', size: 318767104, createdAt: CREATED_AT },
++	{ name: 'acme/cron-cleanup', size: 41943040, createdAt: CREATED_AT }
+ ]
+ 
+ const repositoryTags = [
