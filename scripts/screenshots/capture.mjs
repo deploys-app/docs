@@ -98,6 +98,23 @@ async function shotDeployForm (ctx, suffix) {
 	}
 }
 
+// Warm up every route once before the timed captures. The dev server compiles
+// routes on first visit; without this the first (light) pass pays that cost
+// inside each capture's timeout — most visibly on the deploy form, whose
+// combobox interaction would otherwise time out while the route is still
+// compiling. A throwaway context with a generous timeout absorbs the compile.
+{
+	const warm = await browser.newContext()
+	const page = await warm.newPage()
+	for (const [, path] of [...screens, ['deploy-form', `/deployment/deploy?${P}`]]) {
+		try {
+			await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 60000 })
+		} catch { /* a slow warm-up visit is fine; the timed pass re-navigates */ }
+	}
+	await warm.close()
+	console.log('---- warmed ----')
+}
+
 for (const theme of /** @type {const} */ (['light', 'dark'])) {
 	const suffix = theme === 'dark' ? '-dark' : ''
 	const ctx = await browser.newContext({

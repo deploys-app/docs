@@ -1,5 +1,5 @@
 diff --git a/src/lib/server/mock.js b/src/lib/server/mock.js
-index 9cc0235..9072bb5 100644
+index 4171516..e70aacf 100644
 --- a/src/lib/server/mock.js
 +++ b/src/lib/server/mock.js
 @@ -127,8 +127,8 @@ function deployment (project = 'acme') {
@@ -24,7 +24,7 @@ index 9cc0235..9072bb5 100644
  		schedule: '',
  		port: 8080,
  		protocol: 'http',
-@@ -145,12 +145,12 @@ function deployment (project = 'acme') {
+@@ -145,8 +145,8 @@ function deployment (project = 'acme') {
  		nodePort: 0,
  		annotations: {},
  		resources: {
@@ -34,14 +34,8 @@ index 9cc0235..9072bb5 100644
 +			limits: { cpu: '1000m', memory: '512Mi' }
  		},
  		sidecars: [],
--		url: 'https://web.acme.rcf2.deploys.app',
--		internalUrl: 'http://web.acme.svc.cluster.local',
-+		url: 'web.acme.rcf2.deploys.app',
-+		internalUrl: 'web.acme.svc.cluster.local',
- 		logUrl: '',
- 		eventUrl: '',
- 		podsUrl: '',
-@@ -159,7 +159,7 @@ function deployment (project = 'acme') {
+ 		// Hostnames only — both the Detail and Deployment pages prepend the
+@@ -166,7 +166,7 @@ function deployment (project = 'acme') {
  		internalAddress: '10.0.0.10',
  		status: 'success',
  		action: 'deploy',
@@ -50,7 +44,7 @@ index 9cc0235..9072bb5 100644
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL,
  		successAt: CREATED_AT,
-@@ -168,85 +168,155 @@ function deployment (project = 'acme') {
+@@ -175,85 +175,155 @@ function deployment (project = 'acme') {
  }
  
  const deployments = [
@@ -260,7 +254,7 @@ index 9cc0235..9072bb5 100644
  ]
  
  const wafZone = {
-@@ -404,6 +474,20 @@ const roles = [
+@@ -411,6 +481,20 @@ const roles = [
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	},
@@ -281,7 +275,7 @@ index 9cc0235..9072bb5 100644
  	{
  		role: 'admin',
  		name: 'Administrator',
-@@ -427,7 +511,15 @@ const serviceAccounts = [
+@@ -434,7 +518,15 @@ const serviceAccounts = [
  		sid: 'sa_mock_ci',
  		email: 'ci@acme.deploys.app',
  		name: 'CI Deployer',
@@ -298,7 +292,7 @@ index 9cc0235..9072bb5 100644
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	}
-@@ -456,7 +548,10 @@ const auditLogItems = [
+@@ -471,7 +563,10 @@ const auditLogItems = (() => {
  
  const repositories = [
  	{ name: 'acme/web', size: 184320000, createdAt: CREATED_AT },
