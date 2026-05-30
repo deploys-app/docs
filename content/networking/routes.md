@@ -42,12 +42,23 @@ You can split a single domain across deployments by path:
 The platform strips the matched prefix before forwarding — `api` receives the
 request at `/v1/users`, not `/api/v1/users`.
 
+## Target types
+
+A route's `target` decides where a matched request goes. The console offers
+three types when you create or edit a route:
+
+| Type | `target` value | What it does |
+|---|---|---|
+| **Deployment** | `deployment://<name>` | Forward to an in-cluster deployment (the common case). |
+| **Redirect** | `redirect://https://example.com` | Return an HTTP redirect to the given URL. |
+| **External server (HTTP)** | `http://<ip>[:port]` | Front a server you run yourself — see [below](#external-server-http). |
+
 ## Routes with config (v2)
 
-The `routeV2` flow lets you target arbitrary URLs instead of just deployments,
-and attach extra request handling:
+The `routeV2` flow lets you set any of the target types above and attach extra
+request handling:
 
-- **`target`** — a target URL or `deployment://<name>` reference.
+- **`target`** — one of the target types in the table above.
 - **`config.basicAuth`** — a username + password the gateway checks before
   forwarding.
 - **`config.forwardAuth`** — a separate endpoint the gateway calls first; if it
@@ -69,6 +80,45 @@ curl https://api.deploys.app/route.createV2 \
     }
   }'
 ```
+
+## External server (HTTP)
+
+Point a verified domain at a server you run yourself — anywhere with a public
+IP — and let the platform's edge sit in front of it. You bring the compute; the
+edge gives you the managed TLS certificate, the [Firewall](/networking/waf/),
+and a stable place to attach `basicAuth` / `forwardAuth`. This is the
+"bring your own server" path for hosts that don't (yet) run as a deployment.
+
+```bash
+curl https://api.deploys.app/route.createV2 \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{
+    "project": "acme",
+    "location": "gke.cluster-rcf2",
+    "domain": "legacy.acme.com",
+    "path": "/",
+    "target": "http://203.0.113.10:8080"
+  }'
+```
+
+The target is an **IP address with an optional port** (port defaults to `80`).
+A few rules the gateway enforces:
+
+- **Public IPs only.** Private, loopback, link-local, multicast, unspecified,
+  and carrier-grade-NAT addresses are rejected — this blocks requests from
+  being aimed at internal infrastructure (including the cloud metadata endpoint
+  at `169.254.169.254`).
+- **IP literals only.** Hostnames aren't accepted yet; resolve to an IP first.
+- **HTTP only.** `https://` upstreams aren't supported in this first phase —
+  the hop from the edge to your server is plain HTTP, so keep the server on a
+  trusted network path. The client-facing side is still HTTPS, terminated at
+  the edge.
+
+{{< callout type="note" >}}
+External HTTP routes are billed for the **edge egress** they serve — since the
+compute is yours, there's no flat per-route fee. See
+[Billing overview](/billing/overview/).
+{{< /callout >}}
 
 ## Listing and deleting
 

@@ -20,6 +20,7 @@ no per-deployment monthly minimum. The metered quantities are:
 | **Registry storage** | GiB-hours | Actual stored size |
 | **Egress** | GiB transferred out | Actual bytes leaving the cluster |
 | **Domain CDN** | Flat per domain | Per active domain with CDN on |
+| **External route egress** | GiB transferred out | Actual bytes served from the edge for an [external HTTP route](/networking/routes/#external-server-http) |
 
 Sizing your `resources.requests` matters — that's the number that hits the
 invoice for CPU and memory, whether or not the workload uses every cycle.
