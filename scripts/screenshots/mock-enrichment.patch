@@ -1,5 +1,5 @@
 diff --git a/src/lib/server/mock.js b/src/lib/server/mock.js
-index 4171516..e70aacf 100644
+index a87d79f..d41a85e 100644
 --- a/src/lib/server/mock.js
 +++ b/src/lib/server/mock.js
 @@ -127,8 +127,8 @@ function deployment (project = 'acme') {
@@ -44,16 +44,16 @@ index 4171516..e70aacf 100644
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL,
  		successAt: CREATED_AT,
-@@ -175,85 +175,155 @@ function deployment (project = 'acme') {
+@@ -175,90 +175,154 @@ function deployment (project = 'acme') {
  }
  
  const deployments = [
 -	deployment('acme'),
  	{
  		...deployment('acme'),
--		name: 'cron-cleanup',
--		type: 'CronJob',
--		schedule: '0 * * * *',
+-		name: 'web-paused',
+-		status: 'success',
+-		action: 'pause'
 +		name: 'web',
 +		image: 'registry.deploys.app/acme/web:v2.4.1',
 +		revision: 24,
@@ -63,9 +63,12 @@ index 4171516..e70aacf 100644
 +		url: 'web.acme.rcf2.deploys.app',
 +		allocatedPrice: 142.8,
 +		successAt: '2026-05-27T09:12:00Z'
-+	},
-+	{
-+		...deployment('acme'),
+ 	},
+ 	{
+ 		...deployment('acme'),
+-		name: 'cron-cleanup',
+-		type: 'CronJob',
+-		schedule: '0 * * * *',
 +		name: 'api',
 +		image: 'registry.deploys.app/acme/api:v1.8.0',
 +		revision: 31,
@@ -173,7 +176,6 @@ index 4171516..e70aacf 100644
 -		location: LOCATION_ID,
 -		domain: 'acme.example.com',
 -		wildcard: false,
--		cdn: true,
 -		verification: {
 -			ownership: { type: 'TXT', name: '_deploys.acme.example.com', value: 'verify=mock', errors: [] },
 -			ssl: {
@@ -193,7 +195,6 @@ index 4171516..e70aacf 100644
 +	location: LOCATION_ID,
 +	domain: 'acme.example.com',
 +	wildcard: false,
-+	cdn: true,
 +	verification: {
 +		ownership: { type: 'TXT', name: '_deploys.acme.example.com', value: 'verify=mock', errors: [] },
 +		ssl: {
@@ -219,10 +220,10 @@ index 4171516..e70aacf 100644
 +}
 +
 +const domains = [
-+	{ ...domainBase, domain: 'acme.example.com', cdn: true },
-+	{ ...domainBase, domain: 'www.acme.example.com', cdn: true },
-+	{ ...domainBase, domain: 'api.acme.example.com', cdn: false },
-+	{ ...domainBase, domain: 'acme.dev', wildcard: true, cdn: true }
++	{ ...domainBase, domain: 'acme.example.com' },
++	{ ...domainBase, domain: 'www.acme.example.com' },
++	{ ...domainBase, domain: 'api.acme.example.com' },
++	{ ...domainBase, domain: 'acme.dev', wildcard: true }
  ]
  
 +const routeBase = {
@@ -254,7 +255,7 @@ index 4171516..e70aacf 100644
  ]
  
  const wafZone = {
-@@ -411,6 +481,20 @@ const roles = [
+@@ -416,6 +480,20 @@ const roles = [
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	},
@@ -275,7 +276,7 @@ index 4171516..e70aacf 100644
  	{
  		role: 'admin',
  		name: 'Administrator',
-@@ -434,7 +518,15 @@ const serviceAccounts = [
+@@ -439,7 +517,15 @@ const serviceAccounts = [
  		sid: 'sa_mock_ci',
  		email: 'ci@acme.deploys.app',
  		name: 'CI Deployer',
@@ -292,7 +293,7 @@ index 4171516..e70aacf 100644
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	}
-@@ -471,7 +563,10 @@ const auditLogItems = (() => {
+@@ -476,7 +562,10 @@ const auditLogItems = (() => {
  
  const repositories = [
  	{ name: 'acme/web', size: 184320000, createdAt: CREATED_AT },

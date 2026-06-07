@@ -40,13 +40,12 @@ one, and you're ready to deploy.
 
 ## Project-level settings
 
-Two things live on the project itself, outside any specific resource:
+A couple of things live on the project itself, outside any specific resource:
 
 - **Quotas** — caps on what the project can use (max deployments, max replicas
   per deployment). Set on the project record; visible from `project.get`.
-- **Config** — feature toggles. Today the main one is `domainAllowDisableCdn`,
-  which controls whether [domains](/networking/domains/) in this project can
-  turn CDN off.
+- **Config** — reserved for project-level feature toggles. There are none
+  today, so `config` comes back empty from `project.get`.
 
 ```bash
 deploys project get --project acme
