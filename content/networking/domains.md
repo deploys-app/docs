@@ -2,27 +2,27 @@
 title: 'Domains'
 linkTitle: 'Domains'
 weight: 1
-description: 'Attach custom domains, prove you own them, terminate TLS, and turn on the CDN.'
-lead: 'A domain represents a custom hostname (or wildcard) you own. Attach it to a project + location, prove ownership with DNS, and the platform terminates TLS and routes traffic for you.'
+description: 'Attach custom domains, prove you own them, terminate TLS, and serve through the CDN.'
+lead: 'A domain represents a custom hostname (or wildcard) you own. Attach it to a project + location, prove ownership with DNS, and the platform terminates TLS, serves it through the CDN, and routes traffic for you.'
 ---
 
 ## The Domains page
 
 The Domains tab in the console lists every custom domain in the project, with
-its wildcard flag, CDN flag, and the location it's bound to.
+its wildcard flag and the location it's bound to.
 
-{{< shot src="/img/domain-list.png" url="console.deploys.app/domain?project=acme" alt="Domain list: apex, www, api, and a wildcard" caption="Four domains in the same project — a mix of apex, subdomains, CDN on and off, and a wildcard." >}}
+{{< shot src="/img/domain-list.png" url="console.deploys.app/domain?project=acme" alt="Domain list: apex, www, api, and a wildcard" caption="Four domains in the same project — a mix of apex, subdomains, and a wildcard." >}}
 
 ## Create a domain
 
-You'll set four things:
+You'll set three things:
 
 - **Domain** — the hostname, e.g. `acme.example.com` or `acme.dev` (apex).
 - **Location** — the cluster the domain will serve from. The hostname's TLS
   certificate is provisioned in this location.
 - **Wildcard** — if `true`, the domain covers `*.host` as well as `host`.
-- **CDN** — if `true`, traffic goes through the CDN edge before reaching the
-  origin. Recommended for public-facing apps.
+
+Every domain is served through our CDN edge — there's no separate toggle.
 
 ```bash
 curl https://api.deploys.app/domain.create \
@@ -31,8 +31,7 @@ curl https://api.deploys.app/domain.create \
     "project": "acme",
     "location": "gke.cluster-rcf2",
     "domain": "acme.example.com",
-    "wildcard": false,
-    "cdn": true
+    "wildcard": false
   }'
 ```
 
@@ -76,25 +75,38 @@ curl https://api.deploys.app/route.create \
 
 ## The CDN
 
-When CDN is on, the platform fronts the domain with an edge cache. You get:
+Every domain is fronted by our edge cache — it's included, with nothing to turn
+on. You get:
 
 - Global PoP routing — TLS terminates at the closest edge to the user.
 - Static asset caching with sensible defaults (respects standard
   `Cache-Control`).
 - DDoS mitigation and request filtering.
 
-Two operations matter day to day:
-
-- **Purge cache** — invalidate cached content for the domain. Available from
-  the console and as `domain.purgeCache` in the API.
-- **Downgrade** — turn CDN off. There's a dedicated console flow at
-  `/domain/cdn-downgrade` because it changes the routing path.
+**Purge cache** invalidates cached content for the domain. It's available from
+the console and as `domain.purgeCache` in the API. Purge the whole domain, an
+exact URL (`file`), or everything under a path (`prefix`):
 
 ```bash
+# purge the whole domain
 curl https://api.deploys.app/domain.purgeCache \
-  -d '{ "project": "acme", "location": "gke.cluster-rcf2",
-        "domain": "acme.example.com" }'
+  -d '{ "project": "acme", "domain": "acme.example.com" }'
+
+# purge a single file
+curl https://api.deploys.app/domain.purgeCache \
+  -d '{ "project": "acme", "domain": "acme.example.com",
+        "file": "https://acme.example.com/style.css" }'
+
+# purge everything under a path prefix
+curl https://api.deploys.app/domain.purgeCache \
+  -d '{ "project": "acme", "domain": "acme.example.com",
+        "prefix": "acme.example.com/assets" }'
 ```
+
+{{< callout type="note" >}}
+A wildcard domain can't be purged by host alone — pass a `file` or `prefix` so
+the edge knows which concrete host to invalidate.
+{{< /callout >}}
 
 ## Removing a domain
 

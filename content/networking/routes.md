@@ -139,7 +139,7 @@ affected — only the routing.
 client
   │
   ▼ HTTPS to acme.example.com/api/v1/users
-edge / CDN (if domain.cdn = true)
+edge / CDN (TLS terminates here)
   │
   ▼
 location ingress
