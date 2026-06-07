@@ -24,8 +24,9 @@ no per-deployment monthly minimum. The metered quantities are:
 Sizing your `resources.requests` matters — that's the number that hits the
 invoice for CPU and memory, whether or not the workload uses every cycle.
 
-The CDN that fronts every [custom domain](/networking/domains/) is included at
-no extra charge — there's no separate CDN line item.
+Where a location provides edge caching, the CDN that fronts your
+[custom domains](/networking/domains/) is included at no extra charge — there's
+no separate CDN line item.
 
 ## Billing accounts
 

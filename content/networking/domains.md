@@ -2,8 +2,8 @@
 title: 'Domains'
 linkTitle: 'Domains'
 weight: 1
-description: 'Attach custom domains, prove you own them, terminate TLS, and serve through the CDN.'
-lead: 'A domain represents a custom hostname (or wildcard) you own. Attach it to a project + location, prove ownership with DNS, and the platform terminates TLS, serves it through the CDN, and routes traffic for you.'
+description: 'Attach custom domains, prove you own them, terminate TLS, and route traffic.'
+lead: 'A domain represents a custom hostname (or wildcard) you own. Attach it to a project + location, prove ownership with DNS, and the platform terminates TLS and routes traffic for you.'
 ---
 
 ## The Domains page
@@ -22,7 +22,9 @@ You'll set three things:
   certificate is provisioned in this location.
 - **Wildcard** — if `true`, the domain covers `*.host` as well as `host`.
 
-Every domain is served through our CDN edge — there's no separate toggle.
+In locations with edge caching enabled, domains are served through our CDN
+automatically — there's no separate toggle. CDN availability depends on the
+location (see [The CDN](#the-cdn)).
 
 ```bash
 curl https://api.deploys.app/domain.create \
@@ -75,13 +77,19 @@ curl https://api.deploys.app/route.create \
 
 ## The CDN
 
-Every domain is fronted by our edge cache — it's included, with nothing to turn
-on. You get:
+In locations where edge caching is enabled, domains are fronted by our edge
+cache automatically — it's included, with nothing to turn on. You get:
 
 - Global PoP routing — TLS terminates at the closest edge to the user.
 - Static asset caching with sensible defaults (respects standard
   `Cache-Control`).
 - DDoS mitigation and request filtering.
+
+{{< callout type="note" >}}
+CDN availability depends on the location. Locations without edge caching serve
+your domain directly; `domain.purgeCache` returns `api: location not support`
+for a domain in such a location.
+{{< /callout >}}
 
 **Purge cache** invalidates cached content for the domain. It's available from
 the console and as `domain.purgeCache` in the API. Purge the whole domain, an
