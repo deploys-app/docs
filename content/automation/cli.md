@@ -3,7 +3,7 @@ title: 'The deploys CLI'
 linkTitle: 'CLI'
 weight: 1
 description: 'A small Go binary that wraps the API — handy for shell scripts and CI jobs.'
-lead: 'The deploys CLI lets you drive every deployment, role, disk, and pull secret operation from the terminal. It''s the same backend the console talks to, just with a less-clicky interface.'
+lead: 'The deploys CLI drives every user-facing API from the terminal — deployments, domains, routes, WAF, the registry, billing, env groups, and more. It''s the same backend the console talks to, just with a less-clicky interface.'
 ---
 
 ## Install
@@ -34,7 +34,7 @@ You can also point the CLI at a non-default API endpoint via
 `DEPLOYS_ENDPOINT` (mainly useful for staging).
 
 ```bash
-export DEPLOYS_AUTH_USER=ci@acme.deploys.app
+export DEPLOYS_AUTH_USER=ci@acme.serviceaccount.deploys.app
 export DEPLOYS_AUTH_PASS=…the key…
 deploys me get
 ```
@@ -46,27 +46,36 @@ deploys <namespace> <action> [--flags] [-oyaml | -ojson | -otable]
 ```
 
 Output defaults to a table; switch to YAML or JSON with `-oyaml` / `-ojson`
-for piping into other tools.
+for piping into other tools. Running `deploys` with no arguments prints the
+full list of namespaces and their actions.
 
 ### Namespaces
 
-| Namespace | Aliases | What it covers |
+| Namespace | Aliases | Actions |
 |---|---|---|
-| `me` | — | Profile and permission checks |
-| `location` | — | List clusters you can deploy to |
-| `project` | — | Projects + per-project usage |
-| `role` | — | Create roles, bind users/service accounts |
-| `deployment` | `deploy`, `d` | Deploy, list, get, delete |
-| `route` | — | HTTP routes |
-| `disk` | — | Persistent disks |
-| `pullsecret` | `ps` | Third-party registry credentials |
-| `workloadidentity` | `wi` | GCP federation bindings |
-| `serviceaccount` | `sa` | Machine identities + keys |
-| `collector` | — | Cluster-side collector commands |
+| `me` | — | `get`, `authorized` |
+| `billing` | — | `create`, `list`, `get`, `update`, `delete`, `report`, `skus`, `project`, `invoices`, `invoice`, `downloadinvoice`, `downloadreceipt` |
+| `location` | — | `list`, `get` |
+| `project` | — | `create`, `list`, `get`, `update`, `delete`, `usage` |
+| `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind` |
+| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `rollback`, `metrics`, `set image` |
+| `domain` | — | `create`, `get`, `list`, `delete`, `purgecache` |
+| `route` | — | `create`, `get`, `list`, `delete` |
+| `waf` | — | `get`, `list`, `set`, `delete`, `metrics`, `limitmetrics` |
+| `disk` | — | `create`, `get`, `list`, `update`, `delete` |
+| `pullsecret` | `ps` | `create`, `get`, `list`, `delete` |
+| `workloadidentity` | `wi` | `create`, `get`, `list`, `delete` |
+| `serviceaccount` | `sa` | `create`, `get`, `list`, `update`, `delete`, `createkey`, `deletekey` |
+| `email` | — | `send`, `list` |
+| `registry` | — | `list`, `get`, `tags`, `manifests`, `storage`, `delete`, `deletemanifest`, `untag`, `metrics` |
+| `envgroup` | `eg` | `create`, `get`, `list`, `update`, `delete` |
+| `auditlog` | — | `list` |
+| `dropbox` | — | `list`, `metrics` |
+| `github` | — | `link`, `unlink`, `list` |
 
-Namespaces not covered by the CLI (today): `domain`, `route` config v2,
-`waf`, `registry`, `billing`, `envGroup`, `auditLog`. Use the API or the
-console for those.
+The internal `Deployer` and `Collector` APIs are machine-to-machine and not
+exposed here. The two multipart upload endpoints — KYC documents and invoice
+transfer slips — aren't either; use the console for those.
 
 ## Useful one-liners
 
@@ -91,7 +100,47 @@ deploys deployment deploy \
 deploys deployment set image web \
   --project acme --location gke.cluster-rcf2 \
   --image registry.deploys.app/acme/web@sha256:…
+
+# roll back to a previous revision
+deploys deployment rollback \
+  --project acme --location gke.cluster-rcf2 \
+  --name web --revision 7
+
+# create an env group from inline key=value pairs (repeat --env)
+deploys envgroup create --project acme --name shared \
+  --env LOG_LEVEL=info --env REGION=apac
+
+# list registry repositories and a repo's tags
+deploys registry list --project acme
+deploys registry tags --project acme --repository web
+
+# recent audit-log entries for a project
+deploys auditlog list --project acme --limit 20
+
+# purge a cached file from a custom domain's edge
+deploys domain purgecache --project acme \
+  --domain www.acme.com --file /assets/app.js
 ```
+
+## Editing the WAF zone
+
+The WAF set call replaces the whole zone — all rules and rate limits — in one
+all-or-nothing operation, so the CLI takes a spec file rather than per-rule
+flags. The round-trip is: dump the current zone as YAML, edit it, set it back.
+
+```bash
+# dump the live zone
+deploys waf get --project acme --location gke.cluster-rcf2 -oyaml > waf.yaml
+
+# …edit waf.yaml: add a rule or a rate limit…
+
+# apply it back (-f is required so a bare `waf set` can't wipe the zone)
+deploys waf set --project acme --location gke.cluster-rcf2 -f waf.yaml
+```
+
+The read-only fields in the dumped YAML (status, timestamps) are ignored on
+set, so you can feed the `waf get` output straight back in after editing. See
+[Web Application Firewall](/networking/waf/) for the rule and limit schema.
 
 ## Permission check before acting
 
@@ -109,7 +158,8 @@ to fail early with a clear error rather than from an opaque 403 mid-deploy.
 
 ## Where to go next
 
-- For CI integration, see [GitHub Action](/automation/github-action/) — it
-  wraps the CLI for you.
-- For everything the CLI doesn't cover, the [API reference](/api/overview/) is
-  the comprehensive view.
+- For CI integration, see [GitHub Action](/automation/github-action/) and
+  [Deploy from GitHub](/automation/deploy-from-github/).
+- The [API reference](/api/overview/) is the comprehensive view of every
+  endpoint, including the few the CLI doesn't surface.
+```
