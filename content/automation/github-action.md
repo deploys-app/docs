@@ -1,10 +1,17 @@
 ---
 title: 'GitHub Action'
 linkTitle: 'GitHub Action'
-weight: 2
+weight: 3
 description: 'Deploy from a GitHub Actions workflow in a single step.'
 lead: 'The official deploys-app/deploys-action lets a GitHub Actions workflow roll out a new revision once your image is built and pushed. It''s the deploys CLI wrapped in a step.'
 ---
+
+{{< callout type="tip" >}}
+Want Deploys.app to build the image too — keyless, with preview deployments
+on every PR? See [Deploy from GitHub](/automation/deploy-from-github/). This
+page covers the deploy-only action for teams that build and push images
+elsewhere.
+{{< /callout >}}
 
 ## A complete workflow
 
