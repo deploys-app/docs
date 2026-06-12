@@ -17,7 +17,8 @@ Click into one for its keys and current bindings.
 
 ## Create a service account
 
-You pick the ID; the email is generated from it as `<id>@<project>.deploys.app`.
+You pick the ID; the email is generated from it as
+`<id>@<project>.serviceaccount.deploys.app`.
 
 ```bash
 deploys serviceaccount create \
@@ -33,7 +34,7 @@ the account's email before it can do anything useful:
 ```bash
 deploys role grant \
   --project acme --role deployer \
-  --email ci@acme.deploys.app
+  --email ci@acme.serviceaccount.deploys.app
 ```
 
 ## Create a key
@@ -61,7 +62,7 @@ the **password**. They go in environment variables that every authenticated
 tool understands:
 
 ```bash
-export DEPLOYS_AUTH_USER=ci@acme.deploys.app
+export DEPLOYS_AUTH_USER=ci@acme.serviceaccount.deploys.app
 export DEPLOYS_AUTH_PASS=…the key…
 ```
 
