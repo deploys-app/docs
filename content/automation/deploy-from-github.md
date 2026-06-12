@@ -51,26 +51,40 @@ deploys role grant \
 a PR closes; `registry.push` lets it push the built image to your project's
 [registry](/registry/overview/).
 {{< /step >}}
-{{< step title="Install the Deploys.app GitHub App" >}}
-Install the Deploys.app GitHub App on the repository (or the whole
-organization). The App is how the action posts the preview comment and
-deployment statuses, and the link in the next step requires it to already be
-installed on the repo.
-{{< /step >}}
 {{< step title="Link the repository to the project" >}}
 The link is what ties a GitHub repository to a project and a service account —
-it's the authorization the token exchange checks against. Create it from the
-console's **GitHub** page in the project settings (the console resolves the
-repository automatically), or with the CLI:
+it's the authorization the token exchange checks against. Open the console's
+**GitHub** page and click **Link repository**. The flow has two steps:
 
-```bash
-deploys github link \
-  --project acme \
-  --repository acme/web \
-  --service-account ci
-```
+1. **Install the GitHub App** — click the install button, pick the repository
+   (or the whole organization) on GitHub, and GitHub redirects you back to the
+   console automatically. The console remembers the installation, so you won't
+   need to reinstall next time.
+2. **Pick the repository** — choose it from a searchable dropdown of the
+   repositories visible to the installed App (just created the repo? hit
+   **Refresh** to re-fetch the list), choose the service account you created
+   above, set the **Production branch**, and click **Link**.
+
+The App is also how the action posts the preview comment and deployment
+statuses on pull requests. Prefer the terminal? `deploys github link` does the
+same once the App is installed.
 {{< /step >}}
 {{< /steps >}}
+
+## Production branch
+
+Each link has a **Production branch** setting, chosen at link time in the
+console. It defaults to `main`; leave it empty to allow production deploys
+from any branch.
+
+When set, the platform only accepts production deploys from that branch: the
+token exchange refuses push-event workflow runs from any other ref (including
+tags). Pull-request previews are unaffected — they stay allowed from any
+branch. The generated workflow's `on.push.branches` matches the configured
+branch automatically.
+
+To change the production branch later, unlink the repository and link it
+again.
 
 ## Add the workflow
 
@@ -102,9 +116,14 @@ jobs:
 {{< /code >}}
 
 {{< callout type="tip" >}}
-The console's **GitHub** page can generate this file for you, pre-filled with
-the project, location, and deployment name.
+After linking, the console's **GitHub** page can generate this file for you,
+pre-filled with the project, location, and deployment name — use the **Copy**
+button, or **Create on GitHub** to open GitHub with the workflow file
+pre-filled.
 {{< /callout >}}
+
+The example uses `main`; the generated workflow sets `on.push.branches` to
+whatever production branch the link is configured with.
 
 Push to `main` and the action builds the image from the repo's Dockerfile,
 pushes it to the project registry, and deploys it as `web`.
