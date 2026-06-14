@@ -30,11 +30,16 @@ assistant acts as **your** account.
 **Claude Code:**
 
 ```bash
+# add it to the current project (default scope)
 claude mcp add --transport http deploys https://mcp.deploys.app/
+
+# …or make it available in every project on your machine
+claude mcp add --transport http --scope user deploys https://mcp.deploys.app/
 ```
 
 The first time the assistant uses it, a browser window opens for you to sign in
-to Deploys.app. After that the connection is remembered.
+to Deploys.app. After that the connection is remembered. Use `claude mcp list`
+to check which servers are configured in the current scope.
 
 **Claude Desktop:** Settings → **Connectors** → *Add custom connector* → set the
 URL to `https://mcp.deploys.app/` and complete the sign-in.
@@ -73,6 +78,9 @@ claude mcp add deploys \
   -e DEPLOYS_SA_SECRET='…the key…' \
   -- /absolute/path/to/deploys-mcp
 ```
+
+Add `--scope user` here too to make it available in every project rather than
+just the current one.
 
 Or in the Claude Desktop config (`claude_desktop_config.json`):
 
