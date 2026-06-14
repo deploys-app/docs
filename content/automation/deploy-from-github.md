@@ -63,7 +63,8 @@ it's the authorization the token exchange checks against. Open the console's
 2. **Pick the repository** — choose it from a searchable dropdown of the
    repositories visible to the installed App (just created the repo? hit
    **Refresh** to re-fetch the list), choose the service account you created
-   above, set the **Production branch**, and click **Link**.
+   above, pick a **Deploy trigger** and **Production branch** (see below), and
+   click **Link**.
 
 The App is also how the action posts the preview comment and deployment
 statuses on pull requests. Prefer the terminal? `deploys github link` does the
@@ -71,20 +72,55 @@ same once the App is installed.
 {{< /step >}}
 {{< /steps >}}
 
-## Production branch
+## Deploy trigger
 
-Each link has a **Production branch** setting, chosen at link time in the
-console. It defaults to `main`; leave it empty to allow production deploys
-from any branch.
+Each link has a **Deploy trigger** that decides which workflow runs deploy:
 
-When set, the platform only accepts production deploys from that branch: the
-token exchange refuses push-event workflow runs from any other ref (including
-tags). Pull-request previews are unaffected — they stay allowed from any
-branch. The generated workflow's `on.push.branches` matches the configured
-branch automatically.
+| Trigger | Push to the production branch | Pull-request previews |
+|---|---|---|
+| **Branch + PR previews** (default) | ✅ deploys | ✅ preview per PR |
+| **Branch only** | ✅ deploys | — no preview |
+| **PR previews only** | — never deploys | ✅ preview per PR |
 
-To change the production branch later, unlink the repository and link it
-again.
+The platform enforces the trigger at the token exchange, keyed off the verified
+OIDC token — not just the generated workflow:
+
+- A **push / tag** run only gets a token when the trigger deploys branches
+  (*Branch + PR previews* or *Branch only*); otherwise it is rejected.
+- A **pull-request** run only gets a token when the trigger posts previews
+  (*Branch + PR previews* or *PR previews only*); otherwise it is rejected.
+
+### Production branch
+
+For the two branch-deploying triggers, the **Production branch** setting decides
+*which* branch deploys. It defaults to `main`; leave it empty to allow a push to
+**any** branch. Pushes to any other ref (including tags) are refused at the token
+exchange. *PR previews only* links never deploy a branch, so this setting does
+not apply.
+
+To change the trigger or production branch later, unlink the repository and link
+it again.
+
+### Generated workflow
+
+The console's generator writes the matching `on:` block, so the workflow only
+runs for the events that can actually deploy:
+
+```yaml
+on:                  # Branch + PR previews
+  push:
+    branches: [main]
+  pull_request:
+```
+```yaml
+on:                  # Branch only
+  push:
+    branches: [main]
+```
+```yaml
+on:                  # PR previews only
+  pull_request:
+```
 
 ## Add the workflow
 
@@ -122,8 +158,9 @@ button, or **Create on GitHub** to open GitHub with the workflow file
 pre-filled.
 {{< /callout >}}
 
-The example uses `main`; the generated workflow sets `on.push.branches` to
-whatever production branch the link is configured with.
+The example is the *Branch + PR previews* shape with `main` as the branch; the
+generated workflow's `on:` block matches your link's [deploy
+trigger](#deploy-trigger) and production branch.
 
 Push to `main` and the action builds the image from the repo's Dockerfile,
 pushes it to the project registry, and deploys it as `web`.
