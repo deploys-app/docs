@@ -98,8 +98,12 @@ For the two branch-deploying triggers, the **Production branch** setting decides
 exchange. *PR previews only* links never deploy a branch, so this setting does
 not apply.
 
-To change the trigger or production branch later, unlink the repository and link
-it again.
+To change the trigger, production branch, or service account later, open the
+console's **GitHub** page, click the **edit** (pencil) button on the repository,
+adjust the fields, and **Save** — no need to unlink and relink. Changing the
+trigger or branch only updates the link; recreate the workflow file afterwards
+(the editor nudges you, and links straight to the generator) so its `on:` block
+matches the new setting.
 
 ### Generated workflow
 
@@ -155,7 +159,9 @@ jobs:
 After linking, the console's **GitHub** page can generate this file for you,
 pre-filled with the project, location, and deployment name — use the **Copy**
 button, or **Create on GitHub** to open GitHub with the workflow file
-pre-filled.
+pre-filled. If you later edit the link's trigger or production branch, recreate
+the file the same way: the generated `on:` block follows the link, and you
+commit the change yourself.
 {{< /callout >}}
 
 The example is the *Branch + PR previews* shape with `main` as the branch; the
