@@ -122,7 +122,7 @@ Ask in natural language; the assistant maps it to an action:
 | You say | Action it runs |
 |---|---|
 | "list my projects" | `project.list` |
-| "show deployments in `moonrhythm`" | `deployment.list` |
+| "show deployments in `acme`" | `deployment.list` |
 | "deploy `ghcr.io/acme/web:v2` to `acme` as service `web`" | `deployment.deploy` |
 | "roll `web` back to the previous revision" | `deployment.rollback` |
 | "what's the usage report for `acme` this month?" | `billing.report` |
@@ -132,10 +132,10 @@ Ask in natural language; the assistant maps it to an action:
 A typical exchange:
 
 ```text
-You:    show deployments in moonrhythm
+You:    show deployments in acme
 Claude: (searches → deployment.list → executes)
-        18 deployments, all healthy. 11 web services, 3 cron jobs,
-        2 workers, 1 internal TCP service. Want details on any one?
+        6 deployments, all healthy — web services, a couple of cron
+        jobs, and a background worker. Want details on any one?
 ```
 
 ## Permissions & safety
