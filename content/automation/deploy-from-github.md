@@ -1,7 +1,7 @@
 ---
 title: 'Deploy from GitHub'
 linkTitle: 'Deploy from GitHub'
-weight: 2
+weight: 3
 description: 'Build and deploy straight from a GitHub repository — keyless OIDC auth, production deploys on push, preview deployments on every PR.'
 lead: 'The deploys-app/build-deploy-action builds your repository on GitHub''s runners and deploys the result in one step. There are no secrets to store: authentication is keyless via GitHub Actions OIDC. Pushing to the default branch deploys to production; every pull request gets a temporary preview deployment with its own URL.'
 ---
