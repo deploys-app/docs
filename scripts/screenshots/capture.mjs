@@ -45,7 +45,10 @@ const screens = [
 	['service-account-list',  `/service-account?${P}`],
 	['billing-report',        `/billing/report`],
 	['project-list',          `/project`],
-	['waf-list',              `/waf?${P}`]
+	['waf-list',              `/waf?${P}`],
+	['cache-list',            `/cache?${P}`],
+	['cache-manage',          `/cache/manage?${P}&${LOC}`, { h: 1150 }],
+	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }]
 ]
 
 const browser = await chromium.launch()
