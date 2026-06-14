@@ -1,7 +1,7 @@
 ---
 title: 'GitHub Action'
 linkTitle: 'GitHub Action'
-weight: 3
+weight: 4
 description: 'Deploy from a GitHub Actions workflow in a single step.'
 lead: 'The official deploys-app/deploys-action lets a GitHub Actions workflow roll out a new revision once your image is built and pushed. It''s the deploys CLI wrapped in a step.'
 ---
