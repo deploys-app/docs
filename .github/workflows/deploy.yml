@@ -1,0 +1,27 @@
+name: Deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  id-token: write   # required — this is the credential
+  contents: read
+  pull-requests: write   # sticky PR preview comment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: deploys-app/build-deploy-action@v1
+      with:
+        project: deploys-app
+        location: gke.cluster-rcf2
+        name: docs
+        mode: static
+        framework: hugo
+        buildCommand: hugo --minify
+        outputDir: public
+        spa: false
+        notFound: 404.html
