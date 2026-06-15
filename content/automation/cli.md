@@ -71,7 +71,7 @@ full list of namespaces and their actions.
 | `envgroup` | `eg` | `create`, `get`, `list`, `update`, `delete` |
 | `auditlog` | — | `list` |
 | `dropbox` | — | `list`, `metrics` |
-| `github` | — | `link`, `unlink`, `list` |
+| `github` | — | `link`, `unlink`, `update`, `list` |
 
 The internal `Deployer` and `Collector` APIs are machine-to-machine and not
 exposed here. The two multipart upload endpoints — KYC documents and invoice
@@ -95,6 +95,13 @@ deploys deployment deploy \
   --name web --image registry.deploys.app/acme/web:v2.4.2 \
   --type WebService --port 8080 \
   --minReplicas 2 --maxReplicas 6
+
+# gate a deployment behind Google login (see /deployments/access/)
+deploys deployment deploy \
+  --project acme --location gke.cluster-rcf2 \
+  --name internal-tool --image registry.deploys.app/acme/tool:v3 \
+  --type WebService --port 8080 \
+  --requireGoogleLogin=true --allowedDomains acme.com
 
 # update just the image (handy in CI after a build)
 deploys deployment set image web \
@@ -121,6 +128,20 @@ deploys auditlog list --project acme --limit 20
 deploys domain purgecache --project acme \
   --domain www.acme.com --file /assets/app.js
 ```
+
+`deployment deploy` carries the full deployment config in flags — beyond the
+basics above it covers env groups (`--envGroups`, `--addEnv`, `--removeEnv`),
+[access](/deployments/access/) (`--requireGoogleLogin`, `--allowedEmails`,
+`--allowedDomains`), resources (`--cpuRequest`, `--memLimit`, …), a
+[disk](/storage/disks/) (`--diskName`, `--diskMountPath`), and sidecars
+(`--sidecarsFile`). Run `deploys deployment deploy` with no flags to see them all.
+
+{{< callout type="note" >}}
+[Static sites](/deployments/static-sites/) are *published* by the
+[build-deploy-action](/automation/deploy-from-github/) (`mode: static`), not the
+CLI — a static release has to be built and uploaded. The CLI still lists, gets,
+and rolls back a `Static` deployment like any other.
+{{< /callout >}}
 
 ## Editing the WAF zone
 

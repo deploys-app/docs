@@ -1,0 +1,148 @@
+---
+title: 'Static sites'
+linkTitle: 'Static sites'
+weight: 3
+description: 'Deploy a prebuilt static site — served straight from object storage at the edge, no container to run.'
+lead: 'A Static deployment serves a folder of prebuilt files — HTML, CSS, JS, images — straight from object storage through the platform''s edge, with no container running behind it. You build the site on GitHub''s runners and publish the result; Deploys.app gives it a managed HTTPS hostname and caches it globally.'
+---
+
+## How it differs from a container
+
+Every other [deployment type](/deployments/types/) runs your code in a
+container. A **Static** deployment doesn't run anything — there's no image, no
+port, no replicas. Each deploy publishes an **immutable, content-addressed
+release** (a manifest plus per-file blobs) to object storage, and the
+platform's static gateway serves it directly. That makes a few things true:
+
+- **It's cheap and fast.** Assets are cached at the edge; there's no container
+  burning CPU between requests.
+- **Releases are atomic.** A deploy flips the live release pointer in one step —
+  no half-updated state — and rolling back is just pointing at an older release.
+- **Most deployment settings don't apply.** No `port`, `image`, `protocol`,
+  replicas, resources, or environment variables — there's no process to
+  configure. The only things you set on a static deployment are
+  [access control](/deployments/access/) and an optional
+  [auto-delete TTL](/deployments/configuration/#ttl-and-one-shot-jobs).
+
+Static sites still get a managed hostname, work with custom
+[domains](/networking/domains/) and [routes](/networking/routes/), and get
+per-PR [preview deployments](#preview-deployments) — the same as a web service.
+
+## How to deploy a static site
+
+Static releases are built and published by the
+[`build-deploy-action`](/automation/deploy-from-github/) with `mode: static`.
+It runs your site's build on GitHub's runners, uploads the output as a release,
+and deploys it — keyless, over GitHub OIDC.
+
+The one-time setup (create a service account, install the GitHub App, link the
+repository) is identical to a container deploy — follow
+[Deploy from GitHub → One-time setup](/automation/deploy-from-github/#one-time-setup),
+then add a workflow with `mode: static`:
+
+{{< code file=".github/workflows/deploy.yml" lang="yaml" >}}
+name: Deploy
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  id-token: write   # required — this is the credential
+  contents: read
+  pull-requests: write   # lets the action post the preview comment
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: deploys-app/build-deploy-action@v1
+      with:
+        project: acme
+        location: gke.cluster-rcf2
+        name: website
+        mode: static
+        framework: hugo
+{{< /code >}}
+
+Push to `main` and the action builds the site, publishes the release, and
+deploys it as `website`. The console's **GitHub** page can generate this file
+for you, pre-filled — see [Deploy from GitHub](/automation/deploy-from-github/).
+
+## Build settings
+
+These inputs only apply when `mode: static`:
+
+| Input | Default | Description |
+|---|---|---|
+| `framework` | `auto` | `auto` (detect Hugo, else Node), `hugo`, `node`, or `none` |
+| `buildCommand` | per framework | Build command. Defaults to `hugo` / `npm run build`; **required** when `framework: none` |
+| `outputDir` | `public` | Folder of built files to publish (`public` for Hugo, often `dist`/`build` for Node) |
+| `nodeVersion` | `.nvmrc` else `20` | Node version for the `node` framework |
+| `spa` | `false` | Serve `index.html` for unknown routes — turn on for client-routed SPAs |
+| `notFound` | `404.html` | Custom 404 document served on a miss when `spa: false` |
+| `workingDirectory` | `.` | Root of the app to build, for monorepos (e.g. `sites/marketing`) |
+| `baseUrl` | the deploy URL | Build-time base URL; left empty, the action injects the deploy's own host so `sitemap.xml` and feeds get the right URL |
+
+`env`, `envGroups`, and `pullSecret` are ignored for static deployments —
+there's no runtime container to read them.
+
+### Examples
+
+A Vite / React single-page app:
+
+```yaml
+- uses: deploys-app/build-deploy-action@v1
+  with:
+    project: acme
+    location: gke.cluster-rcf2
+    name: app
+    mode: static
+    framework: node
+    buildCommand: npm run build
+    outputDir: dist
+    spa: true
+```
+
+A site with no framework preset — just run a command and publish a folder:
+
+```yaml
+- uses: deploys-app/build-deploy-action@v1
+  with:
+    project: acme
+    location: gke.cluster-rcf2
+    name: docs
+    mode: static
+    framework: none
+    buildCommand: make build
+    outputDir: site
+```
+
+## Caching
+
+The release manifest records a cache class per file, and the gateway serves
+each blob accordingly:
+
+- **Fingerprinted assets** (hashed filenames like `app.4f2a.js`) are served
+  `immutable` with a one-year max-age — a browser or edge never re-fetches them.
+- **HTML and clean URLs** are always revalidated (`must-revalidate`), with the
+  blob's hash as the `ETag` so an unchanged page costs a cheap `304`.
+
+Because releases are content-addressed, a new deploy publishes new blobs and
+flips the pointer — there's no cache to purge.
+
+{{< callout type="warning" >}}
+Turning on [access control](/deployments/access/) (Require Google login) on a
+static site **forfeits edge caching** — a gated host can't be cached at the edge
+without leaking pre-auth content, so every request proxies fresh. Keep public
+sites public to keep them fast.
+{{< /callout >}}
+
+## Preview deployments
+
+Like container builds, a static site opened in a pull request gets its own
+preview deployment (`<name>-pr-<number>`) with a public URL and a sticky PR
+comment, deleted when the PR closes. Preview releases are served with
+`X-Robots-Tag: noindex` so search engines never index them. See
+[Deploy from GitHub → pull requests](/automation/deploy-from-github/#what-happens-on-a-pull-request).

@@ -1,7 +1,7 @@
 ---
 title: 'Monitoring & debugging'
 linkTitle: 'Monitoring & debugging'
-weight: 6
+weight: 8
 description: 'Metrics, logs, and Kubernetes events for diagnosing live deployments.'
 lead: 'Every deployment has a dashboard with the three signals you reach for when something is off — usage charts, log output, and the underlying cluster events.'
 ---

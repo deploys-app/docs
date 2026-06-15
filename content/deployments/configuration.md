@@ -1,7 +1,7 @@
 ---
 title: 'Configuration'
 linkTitle: 'Configuration'
-weight: 3
+weight: 5
 description: 'Image, resources, port, replicas, command, args, and the rest of the knobs a deployment exposes.'
 lead: 'Everything you set on the deploy form maps to a field on the deployment.deploy API call. This page walks them, top to bottom, with the values they accept.'
 ---

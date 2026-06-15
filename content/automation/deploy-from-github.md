@@ -189,32 +189,74 @@ Previews are temporary by design. They're deleted automatically when the PR is
 closed or merged; the TTL (default 7 days since the last push, configurable
 with `previewTtl`) is the backstop for previews that never get cleaned up.
 
+## Static sites
+
+Set `mode: static` and the action builds your site (Hugo, a Node SPA, or any
+build command) and publishes it as a [Static deployment](/deployments/types/#static-site)
+served from the edge — no Dockerfile, no container. The setup above (service
+account, App, link) is identical. See **[Static sites](/deployments/static-sites/)**
+for the build inputs and examples.
+
 ## Inputs and outputs
+
+**Common** — apply to every build:
 
 | Input | Required | Description |
 |---|---|---|
 | `project` | yes | Project ID |
 | `location` | yes | Location ID (e.g. `gke.cluster-rcf2`) |
 | `name` | yes | Deployment name |
-| `context` | no | Build context directory (default `.`) |
-| `dockerfile` | no | Path to the Dockerfile |
-| `buildArgs` | no | Docker build args |
-| `port` | no | Port the container listens on (default `8080`) |
-| `type` | no | [Deployment type](/deployments/types/) — `WebService` (default), `Worker`, `TCPService`, `InternalTCPService` |
-| `env` | no | Environment variables, one `KEY=VALUE` per line |
+| `mode` | no | `dockerfile` (default) or `static` |
+| `workingDirectory` | no | Root of the app to build, for monorepos (default `.`) |
 | `previewTtl` | no | How long an idle preview lives (default `7d`) |
 | `apiEndpoint` | no | Override the API endpoint |
 | `registry` | no | Override the registry to push to |
+
+**Container build** (`mode: dockerfile`):
+
+| Input | Required | Description |
+|---|---|---|
+| `context` | no | Build context directory, relative to `workingDirectory` (default `.`) |
+| `dockerfile` | no | Path to the Dockerfile |
+| `buildArgs` | no | Docker build args, one `KEY=VALUE` per line |
+| `port` | no | Port the container listens on (default `8080`) |
+| `type` | no | [Deployment type](/deployments/types/) — `WebService` (default), `Worker`, `TCPService`, `InternalTCPService` |
+| `protocol` | no | WebService protocol — `http` (default), `https`, or `h2c` |
+| `env` | no | Environment variables, one `KEY=VALUE` per line |
+| `envGroups` | no | [Env groups](/deployments/environment-variables/) to attach, one per line or comma-separated |
+| `pullSecret` | no | [Pull secret](/registry/pull-secrets/) name for a private base image |
+
+**Static build** (`mode: static`) — see [Static sites](/deployments/static-sites/#build-settings):
+
+| Input | Default | Description |
+|---|---|---|
+| `framework` | `auto` | `auto`, `hugo`, `node`, or `none` |
+| `buildCommand` | per framework | Build command (required when `framework: none`) |
+| `outputDir` | `public` | Folder of built files to publish |
+| `nodeVersion` | `.nvmrc` else `20` | Node version for the `node` framework |
+| `spa` | `false` | Serve `index.html` for unknown routes |
+| `notFound` | `404.html` | Custom 404 document when `spa: false` |
+| `baseUrl` | the deploy URL | Build-time base URL |
+
+**Access** — see [Deployment access](/deployments/access/) (applies to `WebService` and `Static`):
+
+| Input | Default | Description |
+|---|---|---|
+| `requireGoogleLogin` | `false` | Gate the deployment behind Google sign-in |
+| `allowedEmails` | — | Allowed emails, one per line or comma-separated |
+| `allowedDomains` | — | Allowed email domains, one per line or comma-separated |
 
 The action exposes outputs you can use in later steps — handy for smoke tests
 against the deployed URL:
 
 | Output | Description |
 |---|---|
-| `url` | URL of the deployment that was created or updated |
 | `deployment` | Deployment name (including the `-pr-<n>` suffix for previews) |
-| `environment` | `production` or `preview` |
-| `image` | The image that was built and deployed |
+| `environment` | `production`, or `pr-<n>` for previews |
+| `artifact` | The deployed artifact — the pushed image digest, or the static release SHA |
+| `url` | URL of the deployment that was created or updated |
+
+`image` is still emitted as a deprecated alias of `artifact`; prefer `artifact`.
 
 ## How authentication works
 
