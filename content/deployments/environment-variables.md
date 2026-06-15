@@ -1,7 +1,7 @@
 ---
 title: 'Environment variables'
 linkTitle: 'Environment variables'
-weight: 4
+weight: 6
 description: 'Per-deployment env, reusable env groups, and how partial updates work.'
 lead: 'Most configuration lives in the environment. Deploys.app lets you set it per-deployment, share it across deployments with env groups, and update slices of it without re-stating the rest.'
 ---

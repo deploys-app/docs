@@ -2,8 +2,8 @@
 title: 'Deployment types'
 linkTitle: 'Types'
 weight: 2
-description: 'Web services, workers, scheduled jobs, and TCP services — and when to use each.'
-lead: 'Deploys.app runs five kinds of workloads. The type you pick decides whether the platform gives you a public URL, opens a TCP port, runs you on a cron schedule, or just keeps you running quietly in the background.'
+description: 'Web services, static sites, workers, scheduled jobs, and TCP services — and when to use each.'
+lead: 'Deploys.app runs six kinds of workloads. The type you pick decides whether the platform gives you a public URL, opens a TCP port, runs you on a cron schedule, serves prebuilt files from the edge, or just keeps you running quietly in the background.'
 ---
 
 ## At a glance
@@ -11,6 +11,7 @@ lead: 'Deploys.app runs five kinds of workloads. The type you pick decides wheth
 | Type | API string | Inbound | Scheduling | Use it for |
 |---|---|---|---|---|
 | **Web service** | `WebService` | HTTPS on a managed hostname | Autoscales between replica bounds | Internet-facing apps and APIs |
+| **Static site** | `Static` | HTTPS on a managed hostname | None — served from object storage | Prebuilt static sites (SPAs, docs, marketing) |
 | **Worker** | `Worker` | None | Autoscales between replica bounds | Background processors, queue consumers |
 | **Cron job** | `CronJob` | None | Cron schedule, exits when done | Periodic tasks (cleanup, sync, snapshot) |
 | **TCP service** | `TCPService` | Raw TCP on an external port | Autoscales between replica bounds | Non-HTTP protocols you need exposed |
@@ -33,6 +34,20 @@ deploys deployment deploy \
   --type WebService --port 80 \
   --minReplicas 1 --maxReplicas 5
 ```
+
+## Static site
+
+No container — a folder of prebuilt files (HTML, CSS, JS) served straight from
+object storage through the platform's edge. You get the same managed HTTPS
+hostname as a web service, but there's nothing running between requests, so
+there's no `port`, `image`, replicas, or resources to set. Each deploy
+publishes an immutable, content-addressed release and flips the live pointer
+atomically.
+
+Static releases are built and published by the
+[`build-deploy-action`](/automation/deploy-from-github/) with `mode: static`,
+not the CLI. See **[Static sites](/deployments/static-sites/)** for the full
+walkthrough.
 
 ## Worker
 

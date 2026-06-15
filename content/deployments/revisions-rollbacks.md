@@ -1,7 +1,7 @@
 ---
 title: 'Revisions and rollbacks'
 linkTitle: 'Revisions & rollbacks'
-weight: 5
+weight: 7
 description: 'Every deploy creates an immutable revision. Roll back to any of them in one call.'
 lead: 'A revision is the exact configuration that was rolled out at some point in time — image, env, replicas, the lot. Revisions are immutable, which makes rollback safe and predictable.'
 ---

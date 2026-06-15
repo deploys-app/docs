@@ -69,19 +69,73 @@ reproducible — the same SHA always means the same bits.
 
 ## Inputs
 
+The action calls `deployment.deploy` with these fields. Fields you don't pass
+are preserved from the deployment's current revision when possible — so a CI
+deploy can pass just `image` and leave the rest as configured.
+
+**Target and artifact:**
+
 | Input | Required | Description |
 |---|---|---|
 | `project` | yes | Project ID |
 | `location` | yes | Location ID (e.g. `gke.cluster-rcf2`) |
 | `name` | yes | Deployment name |
-| `image` | yes | Container image with tag or digest |
-| `port` | no | Port the container listens on |
-| `type` | no | Deployment type (default `WebService`) |
-| `minReplicas` | no | Autoscale minimum |
-| `maxReplicas` | no | Autoscale maximum |
+| `image` | for containers | Container image with tag or digest |
+| `type` | no | [Deployment type](/deployments/types/) — `WebService`, `Worker`, `CronJob`, `TCPService`, `InternalTCPService`, `Static` |
+| `site` | for `Static` | Static release reference (`site://…@<sha>`); leave `image` empty |
+| `siteManifestDigest` | no | Manifest digest for the static release |
 
-The action calls `deployment.deploy` with these fields. Fields you don't pass
-are preserved from the deployment's current revision when possible.
+**Networking and scaling:**
+
+| Input | Description |
+|---|---|
+| `port` | Port the container listens on (`WebService`/`TCPService`) |
+| `protocol` | WebService protocol — `http`, `https`, or `h2c` |
+| `internal` | Run a WebService as internal-only (`true`/`false`) |
+| `minReplicas` / `maxReplicas` | Autoscale bounds (0–20) |
+| `schedule` | Cron schedule for a `CronJob` (5 fields) |
+| `ttl` | Auto-delete TTL (`7d`, `12h`, seconds…); `0` clears it |
+
+**Environment and container:**
+
+| Input | Description |
+|---|---|
+| `env` | Env vars (`KEY=VALUE` per line) — replaces the whole set |
+| `addEnv` / `removeEnv` | Add / remove individual env vars without replacing the set |
+| `envGroups` | [Env groups](/deployments/environment-variables/) to attach (replaces) |
+| `addEnvGroups` / `removeEnvGroups` | Add / remove individual env groups |
+| `command` / `args` | Override the image entrypoint / arguments (one token per line) |
+| `workloadIdentity` | [Workload identity](/access/workload-identity/) to bind |
+| `pullSecret` | [Pull secret](/registry/pull-secrets/) for a private registry |
+
+**Storage and resources:**
+
+| Input | Description |
+|---|---|
+| `diskName` / `diskMountPath` / `diskSubPath` | Attach a [persistent disk](/storage/disks/) |
+| `mountData` | Files to mount, as a JSON map of `path → contents` |
+| `cpuRequest` / `memoryRequest` / `cpuLimit` / `memoryLimit` | Resource requests and limits |
+
+**[Access control](/deployments/access/):**
+
+| Input | Description |
+|---|---|
+| `accessRequireGoogleLogin` | Gate the deployment behind Google sign-in (`true`/`false`) |
+| `accessAllowedEmails` | Allowed emails, one per line or comma-separated |
+| `accessAllowedDomains` | Allowed email domains, one per line or comma-separated |
+
+**Auth and escape hatch:**
+
+| Input | Description |
+|---|---|
+| `token` / `authUser` / `authPass` | Credentials (default to the `DEPLOYS_*` env vars below) |
+| `apiEndpoint` | Override the API endpoint |
+| `extraArgs` | A JSON object merged into the `deployment.deploy` request — use for anything not yet a dedicated input |
+
+A Cloud SQL Proxy sidecar can be attached with `cloudSqlProxyInstance`,
+`cloudSqlProxyPort`, and `cloudSqlProxyCredentials`.
+
+Outputs: `url` (the deployed URL) and `deployment` (the deployment name).
 
 ## Authentication
 
