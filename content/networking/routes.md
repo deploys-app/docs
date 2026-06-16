@@ -53,19 +53,6 @@ three types when you create or edit a route:
 | **Redirect** | `redirect://https://example.com` | Return an HTTP redirect to the given URL. |
 | **External server (HTTP)** | `http://<ip>[:port]` | Front a server you run yourself — see [below](#external-server-http). |
 
-### Content-addressed targets (API only)
-
-Three more target schemes serve content from the platform's shared IPFS gateway
-instead of a deployment. They're accepted by `route.createV2` but aren't in the
-console's target picker — set them through the API, and the console will display
-(and round-trip) an existing one unchanged.
-
-| Type | `target` value | What it does |
-|---|---|---|
-| **IPFS** | `ipfs://<cid>` | Serve an immutable IPFS object by content id. |
-| **IPNS** | `ipns://<name>` | Serve a mutable IPNS name (resolves to its current object). |
-| **DNSLink** | `dnslink://<domain>` | Serve content published via a domain's DNSLink record. |
-
 ## Routes with config (v2)
 
 The `routeV2` flow lets you set any of the target types above and attach extra
