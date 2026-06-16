@@ -28,8 +28,19 @@ If you only want to nudge a couple of values, use the partial fields below.
 ## Reusable env groups
 
 An **env group** is a named bag of variables you can attach to multiple
-deployments. Change the group, redeploy the deployments that use it, and they
-all pick up the new values.
+deployments. Changing the group's values stores them but does **not** restart
+anything by default — each deployment picks the new values up on its next deploy.
+
+To roll the change out immediately, set `redeploy: true` on `envGroup.update`
+and every deployment that uses the group is redeployed to a new revision. In the
+console this is the **Update and redeploy** button (the plain **Update** button
+just stores the values). Paused deployments are left untouched and pick up the
+new values when you resume them.
+
+Because `redeploy: true` rolls a new revision out to running deployments, it
+requires the `deployment.deploy` permission in addition to `envgroup.update`. A
+caller that holds only `envgroup.update` can still change the stored values
+(leaving `redeploy` unset, or `false`).
 
 ```bash
 # create or update a group (replaces its contents)
