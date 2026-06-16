@@ -7,7 +7,8 @@
 	{{- if .IsHome }}<title>{{ .Site.Title }} — Deploy and run containers</title>
 	{{- else }}<title>{{ $title }} · {{ .Site.Title }}</title>{{ end }}
 	<meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}">
-	<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+	<link rel="icon" type="image/webp" href="/favicon.webp">
+	<link rel="icon" type="image/png" href="/favicon.png">
 	<script>
 		// Apply the persisted (or system-preferred) theme before first paint so
 		// the page never flashes the wrong colors. The "theme-ready" class is
