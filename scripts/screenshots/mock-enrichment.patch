@@ -1,8 +1,8 @@
 diff --git a/src/lib/server/mock.js b/src/lib/server/mock.js
-index 7849ada..56a4585 100644
+index 1402806..c360791 100644
 --- a/src/lib/server/mock.js
 +++ b/src/lib/server/mock.js
-@@ -262,58 +262,72 @@ const deployments = [
+@@ -268,58 +268,72 @@ const deployments = [
  	}
  ]
  
@@ -120,7 +120,7 @@ index 7849ada..56a4585 100644
  ]
  
  const wafZone = {
-@@ -667,6 +681,20 @@ const roles = [
+@@ -673,6 +687,20 @@ const roles = [
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	},
@@ -141,7 +141,7 @@ index 7849ada..56a4585 100644
  	{
  		role: 'admin',
  		name: 'Administrator',
-@@ -690,7 +718,15 @@ const serviceAccounts = [
+@@ -696,7 +724,15 @@ const serviceAccounts = [
  		sid: 'sa_mock_ci',
  		email: 'ci@acme.serviceaccount.deploys.app',
  		name: 'CI Deployer',
@@ -158,7 +158,7 @@ index 7849ada..56a4585 100644
  		createdAt: CREATED_AT,
  		createdBy: USER_EMAIL
  	}
-@@ -787,7 +823,10 @@ const auditLogItems = (() => {
+@@ -793,7 +829,10 @@ const auditLogItems = (() => {
  
  const repositories = [
  	{ name: 'acme/web', size: 184320000, createdAt: CREATED_AT },
@@ -170,3 +170,41 @@ index 7849ada..56a4585 100644
  ]
  
  const repositoryTags = [
+@@ -978,12 +1017,36 @@ function invoiceListItem (inv) {
+ 
+ const dropboxItems = [
+ 	{
+-		downloadUrl: 'https://dropbox.deploys.app/d/mock-build.tar.gz',
++		downloadUrl: 'https://dropbox.deploys.app/files/k3Qp9mZx7Rt2Lv8Wd4Nc1Bg-a1b2c3d4e5f6a7b8c9d0',
+ 		filename: 'build.tar.gz',
+ 		size: 5242880,
+ 		ttl: 86400,
+ 		createdAt: CREATED_AT,
+ 		expiresAt: '2026-05-02T08:00:00Z'
++	},
++	{
++		downloadUrl: 'https://dropbox.deploys.app/files/Hn5Tb2Wq8Yx1Kd6Vc3Mf7Lp-9f8e7d6c5b4a3210ffee',
++		filename: 'db-dump-2026-05-01.sql.gz',
++		size: 50331648,
++		ttl: 604800,
++		createdAt: CREATED_AT,
++		expiresAt: '2026-05-08T08:00:00Z'
++	},
++	{
++		downloadUrl: 'https://dropbox.deploys.app/files/Rj4Cf8Nz1Px6Bm2Gd9Wt5Qk-1234abcd5678ef90aa11',
++		filename: 'report-april.pdf',
++		size: 1258291,
++		ttl: 259200,
++		createdAt: CREATED_AT,
++		expiresAt: '2026-05-04T08:00:00Z'
++	},
++	{
++		downloadUrl: 'https://dropbox.deploys.app/files/Wd7Lq2Vx9Bn4Kp1Cf6Mz3Rt-0fe1dc2b3a49587667cc',
++		filename: 'site.tar.gz',
++		size: 839680,
++		ttl: 172800,
++		createdAt: CREATED_AT,
++		expiresAt: '2026-05-03T08:00:00Z'
+ 	}
+ ]
+ 

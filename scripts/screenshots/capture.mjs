@@ -40,6 +40,7 @@ const screens = [
 	['domain-list',           `/domain?${P}`],
 	['route-list',            `/route?${P}`],
 	['disk-list',             `/disk?${P}`],
+	['dropbox-list',          `/dropbox?${P}`],
 	['registry-list',         `/registry?${P}`],
 	['role-list',             `/role?${P}`],
 	['service-account-list',  `/service-account?${P}`],
