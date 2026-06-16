@@ -2,25 +2,36 @@
 title: 'Audit log'
 linkTitle: 'Audit log'
 weight: 5
-description: 'Who did what, when. Filterable by resource, outcome, and time range.'
-lead: 'Every state-changing API call lands in the audit log — actor, action, resource, outcome, and timestamp. Use it to answer "who deployed that?" and "what was tried but blocked?"'
+description: 'Who did what, when. Filterable by resource, actor, outcome, and time range.'
+lead: 'Every state-changing API call that passes authorization lands in the audit log — actor, action, resource, outcome, and timestamp. Use it to answer "who deployed that?" and "which writes failed?"'
 ---
 
 ## What gets logged
 
-Every call that creates, updates, or deletes a resource — `deployment.deploy`,
-`deployment.rollback`, `domain.create`, `route.delete`, `role.bind`,
-`serviceAccount.createKey`, and so on — is recorded. Read-only calls
-(`*.list`, `*.get`, `*.metrics`) are not.
+Every call that creates, updates, or deletes a resource — a deploy, a rollback,
+a domain create, a route delete, a role grant, a service-account key create, and
+so on — is recorded once it passes authorization. Read-only calls (`*.list`,
+`*.get`, `*.metrics`) are not.
+
+{{< callout type="note" >}}
+**Permission denials are not logged.** A call rejected by the permission check
+returns before the write is attempted, so it never reaches the audit log. The
+log records *authorized* writes — the ones that ran — not access attempts. To
+reason about who *can* do what, use [roles](/access/roles/), not the audit log.
+{{< /callout >}}
 
 Each entry captures:
 
 - **Actor** — the principal who made the call (user email or service-account
-  email), plus their type.
-- **Action** — the API function name, e.g. `deployment.deploy`.
-- **Resource** — the type, ID, name, and location of the affected resource.
-- **Outcome** — `success`, `forbidden`, or `error`.
-- **Detail** — a short human-readable summary (e.g. *"Deployed revision 7"*).
+  email), plus their type (`User` or `ServiceAccount`).
+- **Action** — the verb that ran: `deploy`, `create`, `delete`, `rollback`,
+  `grant`, `revoke`, and so on.
+- **Resource** — the `type` (`deployment`, `domain`, `role`, …, lowercase), plus
+  the id, name, and location of the affected resource.
+- **Outcome** — `success` or `failure`. A `failure` is an authorized call that
+  *ran but errored* — a validation error, a conflict, a downstream failure — not
+  a permission denial.
+- **Detail** — a short human-readable summary (e.g. *"revision 7"*).
 - **Created at** — when the call happened, in UTC.
 
 ## Filter and browse
@@ -28,50 +39,59 @@ Each entry captures:
 The Audit Logs page lets you narrow by:
 
 - **Resource type** — Deployment, Domain, Route, Disk, Role, ServiceAccount, …
-- **Outcome** — success, forbidden, error.
+- **Outcome** — success or failure.
 - **Date range** — today, last 7 days, last 30 days, last 90 days, last year,
   or a custom range.
 
-The same filters are available on the API:
+The `auditLog.list` function takes the same filters — plus an `actor` filter the
+console doesn't expose — and a `limit`. `resourceType` and `outcome` match
+exactly, and the resource type is **lowercase** (`deployment`, not
+`Deployment`). The time window is `after` / `before` (RFC 3339). There is no
+`action` filter — narrow by `resourceType`, then read the `action` field on each
+entry.
 
 ```bash
 curl https://api.deploys.app/auditLog.list \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{
     "project": "acme",
-    "resourceType": "Deployment",
+    "resourceType": "deployment",
     "outcome": "success",
-    "from": "2026-05-01T00:00:00Z",
-    "to": "2026-06-01T00:00:00Z"
+    "after": "2026-05-01T00:00:00Z",
+    "before": "2026-06-01T00:00:00Z",
+    "limit": 200
   }'
 ```
 
-The response is a paginated list of entries you can sift through or pipe
-through `jq` for ad-hoc analysis.
+The response is a list of entries you can sift through or pipe through `jq` for
+ad-hoc analysis.
 
 ## Common queries
 
-- **"Who deployed the bad release?"** — filter by `Deployment` resource type,
-  action `deployment.deploy`, and the rough time window. The actor on the
+- **"Who deployed the bad release?"** — filter by `deployment` resource type and
+  the rough time window, then look for `action: "deploy"`. The actor on the
   matching entry is your culprit (or your hero).
-- **"What was blocked?"** — outcome `forbidden`. Useful when adjusting
-  [roles](/access/roles/) — a string of failures usually means someone needs a
-  permission you forgot to add.
-- **"What did the CI service account touch yesterday?"** — set the actor email
-  on the API call (the console doesn't expose this filter directly).
+- **"Which writes failed?"** — outcome `failure`. These are calls that were
+  *allowed* but errored while running — a bad request body, a name conflict, a
+  downstream failure — so it's a debugging aid for automation, not a record of
+  blocked access.
+- **"What did the CI service account touch yesterday?"** — set `actor` to the
+  service-account email plus an `after` / `before` window (the console doesn't
+  expose the actor filter directly).
 
 ## Retention
 
-Entries are retained for the lifetime of the project. Deleting a resource
-doesn't delete its audit history; deleting the *project* eventually purges
-it, but a record of project deletion itself is retained.
+Entries are kept for **one year** after they're written, then purged
+automatically by the database's row-level TTL — no action needed on your part.
+Deleting a resource doesn't remove its existing audit history; the entries age
+out on the same one-year clock.
 
 ## Streaming to your SIEM
 
 Two patterns work well:
 
 - **Pull periodically.** A small service account with `auditLog.list` polls
-  every few minutes for new entries (filter by `from` ≥ last-seen
+  every few minutes for new entries (filter by `after` ≥ last-seen
   `createdAt`) and forwards to your aggregator.
 - **Pull at quarter-of-the-hour cadence** if you only need rough
   near-real-time. Run a cron deployment with `--type CronJob` and

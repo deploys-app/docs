@@ -61,6 +61,21 @@ Returns the project's current monthly usage rolled up by resource type. The
 same data drives the project dashboard and feeds the
 [billing report](/billing/usage-reports/).
 
+For charts rather than a single rollup, two API functions return time-series
+over a `timeRange` (`7d`, `30d`, or `90d`):
+
+- **`project.metrics`** — CPU, memory, disk, egress, replica, and static-storage
+  usage over time, the series behind the project dashboard.
+- **`project.storageMetrics`** — static-site storage held over time.
+
+```bash
+curl https://api.deploys.app/project.metrics \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{ "project": "acme", "timeRange": "30d" }'
+```
+
+Both need only `project.get`.
+
 ## Deleting a project
 
 A project can be deleted only when it's empty — every deployment, domain,
