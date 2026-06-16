@@ -19,7 +19,7 @@ no per-deployment monthly minimum. The metered quantities are:
 | **Disk** | GiB-hours | Allocated (the size you provisioned) |
 | **Registry storage** | GiB-hours | Actual stored size |
 | **Static site storage** | GiB-months | Actual stored size of your published [static site](/deployments/static-sites/) releases |
-| **Egress** | GiB transferred out | Actual bytes leaving the cluster |
+| **Egress** | GiB transferred out | Actual bytes leaving the container (destination isn't tracked) |
 | **External route egress** | GiB transferred out | Actual bytes served from the edge for an [external HTTP route](/networking/routes/#external-server-http) |
 
 Sizing your `resources.requests` matters — that's the number that hits the
