@@ -96,6 +96,26 @@ Storage is metered and billed — see the **Usage** button in the top-right of
 the Registry page for the current size of each repository over time. Trim
 unused tags and manifests to keep the bill in check.
 
+The same numbers are available from the API. `registry.get` returns one
+repository's current size; `registry.getProjectStorage` returns the whole
+project's registry footprint; and `registry.metrics` returns storage and egress
+as time-series over a `timeRange` (`7d`, `30d`, or `90d`) — the series behind the
+Usage charts.
+
+```bash
+# one repository's size right now
+curl https://api.deploys.app/registry.get \
+  -d '{ "project": "acme", "repository": "acme/web" }'
+
+# the project's total registry storage
+curl https://api.deploys.app/registry.getProjectStorage \
+  -d '{ "project": "acme" }'
+
+# storage + egress over time
+curl https://api.deploys.app/registry.metrics \
+  -d '{ "project": "acme", "timeRange": "30d" }'
+```
+
 ```bash
 # delete a tag (frees nothing if the manifest is still tagged elsewhere)
 curl https://api.deploys.app/registry.untag \

@@ -82,6 +82,73 @@ priority 90 — log   — request.headers['user-agent'].contains('bot')
 on the metrics page for a day, then flip it to `block` once you've confirmed
 it's catching what you expect (and not what you don't).
 
+## Rate limiting
+
+Alongside the block/log/allow rules, a zone can carry **rate limits** — counters
+that reject (or just watch) traffic arriving faster than a threshold. Limits are
+independent of the rules: they're evaluated for every request the zone covers,
+so a request that passes every rule can still be rejected by a limit.
+
+A limit sorts requests into **buckets** and rejects a bucket once it exceeds
+`rate` requests per `window`. What defines a bucket is the `key`:
+
+| Key | One bucket per |
+|---|---|
+| `ip` | client IP (the default) |
+| `host` | request hostname |
+| `asn` | client network (autonomous system number) |
+| `country` | client country |
+| `header:<name>` | value of a request header |
+| `cookie:<name>` | value of a cookie |
+
+List several to bucket on the combination — `["ip", "host"]` limits each IP
+*per host*. With no key the limit defaults to `["ip"]`.
+
+Limits live on the same zone as the rules. Set them with `waf.set`, in a
+`limits` array next to `rules` — and, like the rules, `waf.set` replaces the
+whole zone, so send the full `limits` list every time:
+
+```json
+"limits": [
+  {
+    "description": "100 req/min per IP",
+    "key": ["ip"],
+    "rate": 100,
+    "window": "1m"
+  },
+  {
+    "description": "Throttle login to slow credential stuffing",
+    "key": ["ip"],
+    "rate": 5,
+    "window": "1m",
+    "filter": "request.path == '/login' && request.method == 'POST'",
+    "status": 429,
+    "message": "Too many attempts — slow down."
+  }
+]
+```
+
+Each limit understands:
+
+| Field | | Meaning |
+|---|---|---|
+| `rate` | required | Max requests per `window` per bucket (> 0). |
+| `window` | required | Go duration, `1s`–`1h` (e.g. `30s`, `1m`, `1h`). |
+| `key` | optional | Bucket characteristics (above); default `["ip"]`. |
+| `algorithm` | optional | `fixed` (default) fixed window, or `sliding` for a smoother rolling window. |
+| `mode` | optional | `enforce` (default) rejects; `shadow` only counts — see below. |
+| `status` | optional | Response status when limited: `429` (default) or `503`. |
+| `message` | optional | Response body when limited (default `Too Many Requests`). |
+| `filter` | optional | A CEL expression (the same `request.*` surface as rule expressions) scoping the limit to matching requests; empty means every request. A filter that errors at runtime fails *open* — the limit is skipped — so a bad filter can't reject good traffic. |
+
+A zone holds up to 20 limits.
+
+**Size a limit in shadow mode first.** Set `"mode": "shadow"` and the limit
+counts matches without rejecting anything. Watch the limited share on the metrics
+page for a day or two, confirm the threshold only catches abuse, then flip it to
+`enforce`. It's the rate-limit equivalent of rolling out a rule as `log` before
+`block`.
+
 ## Metrics
 
 The Firewall metrics page plots matches per (rule, action) over a selectable
@@ -92,6 +159,18 @@ The same data is available via the API:
 
 ```bash
 curl https://api.deploys.app/waf.metrics \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{ "project": "acme", "location": "gke.cluster-rcf2",
+        "timeRange": "1d" }'
+```
+
+Rate limits have their own series via `waf.limitMetrics`, returned per
+(limit, result) where `result` is `allowed` or `limited`. Charting the limited
+share — `limited / (allowed + limited)` — is how you size a `shadow` limit
+before enforcing it.
+
+```bash
+curl https://api.deploys.app/waf.limitMetrics \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "project": "acme", "location": "gke.cluster-rcf2",
         "timeRange": "1d" }'

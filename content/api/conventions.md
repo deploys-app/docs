@@ -93,8 +93,10 @@ The big picture. Each row is a fully-qualified API function.
 | `domain.list` / `.get` / `.create` / `.delete` | Domain CRUD |
 | `domain.purgeCache` | CDN cache purge for a domain |
 | `route.list` / `.create` / `.createV2` / `.delete` | Route CRUD |
-| `waf.list` / `.get` / `.set` / `.delete` | Firewall zone CRUD |
-| `waf.metrics` | Firewall match counts over time |
+| `waf.list` / `.get` / `.set` / `.delete` | Firewall zone CRUD (rules + rate limits) |
+| `waf.metrics` / `.limitMetrics` | Firewall match counts and rate-limit decisions over time |
+| `cache.list` / `.get` / `.set` / `.delete` | Cache-override zone CRUD |
+| `cache.metrics` | Cache-override decision counts over time |
 
 ### Storage and registry
 
@@ -132,12 +134,27 @@ The big picture. Each row is a fully-qualified API function.
 | `billing.listInvoices` / `.getInvoice` / `.downloadInvoice` | Invoices |
 | `billing.uploadTransferSlip` | Submit a bank-transfer receipt |
 
+### GitHub
+
+For [build-and-deploy from GitHub](/automation/deploy-from-github/). These manage
+the link between a repository and the service account it deploys as.
+
+| Function | What it does |
+|---|---|
+| `github.list` | Repositories linked in the project |
+| `github.link` / `.unlink` | Link or unlink a repository to a service account |
+| `github.update` | Change a link's service account, deploy trigger, or production branch |
+
+The keyless token exchange and build/deploy status reporting (`github.exchangeToken`,
+`github.notify`) are authenticated by the workflow's GitHub OIDC token and called
+by the [build-and-deploy action](/automation/deploy-from-github/), not directly.
+
 ### Other
 
 | Function | What it does |
 |---|---|
-| `email.list` | Email domains attached to the project |
-| `dropbox.list` / `.metrics` | Dropbox uploads (alpha) |
+| `email.list` / `.send` | List project email domains; send a transactional email |
+| `dropbox.list` / `.metrics` | [Dropbox](/storage/dropbox/) stored files and usage |
 
 ## Typed clients
 

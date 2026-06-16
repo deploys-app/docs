@@ -34,27 +34,47 @@ deploys role create \
   --permissions "project.get,deployment.list,deployment.get,deployment.deploy,registry.list"
 ```
 
-The `--permissions` flag takes a comma-separated list of API function names.
-Each function name (e.g. `deployment.deploy`) is one permission — the same
-string you'd POST to as `https://api.deploys.app/<permission>`.
-
-The most useful permissions:
+The `--permissions` flag takes a comma-separated list of permission strings.
+A permission is `<namespace>.<action>`, and unlike the API function names it is
+**always lowercase** — the `serviceAccount.createKey` call, for example, is
+guarded by the `serviceaccount.key.create` permission. Matching is exact, so the
+casing matters: `serviceAccount.createKey` in a role grants nothing. The
+authoritative list is whatever `role.permissions` returns; the most useful ones:
 
 | Group | Permissions |
 |---|---|
-| Project | `project.get`, `project.update`, `project.delete`, `project.usage` |
-| Deployment | `deployment.list`, `deployment.get`, `deployment.deploy`, `deployment.delete`, `deployment.pause`, `deployment.resume`, `deployment.rollback`, `deployment.metrics`, `deployment.revisions` |
-| Domain | `domain.list`, `domain.get`, `domain.create`, `domain.delete`, `domain.purgeCache` |
-| Route | `route.list`, `route.create`, `route.delete` |
+| Project | `project.get`, `project.delete` |
+| Deployment | `deployment.list`, `deployment.get`, `deployment.deploy`, `deployment.delete` |
+| Domain | `domain.list`, `domain.get`, `domain.create`, `domain.delete`, `domain.purgecache` |
+| Route | `route.list`, `route.get`, `route.create`, `route.delete` |
+| Firewall (WAF) | `waf.list`, `waf.get`, `waf.set`, `waf.delete` |
+| Cache | `cache.list`, `cache.get`, `cache.set`, `cache.delete` |
 | Disk | `disk.list`, `disk.get`, `disk.create`, `disk.update`, `disk.delete` |
-| Registry | `registry.list`, `registry.delete`, `registry.deleteManifest`, `registry.untag` |
-| Pull secret | `pullSecret.list`, `pullSecret.create`, `pullSecret.delete` |
-| Role | `role.list`, `role.create`, `role.delete`, `role.bind` |
-| Service account | `serviceAccount.list`, `serviceAccount.create`, `serviceAccount.delete`, `serviceAccount.createKey` |
-| Billing | `billing.get`, `billing.report`, `billing.listInvoices` |
-| Audit | `auditLog.list` |
+| Registry | `registry.list`, `registry.get`, `registry.pull`, `registry.push` |
+| Pull secret | `pullsecret.list`, `pullsecret.get`, `pullsecret.create`, `pullsecret.delete` |
+| Env group | `envgroup.list`, `envgroup.get`, `envgroup.create`, `envgroup.update`, `envgroup.delete` |
+| Workload identity | `workloadidentity.list`, `workloadidentity.get`, `workloadidentity.create`, `workloadidentity.delete` |
+| Service account | `serviceaccount.list`, `serviceaccount.get`, `serviceaccount.create`, `serviceaccount.delete`, `serviceaccount.key.create`, `serviceaccount.key.delete` |
+| Role | `role.list`, `role.get`, `role.create`, `role.delete`, `role.bind` |
+| GitHub | `github.list`, `github.link`, `github.unlink`, `github.update` |
+| Email | `email.list`, `email.send` |
+| Dropbox | `dropbox.list`, `dropbox.upload` |
+| Static sites | `site.publish` |
+| Audit | `auditlog.list` |
 
-The wildcard `*` matches everything.
+Some actions don't have their own permission — they ride on a broader one.
+`deployment.metrics`, `deployment.revisions`, `deployment.rollback`,
+`deployment.pause`, and `deployment.resume` are all covered by `deployment.get`
+or `deployment.deploy`; `registry.delete` / `deleteManifest` / `untag` are
+covered by `registry.push`; `project.usage` and `project.metrics` by
+`project.get`. Granting the made-up string does nothing — grant the broader
+permission instead.
+
+The wildcard `*` matches everything, and each namespace has a `<namespace>.*`
+(for example `domain.*`) covering that namespace's actions.
+
+Billing access isn't a project permission: billing calls are authorized by
+**ownership of the billing account**, not by a role in the project.
 
 ## Binding roles
 
@@ -104,10 +124,11 @@ The audit log records permission denials too — failed calls show up with
 
 - **Deployer for CI**, restricted to `deployment.deploy` and the read calls
   needed to inspect status. CI never needs to manage roles or delete projects.
-- **Viewer for the on-call rotation**, plus `deployment.metrics` and
-  `auditLog.list` if you want them to debug without changing anything.
+- **Viewer for the on-call rotation**, plus `auditlog.list` if you want them to
+  debug without changing anything. (Viewer already has `deployment.get`, which
+  covers metrics and revisions.)
 - **Operator** with everything except `project.delete`, `role.bind`, and
-  `serviceAccount.createKey`. Day-to-day powerful, but can't change who has
+  `serviceaccount.key.create`. Day-to-day powerful, but can't change who has
   access or generate new machine credentials.
 
 Keep `admin` to the smallest practical group; everyone else gets a tailored

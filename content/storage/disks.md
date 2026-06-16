@@ -75,6 +75,22 @@ doesn't need to restart, but the filesystem inside the container may not see
 the new space until the container is restarted or runs `resize2fs` (depending
 on the filesystem).
 
+## Usage over time
+
+`disk.metrics` returns two time-series for a disk — **usage** (bytes actually
+written) and **size** (the provisioned capacity) — over a `timeRange` (`1h`,
+`6h`, `12h`, `1d`, `2d`, `7d`, or `30d`). It's how you spot a volume trending
+toward full before it gets there, so you can resize ahead of an outage.
+
+```bash
+curl https://api.deploys.app/disk.metrics \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{ "project": "acme", "location": "gke.cluster-rcf2",
+        "name": "uploads", "timeRange": "7d" }'
+```
+
+The same data backs the usage chart on the disk's page in the console.
+
 ## Delete a disk
 
 ```bash

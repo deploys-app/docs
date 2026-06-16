@@ -72,6 +72,11 @@ A `cache` override is described by a few fields:
   errors.
 - **`status`** — optional; force only these origin response statuses (e.g.
   `[200, 301]`). Empty forces every cacheable status.
+- **`priority`** — orders the `cache` rules against each other; the lowest number
+  wins and declaration order breaks ties. `0` resolves to the default (`100`).
+  `bypass` rules aren't ordered — a matching bypass always wins.
+- **`mode`** — `enforce` (default) applies the override; `shadow` evaluates and
+  counts it without changing caching. See [Roll out safely](#roll-out-safely).
 
 ## The filter expression
 

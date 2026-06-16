@@ -126,9 +126,30 @@ Optional `subPath` mounts a sub-directory of the disk only.
 
 ## Sidecars — `sidecars`
 
-Each entry has its own `name`, `image`, `port`, `resources`, `command`, `args`,
-and `env`. Use them sparingly — they share the pod with the main container and
-its lifecycle.
+A sidecar is a helper container that shares the pod with your main container and
+its lifecycle. Today the only supported sidecar is the **Cloud SQL Auth Proxy**,
+configured under `cloudSqlProxy` — you don't supply an arbitrary image:
+
+```json
+"sidecars": [
+  {
+    "cloudSqlProxy": {
+      "instance": "my-project:asia-southeast1:main",
+      "port": 5432,
+      "credentials": "<service-account-json>"
+    }
+  }
+]
+```
+
+- **`instance`** — required; the Cloud SQL instance connection name.
+- **`port`** — the local port the proxy listens on (default `3300`). Your app
+  connects to the database at `127.0.0.1:<port>`.
+- **`credentials`** — optional service-account JSON for the proxy; omit it to use
+  the deployment's ambient credentials.
+
+The platform runs this as a `cloudsql-proxy` container alongside yours. Arbitrary
+sidecar containers (your own image, command, and env) aren't supported yet.
 
 ## TTL and one-shot jobs — `ttl`
 
