@@ -3,7 +3,10 @@
 	<label class="navbar-burger" for="nav-toggle" aria-label="Toggle navigation">{{ partial "icon" "menu" }}</label>
 	{{- end }}
 	<a class="navbar-brand" href="/">
-		<span class="mark">{{ partial "icon" "rocket" }}</span>
+		<picture>
+			<source srcset="/img/logo.webp" type="image/webp">
+			<img class="brand-logo" src="/img/logo.png" width="26" height="26" alt="Deploys.app" decoding="async">
+		</picture>
 		Deploys.app
 		<span class="tag">Docs</span>
 	</a>
