@@ -70,7 +70,7 @@ full list of namespaces and their actions.
 | `registry` | — | `list`, `get`, `tags`, `manifests`, `storage`, `delete`, `deletemanifest`, `untag`, `metrics` |
 | `envgroup` | `eg` | `create`, `get`, `list`, `update`, `delete` |
 | `auditlog` | — | `list` |
-| `dropbox` | — | `list`, `metrics` |
+| `dropbox` | — | `list`, `metrics`, `upload` |
 | `github` | — | `link`, `unlink`, `update`, `list` |
 
 The internal `Deployer` and `Collector` APIs are machine-to-machine and not
@@ -127,6 +127,9 @@ deploys auditlog list --project acme --limit 20
 # purge a cached file from a custom domain's edge
 deploys domain purgecache --project acme \
   --domain www.acme.com --file /assets/app.js
+
+# upload a file to dropbox and get a short-lived public download URL
+deploys dropbox upload --project acme --file site.tar.gz --ttl 7
 ```
 
 `deployment deploy` carries the full deployment config in flags — beyond the
