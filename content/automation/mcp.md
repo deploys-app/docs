@@ -128,6 +128,7 @@ Ask in natural language; the assistant maps it to an action:
 | "what's the usage report for `acme` this month?" | `billing.report` |
 | "add the domain `app.acme.com` to `acme`" | `domain.create` |
 | "pause the `worker` deployment in `acme`" | `deployment.pause` |
+| "restart `web` in `acme`" | `deployment.restart` |
 
 A typical exchange:
 

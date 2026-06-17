@@ -38,6 +38,11 @@ Two actions hang off the top right:
 - **Deploy New Revision** — opens the deploy form pre-filled with the current
   configuration. Submit it and the new revision rolls out alongside the old one
   with health-checked traffic shifting.
+- **Restart** — re-rolls the current revision so the pods are recreated, without
+  changing any configuration. Useful to clear bad in-memory state or pick up an
+  external change. Available for services and workers (types that keep standing
+  pods) — not for cron jobs or static sites, which have none. Requires the
+  `deployment.deploy` permission.
 - **Pause** — stops the workload without deleting it. Resume restores it from
   the same revision. Useful for cost control on staging or for emergency stops.
 
