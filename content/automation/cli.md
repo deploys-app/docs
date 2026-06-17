@@ -23,7 +23,9 @@ chmod +x ./deploys && sudo mv ./deploys /usr/local/bin/
 
 The CLI accepts authentication three ways, in this order of precedence:
 
-1. **`DEPLOYS_TOKEN`** — a Bearer token. Useful for short-lived personal use.
+1. **`DEPLOYS_TOKEN`** — a Bearer token. Useful for short-lived personal use, and
+   for a [Google Cloud service-account](/api/overview/#authentication) access
+   token (see below).
 2. **`DEPLOYS_AUTH_USER` + `DEPLOYS_AUTH_PASS`** — a [service account](/access/service-accounts/)
    email and key, sent as HTTP Basic. The right choice for CI.
 3. **Google default credentials**. If neither of the above is set, the CLI
@@ -36,6 +38,17 @@ You can also point the CLI at a non-default API endpoint via
 ```bash
 export DEPLOYS_AUTH_USER=ci@acme.serviceaccount.deploys.app
 export DEPLOYS_AUTH_PASS=…the key…
+deploys me get
+```
+
+To use a **Google Cloud service account**, put a SA access token in
+`DEPLOYS_TOKEN`. The token must carry the `userinfo.email` scope, and the SA's
+email must be granted the permissions you need — see
+[Google Cloud service-account auth](/api/overview/#authentication).
+
+```bash
+export DEPLOYS_TOKEN=$(gcloud auth print-access-token \
+  --scopes=https://www.googleapis.com/auth/userinfo.email)
 deploys me get
 ```
 
