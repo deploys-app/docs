@@ -58,7 +58,7 @@ full list of namespaces and their actions.
 | `location` | — | `list`, `get` |
 | `project` | — | `create`, `list`, `get`, `update`, `delete`, `usage` |
 | `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind` |
-| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `rollback`, `metrics`, `set image` |
+| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `set image` |
 | `domain` | — | `create`, `get`, `list`, `delete`, `purgecache` |
 | `route` | — | `create`, `get`, `list`, `delete` |
 | `waf` | — | `get`, `list`, `set`, `delete`, `metrics`, `limitmetrics` |
@@ -107,6 +107,10 @@ deploys deployment deploy \
 deploys deployment set image web \
   --project acme --location gke.cluster-rcf2 \
   --image registry.deploys.app/acme/web@sha256:…
+
+# restart a deployment (recreate its pods, same config)
+deploys deployment restart \
+  --project acme --location gke.cluster-rcf2 --name web
 
 # roll back to a previous revision
 deploys deployment rollback \
