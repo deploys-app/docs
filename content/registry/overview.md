@@ -35,6 +35,49 @@ The username for service accounts is the account email; the password is the
 key. Generate one from
 [Service accounts → Keys](/access/service-accounts/) in the console.
 
+### Using a Google Cloud service account
+
+You can also authenticate with a **Google Cloud service account** instead of a
+deploys.app key — handy when you already run in Google Cloud or in GitHub Actions
+with a Google credential. The username is the literal `oauth2accesstoken` and the
+password is a short-lived **access token** for the service account:
+
+```bash
+docker login registry.deploys.app \
+  -u oauth2accesstoken \
+  -p "$(gcloud auth print-access-token \
+        --scopes=https://www.googleapis.com/auth/userinfo.email)"
+```
+
+Two things are required:
+
+- **The access token must carry the `https://www.googleapis.com/auth/userinfo.email`
+  scope.** The registry identifies the caller by the token's email, so a token
+  without that scope (for example the default `cloud-platform`-only token) is
+  rejected with `unauthorized: authentication required`.
+- **The service account's email must be granted registry access on the project.**
+  Add `<name>@<project>.iam.gserviceaccount.com` as a member of a role that holds
+  `registry.push` (to push) and/or `registry.pull` (to pull) under
+  [Roles](/access/roles/), exactly as you would any other member.
+
+In **GitHub Actions** with `google-github-actions/auth`, request the email scope
+alongside any others you need, then log in with the access token:
+
+```yaml
+- uses: google-github-actions/auth@v3
+  id: auth
+  with:
+    credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+    token_format: access_token
+    # keep cloud-platform too if the same token also pushes to Artifact Registry
+    access_token_scopes: https://www.googleapis.com/auth/userinfo.email
+- uses: docker/login-action@v4
+  with:
+    registry: registry.deploys.app
+    username: oauth2accesstoken
+    password: ${{ steps.auth.outputs.access_token }}
+```
+
 ## Pushing an image
 
 The repository name is `<project>/<name>` — the project is your project ID,

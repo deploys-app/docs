@@ -33,6 +33,24 @@ right choice for CI and back-end services):
 Authorization: Basic base64(<email>:<key>)
 ```
 
+**Google Cloud service account** — pass a Google Cloud SA **access token** as the
+bearer token, instead of issuing a deploys.app key:
+
+```http
+Authorization: Bearer <google-access-token>
+```
+
+The token must include the `https://www.googleapis.com/auth/userinfo.email` scope
+(deploys.app identifies the caller by the token's email), and the service
+account's email (`<name>@<project>.iam.gserviceaccount.com`) must be granted the
+permissions you need via [Roles](/access/roles/). Mint one with `gcloud auth
+print-access-token --scopes=https://www.googleapis.com/auth/userinfo.email`, or in
+GitHub Actions with `google-github-actions/auth` (`token_format: access_token`).
+It's the same identity the [container
+registry](/registry/overview/#using-a-google-cloud-service-account) accepts —
+useful when you already run in Google Cloud and don't want to manage a separate
+deploys.app key. Note these tokens are short-lived (about an hour).
+
 Unauthenticated calls and calls with a bad token return **401 Unauthorized**.
 Calls authenticated but missing a [permission](/access/roles/) return a
 **200 OK** response with `{ "ok": false, "error": { "message": "api: forbidden" } }` —
