@@ -24,6 +24,10 @@ Each entry captures:
 
 - **Actor** — the principal who made the call (user email or service-account
   email), plus their type (`User` or `ServiceAccount`).
+- **Channel** — the client surface the call came through: `console`, `cli`,
+  `mcp`, or `api` (a direct API call). Self-reported by the client and defaults
+  to `api` when unset, so treat it as a hint about *how* a change was made, not
+  as a security signal — the **actor** is the authoritative identity.
 - **Action** — the verb that ran: `deploy`, `create`, `delete`, `rollback`,
   `grant`, `revoke`, and so on.
 - **Resource** — the `type` (`deployment`, `domain`, `role`, …, lowercase), plus
@@ -39,13 +43,14 @@ Each entry captures:
 The Audit Logs page lets you narrow by:
 
 - **Resource type** — Deployment, Domain, Route, Disk, Role, ServiceAccount, …
+- **Channel** — api, console, cli, or mcp.
 - **Outcome** — success or failure.
 - **Date range** — today, last 7 days, last 30 days, last 90 days, last year,
   or a custom range.
 
 The `auditLog.list` function takes the same filters — plus an `actor` filter the
-console doesn't expose — and a `limit`. `resourceType` and `outcome` match
-exactly, and the resource type is **lowercase** (`deployment`, not
+console doesn't expose — and a `limit`. `resourceType`, `channel`, and `outcome`
+match exactly, and the resource type is **lowercase** (`deployment`, not
 `Deployment`). The time window is `after` / `before` (RFC 3339). There is no
 `action` filter — narrow by `resourceType`, then read the `action` field on each
 entry.
@@ -78,6 +83,9 @@ ad-hoc analysis.
 - **"What did the CI service account touch yesterday?"** — set `actor` to the
   service-account email plus an `after` / `before` window (the console doesn't
   expose the actor filter directly).
+- **"What was changed through the CLI (or the MCP server)?"** — set `channel` to
+  `cli` or `mcp` to separate automation-surface writes from console clicks and
+  direct API calls.
 
 ## Retention
 
