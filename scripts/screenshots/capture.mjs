@@ -49,7 +49,9 @@ const screens = [
 	['waf-list',              `/waf?${P}`],
 	['cache-list',            `/cache?${P}`],
 	['cache-manage',          `/cache/manage?${P}&${LOC}`, { h: 1150 }],
-	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }]
+	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }],
+	['scheduler-list',        `/scheduler?${P}`],
+	['scheduler-detail',      `/scheduler/detail?${P}&name=daily-health-check`, { h: 1150 }]
 ]
 
 const browser = await chromium.launch()

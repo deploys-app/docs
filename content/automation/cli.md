@@ -85,6 +85,7 @@ full list of namespaces and their actions.
 | `auditlog` | — | `list` |
 | `dropbox` | — | `list`, `metrics`, `upload` |
 | `github` | — | `link`, `unlink`, `update`, `list` |
+| `scheduler` | — | `create`, `get`, `list`, `update`, `delete`, `pause`, `resume`, `trigger`, `logs` |
 
 The internal `Deployer` and `Collector` APIs are machine-to-machine and not
 exposed here. The two multipart upload endpoints — KYC documents and invoice
