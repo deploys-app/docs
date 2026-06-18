@@ -64,6 +64,29 @@ Wildcard domains require **DNS-01** verification, so you'll also need to add a
 verify with HTTP-01 and don't need that record.
 {{< /callout >}}
 
+## When a certificate can't be issued
+
+A verified domain normally gets its TLS certificate within a minute or two. Once
+in a while issuance keeps failing — Let's Encrypt is rate-limiting the account, a
+`CAA` record blocks Let's Encrypt, or (for wildcards) the `_acme-challenge` CNAME
+isn't in place — and the certificate stays **issuing** without ever completing.
+
+If a certificate stays unissued for **more than 24 hours**, the platform reclaims
+it: the stale request is removed and the domain flips to **error**. This stops a
+permanently-failing request from burning Let's Encrypt quota and surfaces the
+problem instead of leaving the domain silently without HTTPS.
+
+To recover, fix the underlying cause — clear the `CAA` restriction, add the
+`_acme-challenge` CNAME the console shows, or wait out a Let's Encrypt
+rate-limit — and the platform re-requests the certificate automatically. The
+domain returns to **active** once the certificate issues.
+
+{{< callout type="note" >}}
+After a reclaim the platform keeps retrying about once a day, so a domain that
+becomes issuable later (a rate-limit clears, a missing record is added) recovers
+on its own — you don't need to re-create it.
+{{< /callout >}}
+
 ## Routing traffic
 
 Creating a domain alone doesn't send any traffic to a deployment — you still
