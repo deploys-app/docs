@@ -80,7 +80,6 @@ It only ever acts on a deployment that is *supposed* to have a running pod, so i
 leaves these alone:
 
 - **Scheduled jobs (CronJob)** — they have no standing pods between runs.
-- **Scale-to-zero** deployments — zero pods is the configured intent.
 - **Paused** deployments, in-flight rollouts, and freshly-deployed revisions
   (which get a grace period to pull the image and start up).
 
