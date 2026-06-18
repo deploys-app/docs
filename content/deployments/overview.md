@@ -68,6 +68,34 @@ configured replica range. Metrics flow into the dashboard and usage to billing.
 If readiness never passes, the rollout fails and the previous revision keeps
 serving — you don't get a broken deployment because of a bad image.
 
+## Automatic error cleanup
+
+A deployment that *should* keep pods running but has **no ready pod for 15
+minutes** is automatically marked **error** and its workload is torn down. This
+catches a deployment that applied cleanly but then can't stay up — a
+crash-looping image, an image that never pulls, or a readiness probe that never
+passes — so a dead deployment doesn't sit consuming a slot indefinitely.
+
+It only ever acts on a deployment that is *supposed* to have a running pod, so it
+leaves these alone:
+
+- **Scheduled jobs (CronJob)** — they have no standing pods between runs.
+- **Scale-to-zero** deployments — zero pods is the configured intent.
+- **Paused** deployments, in-flight rollouts, and freshly-deployed revisions
+  (which get a grace period to pull the image and start up).
+
+To recover, fix the image or configuration and deploy again — the deployment is
+recreated from its spec. While it's torn down its URL stops serving, so a
+redeploy is what brings it back.
+
+{{< callout type="note" >}}
+A failed *rollout* is different: if a new revision can't become ready, the
+**previous revision keeps serving** and nothing is torn down. Cleanup only fires
+when there is no ready pod at all for the full grace window — and it backs off
+during a cluster-wide incident, so a bad node pool or a registry outage doesn't
+mass-error your deployments.
+{{< /callout >}}
+
 ## How to drive it
 
 Anything you can do from this page, you can do from the [CLI](/automation/cli/)
