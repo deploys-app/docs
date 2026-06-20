@@ -150,17 +150,22 @@ own and resumes from where it left off (it acknowledges as it goes, so an
 interrupt before an event is handled redelivers it). Add `--poll` to fall back to
 plain RPC polling for an environment that blocks streaming.
 
-A non-CLI consumer can read the same stream directly:
+A non-CLI consumer can read the same stream directly. It's a normal API action,
+`notification.pullStream` — the same `POST` + JSON request as `notification.pull`,
+but the response is an event stream instead of a single batch:
 
 ```
-GET https://api.deploys.app/notification/pull/sse?project=<id>&name=<channel>
+POST https://api.deploys.app/notification.pullStream
+Content-Type: application/json
+
+{ "project": "<id>", "name": "<channel>", "ack": <last-handled-id> }
 ```
 
 Authenticate exactly as for any API call (a `Bearer` token — a scoped
 `me.generateToken` limited to `notification.pull` works well). Each `change`
-event's SSE `id` is the acknowledgement token: send it back as the `ack` query
-parameter (or the standard `Last-Event-ID` header) on reconnect to advance the
-cursor.
+event's SSE `id` is the acknowledgement token: pass it back as `ack` on the next
+connect to advance the cursor. A pre-stream failure (forbidden, unknown channel)
+comes back as the usual `{ "ok": false, "error": … }` JSON rather than a stream.
 
 [sse]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
 
