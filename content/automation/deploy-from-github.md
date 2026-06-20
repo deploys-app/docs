@@ -185,6 +185,15 @@ instead of touching production:
   button.
 - Each push redeploys the same preview in place and re-rolls its TTL.
 
+The PR also reflects **post-deploy** failures, not just the CI-time outcome. A
+preview that deploys green but then crash-loops, gets OOM-killed, or whose apply
+fails afterwards is detected by the platform (the same
+[`deployment.health`](/automation/notification-channels/) signal): the sticky
+comment updates to a failure state with the reason, and the GitHub deployment
+status flips to **failure** — so a preview that started green but is actually
+broken stops looking green. (Production runs get the deployment-status update but
+no PR comment.)
+
 Previews are temporary by design. They're deleted automatically when the PR is
 closed or merged; the TTL (default 7 days since the last push, configurable
 with `previewTtl`) is the backstop for previews that never get cleaned up.
