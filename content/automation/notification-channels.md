@@ -125,7 +125,10 @@ deploys notification create --project acme --name local-agent \
   --type pull \
   --event 'deployment.*'
 
-# fetch the next batch; -follow streams, acking each batch as it goes
+# fetch the next batch once
+deploys notification pull --project acme --name local-agent
+
+# stream new changes live as they happen (one event per line)
 deploys notification pull --project acme --name local-agent --follow
 ```
 
@@ -133,10 +136,33 @@ deploys notification pull --project acme --name local-agent --follow
 pull returns a batch of events plus a `cursor`; pass that value back as `-ack`
 once you have durably handled the batch and the server advances past it. Delivery
 is **at-least-once** — until you ack, the same events are redelivered, so a crash
-mid-batch never loses a change. (`-follow` acks each batch automatically on the
-next poll.) A new channel starts at the current head, so it only sees changes
-made after it was created (history older than the 30-day outbox retention is not
-replayed).
+mid-batch never loses a change. A new channel starts at the current head, so it
+only sees changes made after it was created (history older than the 30-day outbox
+retention is not replayed).
+
+**Live streaming (SSE).** `--follow` opens a [Server-Sent Events][sse] stream and
+the server pushes each change as it lands — no polling interval, near-real-time —
+printing one event per line. Choose the line format with `--output`: `json` emits
+compact NDJSON (one JSON object per line, easy for an agent to parse
+incrementally), `yaml` a YAML document per event, and the default a tab-separated
+`time · actor · action · resource · outcome` line. The stream reconnects on its
+own and resumes from where it left off (it acknowledges as it goes, so an
+interrupt before an event is handled redelivers it). Add `--poll` to fall back to
+plain RPC polling for an environment that blocks streaming.
+
+A non-CLI consumer can read the same stream directly:
+
+```
+GET https://api.deploys.app/notification/pull/sse?project=<id>&name=<channel>
+```
+
+Authenticate exactly as for any API call (a `Bearer` token — a scoped
+`me.generateToken` limited to `notification.pull` works well). Each `change`
+event's SSE `id` is the acknowledgement token: send it back as the `ack` query
+parameter (or the standard `Last-Event-ID` header) on reconnect to advance the
+cursor.
+
+[sse]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events
 
 {{< callout type="note" >}}
 A pull channel is **one consumer, one cursor**. Don't point two agents at the
