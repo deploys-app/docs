@@ -108,6 +108,7 @@ The big picture. Each row is a fully-qualified API function.
 | `registry.getTags` / `.untag` | Tag inspection and deletion |
 | `registry.getManifests` / `.deleteManifest` | Manifest inspection and deletion |
 | `registry.metrics` / `.getProjectStorage` | Storage usage |
+| `registry.gc` | Garbage-collect manifests no deployment uses (dry-run supported) |
 | `pullSecret.list` / `.get` / `.create` / `.delete` | Pull-secret CRUD |
 
 ### Access

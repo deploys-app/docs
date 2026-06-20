@@ -80,7 +80,7 @@ full list of namespaces and their actions.
 | `workloadidentity` | `wi` | `create`, `get`, `list`, `delete` |
 | `serviceaccount` | `sa` | `create`, `get`, `list`, `update`, `delete`, `createkey`, `deletekey` |
 | `email` | — | `send`, `list` |
-| `registry` | — | `list`, `get`, `tags`, `manifests`, `storage`, `delete`, `deletemanifest`, `untag`, `metrics` |
+| `registry` | — | `list`, `get`, `tags`, `manifests`, `storage`, `delete`, `deletemanifest`, `untag`, `gc`, `metrics` |
 | `envgroup` | `eg` | `create`, `get`, `list`, `update`, `delete` |
 | `auditlog` | — | `list` |
 | `dropbox` | — | `list`, `metrics`, `upload` |
