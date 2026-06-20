@@ -88,3 +88,57 @@ deploys role create --project acme --role metrics-reader \
 
 Bind it to your monitoring service account and use the credentials in your
 exporter.
+
+## Reading logs and status programmatically
+
+The dashboard tabs are for humans. An agent, script, or CI job reads the same
+two signals through the API, MCP, and CLI with two actions that return **once**
+— no open stream to consume:
+
+- **`deployment.status`** — structured pod health in one call: the
+  `count` / `ready` / `succeeded` / `failed` tally plus, for every non-ready
+  pod, its raw failure reason (`waitingReason`, `terminatedReason`,
+  `restartCount`, `exitCode`, `lastTerminatedReason`). This is how you answer
+  "is it healthy, and if not, why" without scraping events.
+- **`deployment.logs`** — a **bounded snapshot** of recent container output.
+  `tailLines` defaults to 200 and is clamped to `[1, 1000]` per pod; the
+  response is additionally capped at a committed **256 KiB** byte budget (oldest
+  lines dropped, `cappedByBytes` set) so a verbose multi-pod deployment can't
+  blow your context window. Set `previous: true` to read the **last crashed container** —
+  the panic or stack trace behind a `CrashLoopBackOff` lives there.
+
+```bash
+# why is it unhealthy?
+deploys deployment status --project acme --location gke.cluster-rcf2 --name web
+
+# the crash post-mortem (previous container), as JSON
+deploys deployment logs --project acme --location gke.cluster-rcf2 --name web \
+  --previous --tail 200 -o json
+```
+
+`--follow` on the CLI re-polls the snapshot for you; the API and MCP contracts
+stay snapshot-only (one call, one bounded result).
+
+{{< callout type="warning" >}}
+These read **live** pod logs, which are ephemeral — they're gone once a pod is
+garbage-collected, and `previous` only survives until then. A deployment that
+crashed and was fully torn down leaves nothing to read; lean on
+`deployment.status`'s `lastTerminatedReason` / `exitCode` for the durable
+signal. This is not a historical log store.
+{{< /callout >}}
+
+### Permissions
+
+The split is deliberate, because raw `stdout` can contain secrets while pod
+status cannot:
+
+- **`deployment.status`** is authorized by the ordinary **`deployment.get`**
+  permission — the same read used for `deployment.get` and `deployment.metrics`.
+- **`deployment.logs`** requires its own dedicated **`deployment.logs`**
+  permission, which is **not** public-bindable. Grant config/status reads
+  without granting log reads.
+
+A localhost agent can mint a read-only, short-lived token scoped to exactly
+these two permissions with [`me.generateToken`](/automation/mcp/) (it accepts
+`deployment.get` and `deployment.logs`), so an observability credential never
+carries write access.
