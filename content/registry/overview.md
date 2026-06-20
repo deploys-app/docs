@@ -169,3 +169,41 @@ curl https://api.deploys.app/registry.deleteManifest \
   -d '{ "project": "acme", "repository": "acme/web",
         "digest": "sha256:c2f8…" }'
 ```
+
+## Garbage collection
+
+`registry.gc` removes manifests in the project's repositories that **no
+deployment references** — neither the current revision nor any revision in a
+deployment's history, whether referenced by tag or by digest. A referenced
+manifest is kept entirely (all of its tags survive); an unreferenced one is
+removed along with its tags, and its now-orphaned blobs are reclaimed by the
+registry's background blob cleanup.
+
+Manifests pushed within the last 24 hours are always kept, so a build that
+pushes an image and then deploys it is never collected in between.
+
+It **deletes by default**. Pass `dryRun: true` first to see exactly what would
+be removed (per repository, plus the reclaimable size) without changing
+anything. It requires the `registry.push` permission.
+
+```bash
+# preview — lists what would be removed, deletes nothing
+curl https://api.deploys.app/registry.gc \
+  -d '{ "project": "acme", "dryRun": true }'
+
+# actually collect
+curl https://api.deploys.app/registry.gc \
+  -d '{ "project": "acme" }'
+```
+
+```bash
+# CLI
+deploys registry gc -project acme -dry-run
+deploys registry gc -project acme
+```
+
+{{< callout type="warning" >}}
+GC only considers the project's own deployments. If another project pulls an
+image from this one, that reference is not seen — keep such shared images tagged
+in a project that deploys them, or avoid GC on registries used cross-project.
+{{< /callout >}}
