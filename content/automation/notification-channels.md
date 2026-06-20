@@ -10,7 +10,7 @@ lead: 'A notification channel delivers a notification whenever a matching change
 
 - **Change notifications** — the same writes that produce an [audit log](/access/audit-log/) entry (create, update, delete, deploy, grant, …) fan out to your channels.
 - **Webhook, Discord, or pull** — a signed JSON webhook your service verifies, a Discord incoming-webhook URL that posts a one-line message, or a [pull](#pull-agent-subscription) queue a local agent reads (no public URL needed).
-- **Subscription filters** — receive only the resource types, actions, and outcomes you care about; leave a filter empty to match everything.
+- **Subscription filters** — receive only the events (`resource.action`) and outcomes you care about; leave a filter empty to match everything.
 - **Send test** — deliver a synthetic change on demand and see the result.
 - **Delivery log** — every delivery records its time, result, HTTP status, and latency.
 
@@ -34,9 +34,8 @@ deploys notification create \
   --type webhook \
   --url https://hooks.example.com/deploys \
   --secret "$SIGNING_SECRET" \
-  --resource-type deployment \
-  --action deploy \
-  --action delete
+  --event deployment.deploy \
+  --event deployment.delete
 ```
 
 ### Fields
@@ -124,7 +123,7 @@ Create a pull channel (no URL, no secret), then read from it:
 ```bash
 deploys notification create --project acme --name local-agent \
   --type pull \
-  --resource-type deployment
+  --event 'deployment.*'
 
 # fetch the next batch; -follow streams, acking each batch as it goes
 deploys notification pull --project acme --name local-agent --follow
@@ -161,22 +160,40 @@ Pull channels don't appear in the push **delivery log** and don't support
 
 ## Subscription filters
 
-A subscription has three axes — **resource types**, **actions**, and
-**outcomes**. A change is delivered to a channel when it matches on every axis;
-an empty axis matches anything. So an empty subscription receives every change,
-and `outcomes = [failure]` with the others empty receives only failures.
+A subscription has two axes — **events** and **outcomes**. A change is delivered
+to a channel when it matches on both; an empty axis matches anything, so an empty
+subscription receives every change.
 
-| Axis | Examples | Empty means |
-|---|---|---|
-| Resource types | `deployment`, `route`, `domain`, `role`, … | any resource |
-| Actions | `create`, `update`, `delete`, `deploy`, `grant`, … | any action |
-| Outcomes | `success`, `failure` | either outcome |
+An **event** identifies *what changed* as `<resource>.<action>` — the same writes
+the [audit log](/access/audit-log/) records, e.g. `deployment.deploy`,
+`domain.create`, `role.grant`. The `events` list uses the same grammar as
+[role permissions](/access/roles/), plus a leading `*.` form:
+
+| Pattern | Matches |
+|---|---|
+| `*` | every change |
+| `deployment.*` | any action on deployments |
+| `*.delete` | a delete of any resource |
+| `deployment.deploy` | exactly that resource + action |
+
+The **outcomes** axis is `success` / `failure`; empty means either.
 
 ```bash
-# only failed deploys
+# only failed deployment deploys
 deploys notification update --project acme --name ops-webhook \
-  --resource-type deployment --action deploy --outcome failure
+  --event deployment.deploy --outcome failure
+
+# any deployment change, plus any domain delete
+deploys notification update --project acme --name ops-webhook \
+  --event 'deployment.*' --event '*.delete'
 ```
+
+{{< callout type="note" >}}
+Listing patterns is an **OR** — a change matches if it matches *any* event in the
+list. That's why one channel can watch `deployment.*` **and** `domain.create`
+without also matching `domain.delete` (which separate resource/action axes could
+not express).
+{{< /callout >}}
 
 ## Test and the delivery log
 
