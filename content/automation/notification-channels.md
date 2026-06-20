@@ -2,14 +2,14 @@
 title: 'Notification channels'
 linkTitle: 'Notifications'
 weight: 6
-description: 'Get notified when something changes in your project — deliver create / update / delete / deploy events to a webhook or a Discord channel, filtered by what you care about.'
-lead: 'A notification channel delivers a notification whenever a matching change happens in your project — a deploy, a domain edit, a role grant. Point it at a signed webhook or a Discord channel, choose which changes it receives, and review every delivery. Channels are project-scoped and run on Deploys.app.'
+description: 'Get notified when something changes in your project — deliver create / update / delete / deploy events to a webhook, a Discord channel, or a pull queue an agent reads, filtered by what you care about.'
+lead: 'A notification channel delivers a notification whenever a matching change happens in your project — a deploy, a domain edit, a role grant. Push it to a signed webhook or a Discord channel, or let a local agent pull it on its own schedule. Choose which changes it receives and review every delivery. Channels are project-scoped and run on Deploys.app.'
 ---
 
 ## What you get
 
 - **Change notifications** — the same writes that produce an [audit log](/access/audit-log/) entry (create, update, delete, deploy, grant, …) fan out to your channels.
-- **Webhook or Discord** — a signed JSON webhook your service verifies, or a Discord incoming-webhook URL that posts a one-line message.
+- **Webhook, Discord, or pull** — a signed JSON webhook your service verifies, a Discord incoming-webhook URL that posts a one-line message, or a [pull](#pull-agent-subscription) queue a local agent reads (no public URL needed).
 - **Subscription filters** — receive only the resource types, actions, and outcomes you care about; leave a filter empty to match everything.
 - **Send test** — deliver a synthetic change on demand and see the result.
 - **Delivery log** — every delivery records its time, result, HTTP status, and latency.
@@ -44,8 +44,8 @@ deploys notification create \
 | Field | Description |
 |---|---|
 | **Name** | A project-unique name (lowercase, e.g. `ops-webhook`). |
-| **Type** | `webhook` (signed JSON POST) or `discord` (a Discord incoming-webhook URL). |
-| **URL** | The `https` endpoint to deliver to. |
+| **Type** | `webhook` (signed JSON POST), `discord` (a Discord incoming-webhook URL), or `pull` (an agent-read queue — see [Pull](#pull-agent-subscription)). |
+| **URL** | The `https` endpoint to deliver to (webhook/discord; omit for pull). |
 | **Secret** | The webhook signing secret (webhook only). Write-only — see [Webhook](#webhook). |
 | **Subscription** | Which changes the channel receives — see [Subscription filters](#subscription-filters). |
 | **Disabled** | A disabled channel keeps its config but receives no deliveries. |
@@ -112,6 +112,53 @@ deploys notification create --project acme --name team-discord \
   --outcome failure
 ```
 
+### Pull (agent subscription)
+
+A **pull** channel has no delivery target. Instead of Deploys.app pushing to a
+URL, *you* fetch the project's changes on your own schedule — ideal for a local
+script or AI agent that has no public URL to receive a webhook. The change events
+are the same audit-safe payloads a webhook receives.
+
+Create a pull channel (no URL, no secret), then read from it:
+
+```bash
+deploys notification create --project acme --name local-agent \
+  --type pull \
+  --resource-type deployment
+
+# fetch the next batch; -follow streams, acking each batch as it goes
+deploys notification pull --project acme --name local-agent --follow
+```
+
+**Cursor and acknowledgement.** Deploys.app stores a per-channel cursor. Each
+pull returns a batch of events plus a `cursor`; pass that value back as `-ack`
+once you have durably handled the batch and the server advances past it. Delivery
+is **at-least-once** — until you ack, the same events are redelivered, so a crash
+mid-batch never loses a change. (`-follow` acks each batch automatically on the
+next poll.) A new channel starts at the current head, so it only sees changes
+made after it was created (history older than the 30-day outbox retention is not
+replayed).
+
+{{< callout type="note" >}}
+A pull channel is **one consumer, one cursor**. Don't point two agents at the
+same channel — they'd split the stream. Give each agent its own channel (use a
+unique name).
+{{< /callout >}}
+
+**Auto-delete.** A pull channel deletes itself after an inactivity window so
+abandoned subscriptions don't pile up. The window defaults to **15 minutes**;
+override it per channel with `--pull-ttl <seconds>` (60–86400). Every pull resets
+the timer, so an actively-polling agent stays alive. The tidy path is to delete
+the channel when your agent exits; the auto-delete is the safety net for a crash.
+
+```bash
+deploys notification delete --project acme --name local-agent
+```
+
+Pull channels don't appear in the push **delivery log** and don't support
+**Send test** (there's no endpoint to deliver to). Permission to consume one is
+`notification.pull`.
+
 ## Subscription filters
 
 A subscription has three axes — **resource types**, **actions**, and
@@ -170,7 +217,9 @@ from reaching private, loopback, link-local, and cloud-metadata addresses.
 | View / list / deliveries | `notification.get` / `notification.list` |
 | Delete | `notification.delete` |
 | Send test | `notification.test` |
+| Pull (consume a pull channel) | `notification.pull` |
 
 Grant these on a [role](/access/roles/) like any other permission. Channel URLs
-can point at internal endpoints, so `notification.get` / `notification.list` are
-**not** grantable to public principals (`allUsers` / `allAuthenticatedUsers`).
+can point at internal endpoints and a pull channel streams the project's changes,
+so `notification.get` / `notification.list` / `notification.pull` are **not**
+grantable to public principals (`allUsers` / `allAuthenticatedUsers`).
