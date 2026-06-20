@@ -142,3 +142,44 @@ A localhost agent can mint a read-only, short-lived token scoped to exactly
 these two permissions with [`me.generateToken`](/automation/mcp/) (it accepts
 `deployment.get` and `deployment.logs`), so an observability credential never
 carries write access.
+
+## React to failures without polling
+
+`deployment.status` and `deployment.logs` tell you *what's* wrong — but an agent
+still has to know *when* to look. Polling a deployment on a timer wastes calls and
+adds latency. The
+[notification](/automation/notification-channels/) side closes the loop: the
+platform emits a [`deployment.health`](/automation/notification-channels/) failure
+event the instant a deployment fails asynchronously (a crash-loop the auto-error
+reconcile tears down, or a deployer apply failure), so you read failure detail
+**only at the moment it happens**.
+
+A localhost agent runs the whole observe→diagnose→fix loop over shipped contracts,
+no public URL and no polling:
+
+1. **Mint a scoped token.** [`me.generateToken`](/automation/mcp/) with
+   `notification.create` / `notification.pull` / `notification.delete` +
+   `deployment.get` + `deployment.logs`.
+2. **Subscribe a pull channel.** `notification.create` type `pull`,
+   `subscription: { events: ["deployment.health", "deployment.deploy"], outcomes: ["failure"] }`.
+   A `pull` channel needs no inbound endpoint — you fetch from it.
+3. **Loop `notification.pull`.** On a `deployment.health` failure event:
+   - `deployment.status` → confirm the structured per-pod reason,
+   - `deployment.logs` (`previous: true` if it's `CrashLoopBackOff`) → the panic / stack trace,
+   - decide: `deployment.rollback`, or redeploy with a fix.
+4. **Recovery arrives on the same stream.** Your fix's `deployment.deploy`
+   **success** event flows through the same channel — that's the "it's healthy
+   again" signal, no separate event needed. `notification.delete` on exit (an
+   inactivity reaper cleans up if the agent crashes).
+
+```bash
+# subscribe once
+deploys notification create --project acme --name agent-loop --type pull \
+  --event deployment.health --event deployment.deploy --outcome failure
+
+# then long-poll for the next failure (--follow re-polls for you)
+deploys notification pull --project acme --name agent-loop --follow
+```
+
+The same `deployment.health` event also drives push channels (webhook, Discord)
+for humans — see [notification channels](/automation/notification-channels/).

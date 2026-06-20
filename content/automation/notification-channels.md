@@ -226,6 +226,38 @@ without also matching `domain.delete` (which separate resource/action axes could
 not express).
 {{< /callout >}}
 
+## Asynchronous failures: `deployment.health`
+
+A deployment can fail **after** its `deployment.deploy` call already returned —
+the image pulls but the container crash-loops, gets OOM-killed, or the cluster
+apply fails once the rollout starts. Those transitions happen on the platform's
+own time, not in your request, so they surface as a separate event:
+
+| Event | Fires when |
+|---|---|
+| `deployment.deploy` + `failure` | the deploy was **rejected synchronously** — bad request, quota, validation — at the moment you called it. |
+| `deployment.health` + `failure` | the deploy was accepted, then the workload **failed afterwards** — a crash-loop/OOM/ImagePull the platform auto-errors, or a deployer apply failure. |
+
+Subscribe to **both** for complete coverage of "my deploy is broken":
+
+```bash
+deploys notification update --project acme --name ops-webhook \
+  --event deployment.health --event deployment.deploy --outcome failure
+```
+
+`deployment.health` events are written by the **system**, not a user, so they
+carry an **empty actor** (`actorType` `user`, no email) — that's how you tell a
+self-detected failure from someone's `deployment.deploy`. The `message` carries a
+short, **non-secret** reason — `CrashLoopBackOff`, `OOMKilled`, `no running pods`,
+or `deployer apply failed`. The event never carries log content; read the crash
+output on demand with [`deployment.logs`](/deployments/monitoring/) (set
+`previous:true` for a crash-loop). Because the audit write is unconditional, a
+project with **no** channel still gets an auditable `deployment health` row per
+auto-detected failure.
+
+See [Monitoring → react to failures without polling](/deployments/monitoring/)
+for the end-to-end agent loop this enables.
+
 ## Test and the delivery log
 
 Use **Send test** (console) or `notification test` to deliver a synthetic change
