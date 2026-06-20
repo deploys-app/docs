@@ -139,6 +139,36 @@ Claude: (searches → deployment.list → executes)
         jobs, and a background worker. Want details on any one?
 ```
 
+## Recipes
+
+### Diagnose a failing deploy
+
+When a `deployment.deploy` comes back with a status that isn't `Success`, the
+assistant can close the loop itself — observe, then read the cause:
+
+```text
+You:    I deployed web to acme but it's not coming up. What's wrong?
+Claude: (deployment.status → sees ready:0, waitingReason CrashLoopBackOff)
+        All 3 pods are crash-looping (CrashLoopBackOff, 7 restarts).
+        (deployment.logs with previous:true → reads the crashed container)
+        The previous container panicked on startup:
+          panic: missing env DATABASE_URL
+        Add DATABASE_URL to the deployment's env and redeploy.
+```
+
+The two actions behind this:
+
+- **`deployment.status`** returns pod counts plus each non-ready pod's raw
+  failure reason (`CrashLoopBackOff`, `ImagePullBackOff`, `OOMKilled`, exit
+  code) in one call.
+- **`deployment.logs`** returns a bounded snapshot of recent container output;
+  with `previous: true` it reads the **last crashed container**, which is where
+  a `CrashLoopBackOff`'s panic or stack trace lives.
+
+Both are read-only and return once (no streaming). See
+[Monitoring & debugging](/deployments/monitoring/#reading-logs-and-status-programmatically)
+for the contract and the `deployment.logs` permission split.
+
 ## Permissions & safety
 
 - **It acts as an identity you control.** Over OAuth it's your account; locally
