@@ -71,7 +71,7 @@ full list of namespaces and their actions.
 | `location` | — | `list`, `get` |
 | `project` | — | `create`, `list`, `get`, `update`, `delete`, `usage` |
 | `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind` |
-| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `set image` |
+| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `errors`, `set image` |
 | `domain` | — | `create`, `get`, `list`, `delete`, `purgecache` |
 | `route` | — | `create`, `get`, `list`, `delete` |
 | `waf` | — | `get`, `list`, `set`, `delete`, `metrics`, `limitmetrics` |

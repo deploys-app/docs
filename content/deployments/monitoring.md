@@ -41,6 +41,8 @@ Things to know:
   for you).
 - High-volume log output (thousands of lines per second) can be sampled. Keep
   log lines short; bury big payloads in your aggregator instead.
+- Stack traces in your output are also mined into grouped, deduplicated
+  **issues** — see [application error detection](/deployments/error-detection/).
 
 ## Kubernetes events
 
