@@ -59,7 +59,7 @@ curl -fsS -X POST \
 
 | Query param | | Description |
 |---|---|---|
-| `project` | required | Project sid (the stable slug, e.g. `acme`) the upload is authorized and billed against |
+| `project` | required | Project sid (the stable slug, e.g. `acme`) — or the numeric project ID — the upload is authorized and billed against |
 | `ttl` | optional | Lifetime in days, 1–7 (default 1) |
 | `filename` | optional | Name recorded in `Content-Disposition` for the download |
 
