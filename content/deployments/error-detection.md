@@ -97,15 +97,15 @@ every non-static deployment.
 
 ## Notifications
 
-A **new** issue, or a **resolved** issue that **regresses**, fires a
-[`deployment.error`](/automation/notification-channels/) change event. Like every
+A **new** issue, or a **resolved** issue that **regresses**, fires an
+[`error.detected`](/automation/notification-channels/) change event. Like every
 change event, it's delivered to the project's configured
 [notification channels](/automation/notification-channels/) — a webhook, a Discord
 channel, or a pull queue. Only those two state transitions fire, so a recurring
 error doesn't re-notify on every occurrence, and a **muted** issue never fires at
 all.
 
-Subscribe to `deployment.error` (or the wildcard `deployment.*`) on a channel to
+Subscribe to `error.detected` (or the wildcard `error.*`) on a channel to
 route application errors where your team will see them:
 
 ```bash
@@ -113,7 +113,7 @@ route application errors where your team will see them:
 deploys notification create --project acme --name app-errors \
   --type discord \
   --url https://discord.com/api/webhooks/123/abc \
-  --event deployment.error
+  --event error.detected
 ```
 
 {{< callout type="note" >}}
