@@ -181,6 +181,40 @@ For triaging recurring crashes, **`deployment.errors`** and
 assistant can read what's been throwing without scrolling raw logs. See
 [application error detection](/deployments/error-detection/).
 
+### Ship a throwaway preview
+
+To iterate on a static site or a container without touching production, spin an
+**ephemeral preview** that cleans itself up. `deployment.deploy` with a `ttl`
+(seconds) creates a deployment that auto-deletes when the window expires:
+
+```text
+You:    Build a preview of the new landing page.
+Claude: (deploys_publish_site, environment "preview" → site://…@<sha>)
+        (deployment.deploy type:Static, site:…, ttl:7200 → landing-preview)
+        (deployment.get → url + releaseUrl)
+        Preview is live:  https://landing-preview-….deploys.app   (rolling — always the latest build)
+        This exact build: https://landing-preview-<sha8>-….deploys.app   (immutable; expires in 2h)
+You:    Looks good — keep it up while I show the team.
+Claude: (deployment.extendTTL ttl:7200 → re-stamps the window to now + 2h)
+```
+
+The pieces:
+
+- **`deployment.deploy` with `ttl`** turns any deploy into a self-deleting
+  preview; omit `ttl` for a normal deployment. Publish with a **non-production
+  environment** so the release is served `X-Robots-Tag: noindex`.
+- **`deployment.get`** returns `url` (rolling, always the current build) and —
+  for static deployments — `releaseUrl` (immutable, pinned to that exact build),
+  plus `expiresAt` so the assistant can see (and reap) what's near expiry.
+- **`deployment.extendTTL`** re-stamps the window (`expires_at = now + ttl`)
+  without redeploying — the keep-alive for a long session.
+- **`deployment.delete`** drops it early.
+
+Container previews get a rolling `url` only; the immutable `releaseUrl` is
+static-only (containers have no content-addressed release). Preview URLs are
+public and unlisted. See
+[static sites → preview deployments](/deployments/static-sites/#preview-deployments).
+
 ## Permissions & safety
 
 - **It acts as an identity you control.** Over OAuth it's your account; locally
