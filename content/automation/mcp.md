@@ -161,11 +161,17 @@ The two actions behind this:
 - **`deployment.status`** returns pod counts plus each non-ready pod's raw
   failure reason (`CrashLoopBackOff`, `ImagePullBackOff`, `OOMKilled`, exit
   code) in one call.
-- **`deployment.logs`** returns a bounded snapshot of recent container output;
-  with `previous: true` it reads the **last crashed container**, which is where
-  a `CrashLoopBackOff`'s panic or stack trace lives.
+- **`deployment.logs`** returns a bounded snapshot of recent **live** container
+  output; with `previous: true` it reads the **last crashed container**, which is
+  where a `CrashLoopBackOff`'s panic or stack trace lives.
+- **`deployment.logsHistory`** returns the **durable** 30-day captured history
+  over a `since` / `until` window — oldest-first, or newest-first with
+  `reverse: true`, paged with the opaque `cursor`. Reach for it when the pod is
+  already gone and live logs have nothing left to read (available only where the
+  location has a log bucket configured). It reuses the same `deployment.logs`
+  permission.
 
-Both are read-only and return once (no streaming). See
+All three are read-only and return once (no streaming). See
 [Monitoring & debugging](/deployments/monitoring/#reading-logs-and-status-programmatically)
 for the contract and the `deployment.logs` permission split.
 
