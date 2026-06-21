@@ -92,8 +92,8 @@ exporter.
 ## Reading logs and status programmatically
 
 The dashboard tabs are for humans. An agent, script, or CI job reads the same
-two signals through the API, MCP, and CLI with two actions that return **once**
-— no open stream to consume:
+signals through the API, MCP, and CLI with actions that return **once** — no
+open stream to consume:
 
 - **`deployment.status`** — structured pod health in one call: the
   `count` / `ready` / `succeeded` / `failed` tally plus, for every non-ready
@@ -105,26 +105,52 @@ two signals through the API, MCP, and CLI with two actions that return **once**
   response is additionally capped at a committed **256 KiB** byte budget (oldest
   lines dropped, `cappedByBytes` set) so a verbose multi-pod deployment can't
   blow your context window. Set `previous: true` to read the **last crashed container** —
-  the panic or stack trace behind a `CrashLoopBackOff` lives there.
+  the panic or stack trace behind a `CrashLoopBackOff` lives there. This reads
+  **live**, ephemeral pod output.
+- **`deployment.logsHistory`** — the **durable** sibling of `deployment.logs`.
+  It reads back a **30-day history** of captured log output over a `since` /
+  `until` window, so it survives the pod garbage-collection and full teardowns
+  that leave live logs with nothing to read. Lines come back **oldest-first**
+  (forward) by default, or **newest-first** with `reverse: true`; page forward or
+  back through a large window with the opaque `cursor` (the result returns a
+  `nextCursor` until the window is exhausted), and bound a page with `limit`. As
+  with `deployment.logs`, a page is byte-budget capped — `cappedByBytes` flags a
+  truncated page. Pass `pod` to narrow to a single replica. History **lags live
+  output** by the capture flush interval — it's best-effort, not real-time, so
+  the freshest lines may not have landed yet; reach for `deployment.logs` when
+  you need the current tail. It's available **only for locations configured with
+  a log bucket**; locations without one have no history to read.
 
 ```bash
 # why is it unhealthy?
 deploys deployment status --project acme --location gke.cluster-rcf2 --name web
 
-# the crash post-mortem (previous container), as JSON
+# the crash post-mortem (previous container) — live and ephemeral — as JSON
 deploys deployment logs --project acme --location gke.cluster-rcf2 --name web \
   --previous --tail 200 -o json
+
+# durable 30-day history, oldest-first, over the last 24 hours
+deploys deployment logs-history --project acme --location gke.cluster-rcf2 \
+  --name web --since 24h
+
+# the same window, newest-first
+deploys deployment logs-history --project acme --location gke.cluster-rcf2 \
+  --name web --since 24h --reverse
 ```
 
-`--follow` on the CLI re-polls the snapshot for you; the API and MCP contracts
-stay snapshot-only (one call, one bounded result).
+`--follow` on the CLI re-polls the `deployment.logs` snapshot for you; the API
+and MCP contracts stay snapshot-only (one call, one bounded result).
+`deployment.logsHistory` is a windowed read rather than a tail — page it with
+`cursor` instead of following it.
 
 {{< callout type="warning" >}}
-These read **live** pod logs, which are ephemeral — they're gone once a pod is
-garbage-collected, and `previous` only survives until then. A deployment that
-crashed and was fully torn down leaves nothing to read; lean on
-`deployment.status`'s `lastTerminatedReason` / `exitCode` for the durable
-signal. This is not a historical log store.
+`deployment.logs` reads **live** pod logs, which are ephemeral — they're gone
+once a pod is garbage-collected, and `previous` only survives until then. A
+deployment that crashed and was fully torn down leaves nothing for it to read.
+For the durable signal, reach for `deployment.logsHistory` (the 30-day captured
+history, where the log bucket is configured) or `deployment.status`'s
+`lastTerminatedReason` / `exitCode`. `deployment.logs` itself is not a
+historical log store.
 {{< /callout >}}
 
 ### Permissions
@@ -137,6 +163,9 @@ status cannot:
 - **`deployment.logs`** requires its own dedicated **`deployment.logs`**
   permission, which is **not** public-bindable. Grant config/status reads
   without granting log reads.
+- **`deployment.logsHistory`** reuses that **same `deployment.logs`** permission
+  — the durable history carries the same secret-bearing `stdout`, so it's gated
+  exactly like the live read. Granting `deployment.logs` covers both.
 
 A localhost agent can mint a read-only, short-lived token scoped to exactly
 these two permissions with [`me.generateToken`](/automation/mcp/) (it accepts
