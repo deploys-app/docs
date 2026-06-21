@@ -2,8 +2,8 @@
 title: 'Application error detection'
 linkTitle: 'Error detection'
 weight: 9
-description: 'Automatic Sentry-lite error tracking — deploys.app mines your logs for stack traces and groups them into deduplicated issues with counts, a triage lifecycle, and notifications.'
-lead: 'Deploys.app reads your deployment''s durable logs for application-level stack traces — Go panics, Java/Python/Node/Ruby exceptions, plus a generic fallback — and groups identical traces into deduplicated issues. Each issue carries an occurrence count, first/last-seen, a representative stack, and recent occurrences, with an open → resolved → reopened triage lifecycle. There is nothing to instrument inside your container.'
+description: 'Automatic Sentry-lite error tracking — deploys.app mines your logs for stack traces, or lets your app report errors directly, and groups them into deduplicated issues with counts, a triage lifecycle, and notifications.'
+lead: 'Deploys.app reads your deployment''s durable logs for application-level stack traces — Go panics, Java/Python/Node/Ruby exceptions, plus a generic fallback — and groups identical traces into deduplicated issues. Your app can also report its own errors directly via `error.create`, and a reported error merges with a log-mined trace of the same signature into one issue. Each issue carries an occurrence count, first/last-seen, a representative stack, and recent occurrences, with an open → resolved → reopened triage lifecycle. There is nothing you must instrument inside your container.'
 ---
 
 ## What it is
@@ -30,7 +30,7 @@ infrastructure and pod layers:
 |---|---|---|
 | [`deployment.health`](/automation/notification-channels/#asynchronous-failures-deploymenthealth) / auto-error | infra | no running pods, a deployer apply failure |
 | [`deployment.status`](/deployments/monitoring/#reading-logs-and-status-programmatically) | pod | crash-loops, OOM-kills, pod conditions |
-| **this** — `deployment.errors` | **application** | **stack traces in your log output** |
+| **this** — `error.*` | **application** | **stack traces in your log output, or errors your app reports itself** |
 
 {{< callout type="note" >}}
 **Only stack traces become issues.** A lone `ERROR` or `FATAL` log line — one with
@@ -58,7 +58,11 @@ freshest line, read the [logs](/deployments/monitoring/) directly.
 Identical traces are grouped by a fingerprint computed from the stack frames — the
 function names and files, not the jittery line numbers or the free-text message — so
 the same bug firing a thousand times across every replica is **one** issue with
-`count: 1000`, not a thousand rows.
+`count: 1000`, not a thousand rows. The same fingerprint is shared across both
+sources: an error your app [reports directly](#reporting-errors-from-your-app--errorcreate)
+with `error.create` and a trace the platform mines from your logs land in the **same
+issue** when their stack signatures match, so reporting doesn't double-count what the
+log miner would have caught anyway.
 
 ## Triage lifecycle
 
@@ -87,7 +91,7 @@ every non-static deployment.
 - The **issue detail** shows the full representative stack and the recent
   occurrences, each linking back to that moment in the deployment's log history.
   **Resolve**, **Mute**, and **Reopen** buttons drive the
-  [lifecycle](#triage-lifecycle); they're gated by the `deployment.logs` permission.
+  [lifecycle](#triage-lifecycle); they're gated by the `error.update` permission.
 - When a deployment has never thrown, the tab reads *"No application errors
   detected."*
 
@@ -115,19 +119,21 @@ deploys notification create --project acme --name app-errors \
 {{< callout type="note" >}}
 The notification message carries only the exception **type** (e.g. `panic`,
 `java.lang.NullPointerException`) and a `new error:` / `error regressed:` reason —
-**never** the full title or the stack. An app's error message can embed secrets it
-logged, and a notification payload must stay secret-free. The full title and the
-sample stack live behind the `deployment.logs` permission, in the issue itself.
+**never** the full title or the sample/stack. An app's error message can embed
+secrets it logged, and a notification payload must stay secret-free. The full title
+and the sample stack live behind the `error.get` permission, in the issue itself.
 {{< /callout >}}
 
 ## API
 
-Three actions back the Errors tab. All are gated by the **`deployment.logs`**
-permission — the same one that reads [logs](/deployments/monitoring/#permissions) —
-because an issue's stack carries the same secret-bearing `stdout`. They reject
-`Static` deployments, which have no logs to mine.
+The `error.*` module backs the Errors tab. Reads are gated by their own
+permissions — `error.list` to list issues and `error.get` to fetch an issue with its
+stack — because a stack carries the same secret-bearing `stdout` as the
+[logs](/deployments/monitoring/#permissions). Triage is gated by **`error.update`**,
+and direct reporting by **`error.create`**. All reject `Static` deployments, which
+have no logs to mine.
 
-### `deployment.errors` — list issues
+### `error.list` — list issues
 
 | Param | Description |
 |---|---|
@@ -144,33 +150,33 @@ firstSeen, lastSeen, samplePod }` — plus a `nextCursor` until the list is
 exhausted.
 
 ```bash
-curl https://api.deploys.app/deployment.errors \
+curl https://api.deploys.app/error.list \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "project": "acme", "location": "gke.cluster-rcf2",
         "name": "web", "status": "open", "sort": "count" }'
 ```
 
-### `deployment.errorGet` — one issue, with the stack
+### `error.get` — one issue, with the stack
 
 | Param | Description |
 |---|---|
 | `project` | The project id. |
 | `location` | The deployment's location. |
 | `name` | The deployment name. |
-| `id` | The issue id from `deployment.errors`. |
+| `id` | The issue id from `error.list`. |
 
 Returns the issue with its `sampleMessage` (the full representative stack) and
 `recentEvents[]` — each `{ pod, timestamp, object, offset }` pointing at an
 occurrence in the captured log history.
 
 ```bash
-curl https://api.deploys.app/deployment.errorGet \
+curl https://api.deploys.app/error.get \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "project": "acme", "location": "gke.cluster-rcf2",
         "name": "web", "id": "…issue id…" }'
 ```
 
-### `deployment.errorUpdate` — triage
+### `error.update` — triage
 
 | Param | Description |
 |---|---|
@@ -185,10 +191,81 @@ Flips an issue's [status](#triage-lifecycle). Setting `resolved` marks it fixed;
 
 ```bash
 # mark an issue resolved
-curl https://api.deploys.app/deployment.errorUpdate \
+curl https://api.deploys.app/error.update \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "project": "acme", "location": "gke.cluster-rcf2",
         "name": "web", "id": "…issue id…", "status": "resolved" }'
+```
+
+## Reporting errors from your app — `error.create`
+
+Log mining catches what your app **prints**. But some errors you'd rather report
+explicitly — a handled exception you recover from, an error that never reaches
+`stderr`, or one you want to enrich with structured frames from your own SDK.
+`error.create` lets a running deployment (or an SDK embedded in it) report its own
+application errors directly, instead of relying only on log mining.
+
+A reported error and a log-mined trace with the **same stack signature merge into one
+issue** — they share the same [fingerprint](#how-it-works) — so reporting and mining
+reinforce each other rather than double-counting.
+
+### Request shape
+
+| Field | Description |
+|---|---|
+| `project` | The project id. |
+| `location` | The deployment's location. |
+| `name` | The deployment that's reporting (the deployment name). |
+| `events` | The batch of error events — **up to 100** per call. |
+
+Each entry in `events[]`:
+
+| Field | Description |
+|---|---|
+| `type` | **Required.** The exception type, e.g. `panic`, `java.lang.NullPointerException`. This is the only field that ever appears in a notification. |
+| `kind` | One of `go`, `java`, `python`, `node`, `ruby`, `generic`. Defaults to `generic`. |
+| `title` | A short human title for the issue. |
+| `frames` | The stack frames — each `{ func, file, line }`. The fingerprint is computed from these, so they decide which issue the event merges into. |
+| `sample` | A representative full stack/message string for the issue detail. |
+| `pod` | The reporting pod name. |
+| `ts` | The occurrence timestamp. |
+
+### Auth
+
+The reporting app authenticates as an identity that holds the `error.create`
+permission — pick whichever fits how your workload already authenticates, no new
+infrastructure either way:
+
+- a project **[service-account key](/access/service-accounts/)** — the same kind of
+  key your CI or [MCP](/automation/mcp/) local mode uses; or
+- a **scoped token** from `me.generateToken` attenuated to `error.create`. This is
+  the least-privilege option: the token can do nothing but report errors, and you can
+  keep it short-lived.
+
+{{< callout type="note" >}}
+The [notification](#notifications) for a new or regressed issue carries only the
+exception **`type`** — **never** the `title` or `sample`, which can echo application
+data your app put in the error. Titles and samples stay behind the `error.get`
+permission, in the issue itself.
+{{< /callout >}}
+
+```bash
+# a running app reports one handled exception
+curl https://api.deploys.app/error.create \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{ "project": "acme", "location": "gke.cluster-rcf2", "name": "web",
+        "events": [
+          { "kind": "go",
+            "type": "panic",
+            "title": "runtime error: invalid memory address or nil pointer dereference",
+            "frames": [
+              { "func": "main.(*Handler).Serve", "file": "handler.go", "line": 142 },
+              { "func": "net/http.(*conn).serve", "file": "server.go", "line": 2092 }
+            ],
+            "sample": "panic: runtime error: invalid memory address or nil pointer dereference\n\tmain.(*Handler).Serve(...)\n\t\thandler.go:142",
+            "pod": "web-7d9c8b6f4-abcde",
+            "ts": "2026-06-21T10:04:00Z" }
+        ] }'
 ```
 
 ### Kinds
@@ -206,16 +283,18 @@ The `kind` field tells you which runtime threw, and drives the icon in the conso
 
 ## From the CLI and AI assistants
 
-The same three actions are available outside the console:
+The `error.*` actions are available outside the console too:
 
-- The **CLI** surfaces them under `deploys deployment errors` (list, get, and
-  resolve), so a script or CI job can read and triage issues without the console.
-- The **[MCP server](/automation/mcp/)** exposes the error-listing and
-  error-detail actions, so an AI assistant can pull up a deployment's open issues
-  and read the stack as part of a diagnose-and-fix loop.
+- The **CLI** surfaces them under `deploys error` — `list`, `get`, and `update` to
+  read and triage issues, plus `deploys error report` to send an `error.create`
+  event from a script or CI job without the console.
+- The **[MCP server](/automation/mcp/)** exposes the error-listing and error-detail
+  tools (and an `error.create` tool), so an AI assistant can pull up a deployment's
+  open issues, read the stack, and even report errors as part of a
+  diagnose-and-fix loop.
 
-Both wrap the same `deployment.logs`-gated API, so they can only see what your
-identity is allowed to.
+Both wrap the same `error.*` API, so they can only see and do what your identity is
+allowed to.
 
 ## Retention
 

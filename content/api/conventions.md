@@ -85,7 +85,8 @@ The big picture. Each row is a fully-qualified API function.
 | `deployment.rollback` | Re-apply an older revision as a new revision |
 | `deployment.revisions` | History of revisions |
 | `deployment.metrics` | CPU / mem / requests / egress time-series |
-| `deployment.errors` / `.errorGet` / `.errorUpdate` | [Application error issues](/deployments/error-detection/) — list, fetch, and triage |
+| `error.list` / `.get` / `.update` | [Application error issues](/deployments/error-detection/) — list, fetch, and triage |
+| `error.create` | [Report an application error](/deployments/error-detection/#reporting-errors-from-your-app--errorcreate) directly from a running deployment |
 
 ### Routing
 
