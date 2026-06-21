@@ -175,6 +175,12 @@ All three are read-only and return once (no streaming). See
 [Monitoring & debugging](/deployments/monitoring/#reading-logs-and-status-programmatically)
 for the contract and the `deployment.logs` permission split.
 
+For triaging recurring crashes, **`deployment.errors`** and
+**`deployment.errorGet`** pull up the deployment's grouped, deduplicated error
+**issues** — each with an occurrence count and a representative stack — so the
+assistant can read what's been throwing without scrolling raw logs. See
+[application error detection](/deployments/error-detection/).
+
 ## Permissions & safety
 
 - **It acts as an identity you control.** Over OAuth it's your account; locally
