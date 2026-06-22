@@ -68,9 +68,8 @@ request handling:
 - **`config.host`** — override the `Host` header the gateway sends upstream.
   Empty (the default) forwards the request's original Host — the route's own
   domain. Set it when the backend serves content by Host (virtual hosting); see
-  [External server](#override-the-host-header) below. It applies to
-  `http://` (external) and `deployment://` (WebService) targets and is ignored
-  for redirect and IPFS/IPNS/Static targets.
+  [External server](#override-the-host-header) below. It is valid **only for an
+  `http://` (external) target** and is rejected for every other target type.
 
 ```bash
 curl https://api.deploys.app/route.createV2 \
@@ -151,14 +150,9 @@ deploys route create \
 
 `host` is a bare hostname or IP, with an optional `:port` — no scheme or path.
 It only rewrites the forwarded `Host` header; the backend is still chosen by
-`target`. The same field works on a `deployment://` (WebService) target when
-the container routes by `Host`.
-
-{{< callout type="note" >}}
-The override is **not applied to a `deployment://` route whose deployment has
-deployment-access (Google login) enabled** — the access gate anchors on the
-original Host, so it takes precedence and the override is ignored on that route.
-{{< /callout >}}
+`target`. The override is **external-only** — it is rejected on a
+`deployment://`, redirect, or IPFS route, where the upstream `Host` is either
+reserved for routing or has no meaning.
 
 {{< callout type="note" >}}
 External HTTP routes are billed for the **edge egress** they serve — since the
