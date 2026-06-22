@@ -139,10 +139,54 @@ without leaking pre-auth content, so every request proxies fresh. Keep public
 sites public to keep them fast.
 {{< /callout >}}
 
+## Per-release immutable URLs
+
+A static deployment is reachable at **two** hostnames:
+
+- The **default URL** (the deployment's managed `*.deploys.app` hostname) always
+  serves the **current** release. Publishing or rolling back re-points it — it's
+  deliberately mutable, so "the site" is always the latest build.
+- A **release URL** is pinned to **one exact release** and never moves. Its
+  hostname embeds the first 8 characters of the release-sha
+  (`<name>-<release8>-…`), so a given build keeps a stable address even after
+  newer deploys. Use it to link a specific build in a changelog or pull request,
+  or to compare two builds side by side.
+
+Both are returned by `deployment.get` (`url` and `releaseUrl`) and shown on the
+console's deployment **Details** page. Both are public and content-addressed — a
+release URL can only ever serve its own build's files — so treat them as
+shareable-but-unlisted, the same as the default URL.
+
+{{< callout type="note" >}}
+**Release URLs are immutable but not eternal.** A release URL stays live only
+while its revision is **retained** — Deploys.app keeps the most recent **10**
+revisions per deployment. After 10 newer deploys the old release is
+garbage-collected and its URL 404s. Link a release URL for review and iteration,
+not as a permanent archive.
+{{< /callout >}}
+
 ## Preview deployments
 
-Like container builds, a static site opened in a pull request gets its own
-preview deployment (`<name>-pr-<number>`) with a public URL and a sticky PR
-comment, deleted when the PR closes. Preview releases are served with
-`X-Robots-Tag: noindex` so search engines never index them. See
+A static site opened in a **pull request** gets its own preview deployment
+(`<name>-pr-<number>`) with a public URL and a sticky PR comment, deleted when
+the PR closes. Preview releases are served with `X-Robots-Tag: noindex` so
+search engines never index them. See
 [Deploy from GitHub → pull requests](/automation/deploy-from-github/#what-happens-on-a-pull-request).
+
+The same throwaway-preview loop is available to **any caller** — a local agent,
+a script, or the CLI — without a pull request. Publish the build with a
+non-production environment (so it's served `noindex`), then deploy it with a
+**TTL** so it auto-deletes when the window expires:
+
+{{< code file="preview.sh" lang="bash" >}}
+# publish ./public, deploy it as a 2h throwaway preview, print url + releaseUrl
+deploys site preview --project acme --name website-preview --dir ./public --ttl 7200
+{{< /code >}}
+
+`deployment.get` returns the rolling `url` and the immutable `releaseUrl`. The
+preview deletes itself at the TTL; `deploys deployment extend-ttl` re-stamps the
+window to keep it alive during a long session, and `deploys deployment delete`
+drops it early. Over MCP/API the same flow is `deployment.deploy` with a `ttl`
+plus `deployment.extendTTL` — see
+[the MCP preview recipe](/automation/mcp/#ship-a-throwaway-preview). Previews and
+their release URLs share the 10-revision retention noted above.
