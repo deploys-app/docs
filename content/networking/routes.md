@@ -155,6 +155,12 @@ It only rewrites the forwarded `Host` header; the backend is still chosen by
 the container routes by `Host`.
 
 {{< callout type="note" >}}
+The override is **not applied to a `deployment://` route whose deployment has
+deployment-access (Google login) enabled** — the access gate anchors on the
+original Host, so it takes precedence and the override is ignored on that route.
+{{< /callout >}}
+
+{{< callout type="note" >}}
 External HTTP routes are billed for the **edge egress** they serve — since the
 compute is yours, there's no flat per-route fee. See
 [Billing overview](/billing/overview/).
