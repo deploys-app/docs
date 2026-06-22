@@ -1,7 +1,7 @@
 ---
 title: 'Workload identity'
 linkTitle: 'Workload identity'
-weight: 4
+weight: 5
 description: 'Federate to Google Cloud — let a deployment authenticate as a GCP service account without keys.'
 lead: 'Workload identity binds a deployment to a Google Cloud service account. Inside the container, Application Default Credentials work transparently — no JSON key file to mount, no rotation to manage.'
 ---
