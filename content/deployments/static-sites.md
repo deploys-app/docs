@@ -153,9 +153,13 @@ A static deployment is reachable at **two** hostnames:
   or to compare two builds side by side.
 
 Both are returned by `deployment.get` (`url` and `releaseUrl`) and shown on the
-console's deployment **Details** page. Both are public and content-addressed — a
-release URL can only ever serve its own build's files — so treat them as
-shareable-but-unlisted, the same as the default URL.
+console's deployment **Details** page. A release URL carries the **same access
+posture as the default URL**: for a public site it's public (and
+content-addressed — it can only ever serve its own build's files — so treat it
+as shareable-but-unlisted); for a site with
+[access control](/deployments/access/) ("Require Google login") the release URL
+is gated by the same login, so a private site is **never** exposed through its
+per-release URLs.
 
 {{< callout type="note" >}}
 **Release URLs are immutable but not eternal.** A release URL stays live only
