@@ -65,6 +65,11 @@ request handling:
   returns 2xx the request is forwarded, otherwise the response is returned to
   the client. Request and response headers can be whitelisted via
   `authRequestHeaders` / `authResponseHeaders`.
+- **`config.host`** — override the `Host` header the gateway sends upstream.
+  Empty (the default) forwards the request's original Host — the route's own
+  domain. Set it when the backend serves content by Host (virtual hosting); see
+  [External server](#override-the-host-header) below. It is valid **only for an
+  `http://` (external) target** and is rejected for every other target type.
 
 ```bash
 curl https://api.deploys.app/route.createV2 \
@@ -113,6 +118,41 @@ A few rules the gateway enforces:
   the hop from the edge to your server is plain HTTP, so keep the server on a
   trusted network path. The client-facing side is still HTTPS, terminated at
   the edge.
+
+### Override the Host header
+
+By default the edge forwards your visitor's `Host` (the route domain, e.g.
+`legacy.acme.com`) to your server. If that server virtual-hosts — serving
+different sites by `Host` — point it at the right one with `config.host`:
+
+```bash
+curl https://api.deploys.app/route.createV2 \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{
+    "project": "acme",
+    "location": "gke.cluster-rcf2",
+    "domain": "legacy.acme.com",
+    "path": "/",
+    "target": "http://203.0.113.10:8080",
+    "config": { "host": "legacy.internal" }
+  }'
+```
+
+With the CLI, pass `--host`:
+
+```bash
+deploys route create \
+  --project acme --location gke.cluster-rcf2 \
+  --domain legacy.acme.com --path / \
+  --target http://203.0.113.10:8080 \
+  --host legacy.internal
+```
+
+`host` is a bare hostname or IP, with an optional `:port` — no scheme or path.
+It only rewrites the forwarded `Host` header; the backend is still chosen by
+`target`. The override is **external-only** — it is rejected on a
+`deployment://`, redirect, or IPFS route, where the upstream `Host` is either
+reserved for routing or has no meaning.
 
 {{< callout type="note" >}}
 External HTTP routes are billed for the **edge egress** they serve — since the
