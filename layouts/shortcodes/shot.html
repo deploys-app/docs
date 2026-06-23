@@ -1,11 +1,18 @@
 {{- /* Console screenshot framed as an app panel.
        {{< shot src="/img/foo.png" url="console.deploys.app/…" alt="…" caption="…" >}}
-       When /img/foo-dark.png exists in static/, both light and dark images are
-       emitted and CSS swaps them based on the current theme. */ -}}
+       Images live in assets/img/ and are resolved through Hugo Pipes so the
+       emitted URL carries a content hash (/img/foo.<hash>.png) — re-capturing a
+       screenshot busts the browser/CDN cache automatically, leaving unchanged
+       ones cached. When assets/img/foo-dark.png exists, both light and dark
+       images are emitted and CSS swaps them based on the current theme. */ -}}
 {{- $src := .Get "src" -}}
 {{- $url := .Get "url" | default "console.deploys.app" -}}
 {{- $alt := .Get "alt" -}}
 {{- $cap := .Get "caption" -}}
-{{- $darkSrc := replace $src ".png" "-dark.png" -}}
-{{- $hasDark := and (ne $darkSrc $src) (fileExists (printf "static%s" $darkSrc)) -}}
-<figure class="shot"><div class="shot-frame"><div class="shot-chrome"><span class="shot-dots"><i></i><i></i><i></i></span><span class="shot-url">{{ $url }}</span></div><img class="shot-light" src="{{ $src }}" alt="{{ $alt }}" loading="lazy">{{ if $hasDark }}<img class="shot-dark" src="{{ $darkSrc }}" alt="{{ $alt }}" loading="lazy">{{ end }}</div>{{ with $cap }}<figcaption class="shot-caption">{{ . | markdownify }}</figcaption>{{ end }}</figure>
+{{- $path := strings.TrimPrefix "/" $src -}}
+{{- $res := resources.Get $path -}}
+{{- if not $res }}{{ errorf "shot: image not found in assets/ — src=%q (looked up %q)" $src $path }}{{ end -}}
+{{- $light := $res | resources.Fingerprint -}}
+{{- $darkPath := replace $path ".png" "-dark.png" -}}
+{{- $darkRes := and (ne $darkPath $path) (resources.Get $darkPath) -}}
+<figure class="shot"><div class="shot-frame"><div class="shot-chrome"><span class="shot-dots"><i></i><i></i><i></i></span><span class="shot-url">{{ $url }}</span></div><img class="shot-light" src="{{ $light.RelPermalink }}" alt="{{ $alt }}" loading="lazy">{{ if $darkRes }}{{ $dark := $darkRes | resources.Fingerprint }}<img class="shot-dark" src="{{ $dark.RelPermalink }}" alt="{{ $alt }}" loading="lazy">{{ end }}</div>{{ with $cap }}<figcaption class="shot-caption">{{ . | markdownify }}</figcaption>{{ end }}</figure>

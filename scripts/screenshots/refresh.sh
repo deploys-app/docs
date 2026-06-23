@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Refresh the console screenshots in static/img/.
+# Refresh the console screenshots in assets/img/.
 #
 # Assumes:
 #   - The console repo is cloned at ../../console relative to this script
@@ -49,12 +49,12 @@ for _ in $(seq 1 30); do
 	sleep 0.5
 done
 
-echo "==> capturing screenshots into $docs/static/img/"
+echo "==> capturing screenshots into $docs/assets/img/"
 # ESM resolves @playwright/test relative to the source file's location, not
 # cwd. Drop capture.mjs into the console repo (which has node_modules) for
 # the run; the cleanup trap removes it.
 runner="$console/.shot-runner.mjs"
 cp "$here/capture.mjs" "$runner"
-SHOT_OUT="$docs/static/img" node "$runner"
+SHOT_OUT="$docs/assets/img" node "$runner"
 
 echo "==> done"

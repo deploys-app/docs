@@ -14,7 +14,7 @@
 //   3. The console mock server is up: `cd console && bun dev:mock`. Default
 //      port 5173. Set CONSOLE_URL if you ran it on a different port.
 //
-// Writes PNGs into ../../static/img/.
+// Writes PNGs into ../../assets/img/.
 //
 // Run from the console repo so node resolves @playwright/test:
 //     cd ../../../console && node ../docs/scripts/screenshots/capture.mjs
@@ -27,7 +27,7 @@ import { dirname, resolve } from 'node:path'
 const HERE = dirname(fileURLToPath(import.meta.url))
 // SHOT_OUT is set by refresh.sh (this file gets copied around). Fall back to
 // the standard layout for hand invocations from docs/scripts/screenshots/.
-const OUT = process.env.SHOT_OUT || resolve(HERE, '../../static/img')
+const OUT = process.env.SHOT_OUT || resolve(HERE, '../../assets/img')
 const BASE = process.env.CONSOLE_URL || 'http://localhost:5173'
 const P = 'project=acme'
 const LOC = 'location=gke.cluster-rcf2'
