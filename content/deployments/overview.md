@@ -101,15 +101,20 @@ Anything you can do from this page, you can do from the [CLI](/automation/cli/)
 or [API](/api/overview/). The console, CLI, and API all hit the same backend.
 
 ```bash
-# list deployments in a project
+# list deployments in a project (a non-sensitive index — no env or secrets)
 deploys deployment list --project acme
 
-# get the full config of one deployment
+# get the full config of one deployment (env, mounted files, log URLs, …)
 deploys deployment get --project acme --location gke.cluster-rcf2 --name web
 
 # pause a deployment
 deploys deployment delete --project acme --location gke.cluster-rcf2 --name old-worker
 ```
+
+`deployment list` returns only each deployment's name, type, status and other
+metadata — never its environment variables or other secrets. Use `deployment
+get` for the full configuration. See [Roles & permissions](/access/roles/) for
+how this lets you grant list access without exposing secrets.
 
 {{< callout type="note" >}}
 For each command above the equivalent API call is `POST https://api.deploys.app/deployment.<verb>` with the same fields as JSON. See the [API overview](/api/overview/).

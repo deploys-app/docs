@@ -20,6 +20,15 @@ are short verbs:
 | `update` | `(project, …id fields, …spec)` → resource or empty |
 | `delete` | `(project, …id fields)` → empty |
 
+For some resources a `list` item is a **reduced, non-sensitive projection** of
+what `get` returns, not the full resource — `list` is an index, `get` is the
+detail. Most notably `deployment.list` omits the environment, mounted files,
+command/args, annotations and the signed log URLs (read them with
+`deployment.get`), and `envGroup.list` returns a variable *count* rather than
+the values (read them with `envGroup.get`). This is an authorization boundary:
+`deployment.list`/`envgroup.list` can be granted without exposing secrets. See
+[Roles & permissions](/access/roles/).
+
 Resources scoped to a location (deployments, domains, routes, disks, pull
 secrets, workload identities) take both `project` and `location` on every
 call. Project-only resources (roles, service accounts, env groups,

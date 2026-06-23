@@ -70,6 +70,16 @@ covered by `registry.push`; `project.usage` and `project.metrics` by
 `project.get`. Granting the made-up string does nothing — grant the broader
 permission instead.
 
+`.list` and `.get` differ in **what data they return**, not just scope:
+`deployment.list` is a non-sensitive index — it returns each deployment's name,
+type, status, image and other metadata, but **never** the environment
+variables, mounted files, command/args, annotations, or the signed log URLs.
+Those require `deployment.get`. Likewise `envgroup.list` returns only the group
+names and a variable count, while the values require `envgroup.get`. So a role
+with `deployment.list`/`envgroup.list` but not the matching `.get` can enumerate
+deployments and env groups **without** reading any secret — a useful split for
+dashboards, inventory tooling, or a CI step that only needs to know what exists.
+
 The wildcard `*` matches everything, and each namespace has a `<namespace>.*`
 (for example `domain.*`) covering that namespace's actions.
 
