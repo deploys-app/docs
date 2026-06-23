@@ -16,5 +16,7 @@ mirrors the Deploys.app console — magenta "signal" primary on Ink (dark) /
 Paper (light) surfaces, Hanken Grotesk + JetBrains Mono. Tokens live in
 `assets/style/_theme.scss`.
 
-Console screenshots in `static/img/` are captured from the console's mock
-server (`bun dev:mock`) — see the console repo.
+Console screenshots in `assets/img/` are captured from the console's mock
+server (`bun dev:mock`) — see the console repo. They are served through Hugo
+Pipes with a content hash in the filename (`/img/<name>.<hash>.png`) so a
+re-captured screenshot busts the browser/CDN cache automatically.
