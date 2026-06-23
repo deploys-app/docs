@@ -11,6 +11,12 @@ lead: 'A service account is a project member that isn''t a person. It can hold r
 The Service Accounts tab lists every machine identity in the project — its
 email, name, and description.
 
+{{< callout type="note" >}}
+Service accounts are for *durable* identities (CI, exporters, back-end tools). For
+*ephemeral* automation — an agent or a one-off task that needs a narrow credential
+for a few minutes — mint a [scoped token](/access/scoped-tokens/) instead.
+{{< /callout >}}
+
 {{< shot src="/img/service-account-list.png" url="console.deploys.app/service-account?project=acme" alt="Two service accounts: CI Deployer and Metrics Reader" caption="Service accounts in the acme project — a CI deployer and a read-only metrics reader." >}}
 
 Click into one for its keys and current bindings.

@@ -44,6 +44,7 @@ const screens = [
 	['registry-list',         `/registry?${P}`],
 	['role-list',             `/role?${P}`],
 	['service-account-list',  `/service-account?${P}`],
+	['scoped-token-list',     `/scoped-token?${P}`],
 	['billing-report',        `/billing/report`],
 	['project-list',          `/project`],
 	['waf-list',              `/waf?${P}`],

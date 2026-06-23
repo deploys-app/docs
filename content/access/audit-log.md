@@ -1,7 +1,7 @@
 ---
 title: 'Audit log'
 linkTitle: 'Audit log'
-weight: 5
+weight: 6
 description: 'Who did what, when. Filterable by resource, actor, outcome, and time range.'
 lead: 'Every state-changing API call that passes authorization lands in the audit log — actor, action, resource, outcome, and timestamp. Use it to answer "who deployed that?" and "which writes failed?"'
 ---
@@ -23,7 +23,11 @@ reason about who *can* do what, use [roles](/access/roles/), not the audit log.
 Each entry captures:
 
 - **Actor** — the principal who made the call (user email or service-account
-  email), plus their type (`User` or `ServiceAccount`).
+  email), plus their type (`User` or `ServiceAccount`). When the call was made
+  through a [scoped token](/access/scoped-tokens/), the actor stays the human or
+  service account that *minted* it, and the token's `label` rides alongside as
+  the **agent** tag — so an agent session is attributable without ever losing the
+  principal behind it.
 - **Channel** — the client surface the call came through: `console`, `cli`,
   `mcp`, or `api` (a direct API call). Self-reported by the client and defaults
   to `api` when unset, so treat it as a hint about *how* a change was made, not
