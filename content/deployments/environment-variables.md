@@ -124,6 +124,16 @@ or in metrics. They *are* visible to anyone with read access to the
 deployment, so make sure your [roles](/access/roles/) limit who can call
 `deployment.get` on projects that hold production secrets.
 
+`deployment.get` — not `deployment.list` — is the boundary. **`deployment.list`
+is a non-sensitive index:** it returns each deployment's name, type, status,
+image, replicas and other metadata, but **never** `env`, `mountData`,
+`command`/`args`, annotations, or the signed log URLs. To read the environment
+of a deployment you must call `deployment.get` on it. The same split applies to
+env groups: **`envGroup.list` returns only the group names and a count of
+variables** (`envCount`), never the values — call `envGroup.get` to read them.
+So a role with `deployment.list`/`envgroup.list` but not the matching `.get`
+can enumerate deployments and env groups without seeing any secret.
+
 A common pattern: keep secrets in a dedicated env group per environment
 (`secrets-staging`, `secrets-prod`), and grant read on those groups only to
 operators and CI.
