@@ -99,26 +99,104 @@ res, err := c.DropboxUpload(ctx, &client.DropboxUploadOptions{
 This is exactly what static-site publishing uses internally: upload an archive,
 then pass `res.DownloadURL` to `PublishSite`.
 
-## List and meter from the CLI
+## Hand someone an upload URL
 
-The [`deploys` CLI](/automation/cli/) exposes the read side — listing stored
-files and pulling usage metrics. (Uploading is done through the console or the
-API above.) Both require the `dropbox.list` permission.
+Sometimes the file isn't *yours* to upload — you want a teammate, a browser, or
+an automated step to drop a file in without handing them a deploys.app token.
+Mint a **signed upload URL**: a short-lived URL anyone can `PUT` a file to
+directly. The bytes go straight to Dropbox, and the URL enforces the size and
+content-type limits you set.
+
+Two steps — **create** the URL (authenticated, needs `dropbox.upload`), then
+**`PUT`** the file to it (no credential — the URL itself is the capability):
 
 ```bash
-# everything currently stored in the project
+# 1. create — returns an uploadUrl to hand off + the eventual downloadUrl
+curl -fsS -X POST "https://dropbox.deploys.app/uploads" \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"project":"acme","ttl":3,"filename":"build.tar.gz","contentType":"application/gzip","maxSize":104857600,"expires":900}'
+```
+
+```json
+{
+  "ok": true,
+  "result": {
+    "method": "PUT",
+    "uploadUrl": "https://dropbox.deploys.app/uploads/<token>",
+    "downloadUrl": "https://dropbox.deploys.app/files/<token>",
+    "contentType": "application/gzip",
+    "minSize": 1,
+    "maxSize": 104857600,
+    "ttl": 3,
+    "uploadExpiresAt": "2026-06-19T08:15:00Z"
+  }
+}
+```
+
+```bash
+# 2. upload — whoever holds the URL PUTs the file (no token needed)
+curl -fsS -X PUT "<uploadUrl>" \
+  -H "Content-Type: application/gzip" \
+  --data-binary @build.tar.gz
+```
+
+| Body field | | Description |
+|---|---|---|
+| `project` | required | Project sid (or numeric ID) the upload is authorized and billed against |
+| `ttl` | optional | Download lifetime in days, 1–7 (default 1); the clock starts when the file is `PUT` |
+| `filename` | optional | Name recorded in `Content-Disposition` for the download |
+| `contentType` | optional | If set, the `PUT` must send this exact `Content-Type` |
+| `minSize` / `maxSize` | optional | Byte bounds enforced on the `PUT` — min floors at 1 (empty uploads are refused), max clamps to the service cap (default 5 GiB) |
+| `expires` | optional | How long the upload URL stays valid, in seconds, 1–3600 (default 900) |
+
+The `PUT` is enforced: a body outside the size bounds, a mismatched
+`Content-Type`, or an expired/forged URL is rejected; on success it returns the
+live `downloadUrl` with the file's `size` and `expiresAt`. The upload URL is a
+capability — treat it like a secret. Re-using it before it expires overwrites the
+file.
+
+### From Go
+
+```go
+res, err := c.DropboxCreateUploadURL(ctx, &client.DropboxCreateUploadURLOptions{
+    Project:     "acme",
+    Filename:    "build.tar.gz",     // optional
+    ContentType: "application/gzip", // optional, enforced on the PUT
+    MaxSize:     100 << 20,          // optional byte cap
+    TTLDays:     3,                  // 1–7, default 1
+    Expires:     900,                // upload-URL lifetime in seconds
+})
+// res.UploadURL (hand off), res.DownloadURL (where it lands), res.UploadExpiresAt
+```
+
+## From the CLI
+
+The [`deploys` CLI](/automation/cli/) covers the whole lifecycle:
+
+```bash
+# upload a local file (needs dropbox.upload)
+deploys dropbox upload --project acme --file build.tar.gz --ttl 3
+
+# mint a signed upload URL to hand off (needs dropbox.upload)
+deploys dropbox upload-url --project acme --filename build.tar.gz \
+  --content-type application/gzip --max-size 104857600 --expires 900
+
+# everything currently stored in the project (needs dropbox.list)
 deploys dropbox list --project acme
 
 # narrow by upload time, cap the count
 deploys dropbox list --project acme \
   --after 2026-06-01 --before 2026-06-15 --limit 20
 
-# egress + storage over the last 30 days (7d / 30d / 90d)
+# egress + storage over the last 30 days, 7d / 30d / 90d (needs dropbox.list)
 deploys dropbox metrics --project acme --time-range 30d
 ```
 
-`list` returns each file's download URL, filename, size, TTL, and its created /
-expires timestamps — the same view the console shows.
+`upload` reads a file (or stdin) and prints the download URL; `upload-url` prints
+an upload URL to hand off plus the eventual download URL; `list` returns each
+file's download URL, filename, size, TTL, and its created / expires timestamps —
+the same view the console shows.
 
 ## Permissions
 
