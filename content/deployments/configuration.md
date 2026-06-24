@@ -127,8 +127,13 @@ Optional `subPath` mounts a sub-directory of the disk only.
 ## Sidecars — `sidecars`
 
 A sidecar is a helper container that shares the pod with your main container and
-its lifecycle. Today the only supported sidecar is the **Cloud SQL Auth Proxy**,
-configured under `cloudSqlProxy` — you don't supply an arbitrary image:
+its lifecycle. Sidecars are curated: you pick one from a fixed set and configure
+it, you don't supply an arbitrary image. Two managed sidecars are available — the
+**Cloud SQL Auth Proxy** (`cloudSqlProxy`) and the **AlloyDB Auth Proxy**
+(`alloyDbProxy`). You can attach up to two sidecars per deployment, and they must
+listen on different ports.
+
+### Cloud SQL Auth Proxy — `cloudSqlProxy`
 
 ```json
 "sidecars": [
@@ -136,7 +141,8 @@ configured under `cloudSqlProxy` — you don't supply an arbitrary image:
     "cloudSqlProxy": {
       "instance": "my-project:asia-southeast1:main",
       "port": 5432,
-      "credentials": "<service-account-json>"
+      "autoIamAuthn": true,
+      "privateIp": true
     }
   }
 ]
@@ -147,9 +153,44 @@ configured under `cloudSqlProxy` — you don't supply an arbitrary image:
   connects to the database at `127.0.0.1:<port>`.
 - **`credentials`** — optional service-account JSON for the proxy; omit it to use
   the deployment's ambient credentials.
+- **`autoIamAuthn`** — optional; authenticate to the database with the
+  deployment's IAM principal instead of a database password. Pair it with a
+  [`workloadIdentity`](#pull-secret-and-workload-identity) binding for fully keyless access.
+  Cannot be combined with `credentials`.
+- **`privateIp`** — optional; connect to the instance's private IP instead of its
+  public IP.
 
-The platform runs this as a `cloudsql-proxy` container alongside yours. Arbitrary
-sidecar containers (your own image, command, and env) aren't supported yet.
+The platform runs this as a `cloudsql-proxy` container alongside yours.
+
+### AlloyDB Auth Proxy — `alloyDbProxy`
+
+The AlloyDB Auth Proxy works the same way for an AlloyDB (PostgreSQL) instance:
+
+```json
+"sidecars": [
+  {
+    "alloyDbProxy": {
+      "instance": "projects/my-project/locations/asia-southeast1/clusters/main/instances/primary",
+      "port": 5432
+    }
+  }
+]
+```
+
+- **`instance`** — required; the full AlloyDB instance URI
+  (`projects/<project>/locations/<location>/clusters/<cluster>/instances/<instance>`).
+- **`port`** — the local port the proxy listens on (default `5432`). Your app
+  connects to the database at `127.0.0.1:<port>`.
+- **`credentials`** — optional service-account JSON for the proxy; omit it and
+  bind a [`workloadIdentity`](#pull-secret-and-workload-identity) so the proxy authenticates
+  keyless via Application Default Credentials and nothing sensitive is stored.
+
+The platform runs this as an `alloydb-proxy` container alongside yours.
+
+{{< callout type="info" >}}
+Arbitrary sidecar containers (your own image, command, and env) aren't supported —
+sidecars are limited to the managed proxies above.
+{{< /callout >}}
 
 ## TTL and one-shot jobs — `ttl`
 
