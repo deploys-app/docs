@@ -187,7 +187,7 @@ The AlloyDB Auth Proxy works the same way for an AlloyDB (PostgreSQL) instance:
 
 The platform runs this as an `alloydb-proxy` container alongside yours.
 
-{{< callout type="info" >}}
+{{< callout type="note" >}}
 Arbitrary sidecar containers (your own image, command, and env) aren't supported —
 sidecars are limited to the managed proxies above.
 {{< /callout >}}
