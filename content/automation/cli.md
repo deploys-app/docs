@@ -72,6 +72,7 @@ full list of namespaces and their actions.
 | `project` | — | `create`, `list`, `get`, `update`, `delete`, `usage` |
 | `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind` |
 | `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `errors`, `set image` |
+| `site` | — | `publish`, `deploy`, `preview` |
 | `domain` | — | `create`, `get`, `list`, `delete`, `purgecache` |
 | `route` | — | `create`, `get`, `list`, `delete` |
 | `waf` | — | `get`, `list`, `set`, `delete`, `metrics`, `limitmetrics` |
@@ -157,11 +158,32 @@ basics above it covers env groups (`--envGroups`, `--addEnv`, `--removeEnv`),
 [disk](/storage/disks/) (`--diskName`, `--diskMountPath`), and sidecars
 (`--sidecarsFile`). Run `deploys deployment deploy` with no flags to see them all.
 
+## Publishing a static site
+
+The `site` namespace builds a [static site](/deployments/static-sites/) from a
+local folder and uploads it as an immutable release — no GitHub Actions
+required. An upload progress bar is shown while files upload.
+
+```bash
+# build first (npm run build, hugo, …), then publish ./dist and deploy it
+# as a permanent deployment — prints the rolling url and the immutable releaseUrl
+deploys site deploy --project acme --name website --dir ./dist --location gke.cluster-rcf2
+```
+
+- `site publish` uploads the folder and prints a `site://` release ref **without
+  deploying** — handy for scripting or feeding a `Static` deployment yourself.
+- `site preview` deploys a throwaway, auto-deleting preview (see
+  [Static sites → Preview deployments](/deployments/static-sites/#preview-deployments)).
+
+`--spa` and `--notFound` mirror the build-action inputs; `--environment` defaults
+to `production`. Publishing needs the `site.publish` permission and active
+billing.
+
 {{< callout type="note" >}}
-[Static sites](/deployments/static-sites/) are *published* by the
-[build-deploy-action](/automation/deploy-from-github/) (`mode: static`), not the
-CLI — a static release has to be built and uploaded. The CLI still lists, gets,
-and rolls back a `Static` deployment like any other.
+For CI, the [build-deploy-action](/automation/deploy-from-github/)
+(`mode: static`) is still the best fit — it builds on a runner and is keyless.
+`site deploy` is the quickest path for a one-off or a locally-built site. Either
+way the CLI lists, gets, and rolls back a `Static` deployment like any other.
 {{< /callout >}}
 
 ## Editing the WAF zone

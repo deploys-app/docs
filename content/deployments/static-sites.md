@@ -30,6 +30,13 @@ per-PR [preview deployments](#preview-deployments) — the same as a web service
 
 ## How to deploy a static site
 
+There are two ways to ship a static release: from **GitHub Actions** (best for
+CI — it builds your repo on a runner and is keyless) or straight from **your
+machine** with the [CLI](/automation/cli/). Both upload the same kind of
+immutable release; pick whichever fits your workflow.
+
+### From GitHub Actions
+
 Static releases are built and published by the
 [`build-deploy-action`](/automation/deploy-from-github/) with `mode: static`.
 It runs your site's build on GitHub's runners, uploads the output as a release,
@@ -69,6 +76,28 @@ jobs:
 Push to `main` and the action builds the site, publishes the release, and
 deploys it as `website`. The console's **GitHub** page can generate this file
 for you, pre-filled — see [Deploy from GitHub](/automation/deploy-from-github/).
+
+### From your machine
+
+Build the site locally, then publish and deploy the output folder in one command
+with the [`deploys` CLI](/automation/cli/) — no GitHub Actions required:
+
+{{< code file="deploy.sh" lang="bash" >}}
+# build first (npm run build, hugo, …), then publish ./dist and deploy it
+deploys site deploy --project acme --name website --dir ./dist --location gke.cluster-rcf2
+{{< /code >}}
+
+`site deploy` uploads `--dir` as an immutable release and deploys it as a
+permanent `website`, printing the rolling `url` and the immutable `releaseUrl`.
+An upload progress bar is shown while files upload. Re-run it any time to ship a
+new release. `--spa` and `--notFound` mirror the
+[build settings](#build-settings) below; `--environment` defaults to
+`production`.
+
+To upload **without** deploying — for scripting, or to deploy the release
+yourself — `deploys site publish` prints just a `site://` release ref. For a
+throwaway, auto-deleting deploy, use `deploys site preview` (see
+[Preview deployments](#preview-deployments)).
 
 ## Build settings
 
