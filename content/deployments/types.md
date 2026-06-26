@@ -45,9 +45,9 @@ publishes an immutable, content-addressed release and flips the live pointer
 atomically.
 
 Static releases are built and published by the
-[`build-deploy-action`](/automation/deploy-from-github/) with `mode: static`,
-not the CLI. See **[Static sites](/deployments/static-sites/)** for the full
-walkthrough.
+[`build-deploy-action`](/automation/deploy-from-github/) with `mode: static`, or
+straight from your machine with `deploys site deploy`. See
+**[Static sites](/deployments/static-sites/)** for the full walkthrough.
 
 ## Worker
 
