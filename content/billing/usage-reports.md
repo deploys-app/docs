@@ -70,11 +70,19 @@ curl https://api.deploys.app/billing.getInvoice \
   -d '{ "id": "inv_…" }'
 
 curl https://api.deploys.app/billing.downloadInvoice \
-  -d '{ "id": "inv_…" }'        # returns a URL to the PDF
+  -d '{ "id": "inv_…" }'        # returns a URL to the invoice PDF
+
+curl https://api.deploys.app/billing.downloadReceipt \
+  -d '{ "id": "inv_…" }'        # paid invoices only; the receipt / tax-invoice PDF
 ```
 
 The PDF is the document to forward to your finance team — the line items
 match the report shown in the console.
+
+Once an invoice is **paid**, it also gets a **receipt number**
+(`receiptNumber`, `DPLY-RC-YYYYMM-NNNN`) — the receipt's own running number,
+separate from the invoice `number` — visible via `billing.getInvoice` and on
+the receipt PDF from `billing.downloadReceipt`.
 
 ## Patterns
 
