@@ -140,10 +140,11 @@ The big picture. Each row is a fully-qualified API function.
 
 | Function | What it does |
 |---|---|
-| `billing.list` / `.get` / `.create` / `.update` / `.delete` | Billing account CRUD |
+| `billing.list` / `.get` / `.create` / `.update` / `.delete` | Billing account CRUD. The account `type` (`individual`/`company`) drives the Head Office line on tax documents |
 | `billing.project` | Set the billing account on a project |
 | `billing.report` | Usage rolled up over a date range |
-| `billing.listInvoices` / `.getInvoice` / `.downloadInvoice` | Invoices |
+| `billing.listInvoices` / `.getInvoice` / `.downloadInvoice` | Invoices. An invoice carries `taxEntityType` (buyer entity, snapshotted) and, once paid, a `receiptNumber` (`DPLY-RC-YYYYMM-NNNN`) separate from `number` |
+| `billing.downloadReceipt` | Download the receipt / tax-invoice PDF of a **paid** invoice |
 | `billing.uploadTransferSlip` | Submit a bank-transfer receipt |
 
 ### GitHub

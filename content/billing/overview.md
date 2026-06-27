@@ -39,9 +39,17 @@ moment.
 Each account carries:
 
 - **Name** — the human label.
+- **Entity type** — `individual` or `company` (default `individual`). A
+  **company** is a juristic person, so its tax invoices and receipts print the
+  branch designation **"Head Office (สำนักงานใหญ่)"** beside its address, as Thai
+  tax law requires; an individual does not. Set it on the create/edit form or
+  via the `type` field on `billing.create` / `billing.update`.
 - **Tax ID / name / address** — what appears on invoices.
 - **Active** — whether new charges can post. Inactive accounts can't have new
   resources created against them.
+
+Our own company address (the seller) always shows "Head Office (สำนักงานใหญ่)" on
+every invoice and receipt.
 
 Manage billing accounts at **Billing → Accounts** in the console, or via the
 `billing.create`, `billing.update`, `billing.list` API functions.
@@ -62,13 +70,23 @@ period. Once the period closes, the invoice moves to `open` and stays there
 until paid (then `paid`) or voided (`void`). You'll see the badge change on
 the **Billing → Invoices** page as it progresses.
 
+When an invoice is marked **paid**, it is also assigned a separate **receipt
+number** (`receiptNumber`) of the form `DPLY-RC-YYYYMM-NNNN`. This is the
+receipt / tax-invoice document's own running number — a gapless sequence that
+resets each calendar month — and is **distinct from the invoice number**
+(`number`). A paid invoice's receipt can be downloaded as its own PDF, which
+carries the receipt number as its document number.
+
 ```bash
 curl https://api.deploys.app/billing.listInvoices \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "id": "ba_…" }'
 
 curl https://api.deploys.app/billing.downloadInvoice \
-  -d '{ "id": "inv_…" }'        # returns a URL to the PDF
+  -d '{ "id": "inv_…" }'        # returns a URL to the invoice PDF
+
+curl https://api.deploys.app/billing.downloadReceipt \
+  -d '{ "id": "inv_…" }'        # paid invoices only; returns the receipt PDF
 ```
 
 ## Where to watch your costs

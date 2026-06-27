@@ -88,6 +88,12 @@ full list of namespaces and their actions.
 | `github` | — | `link`, `unlink`, `update`, `list` |
 | `scheduler` | — | `create`, `get`, `list`, `update`, `delete`, `pause`, `resume`, `trigger`, `logs` |
 
+For `billing`, `create` / `update` take a `-type individual|company` flag (a
+company prints "Head Office (สำนักงานใหญ่)" on its tax documents).
+`downloadinvoice` returns the invoice PDF for any status, while
+`downloadreceipt` returns the receipt / tax-invoice PDF only once the invoice is
+**paid** (and a receipt number has been assigned).
+
 The internal `Deployer` and `Collector` APIs are machine-to-machine and not
 exposed here. The two multipart upload endpoints — KYC documents and invoice
 transfer slips — aren't either; use the console for those.
