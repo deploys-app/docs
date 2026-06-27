@@ -168,6 +168,35 @@ without leaking pre-auth content, so every request proxies fresh. Keep public
 sites public to keep them fast.
 {{< /callout >}}
 
+## Response headers
+
+Beyond the [cache headers](#caching) above, the gateway stamps a fixed set of
+headers on every response that serves your site — any page, asset, or 404 page.
+They're built in, not configurable per deployment:
+
+| Header | Value | Set on |
+|---|---|---|
+| `X-Content-Type-Options` | `nosniff` | every served response |
+| `X-Frame-Options` | `DENY` | every served response |
+| `X-Robots-Tag` | `noindex` | HTML responses of **preview** releases only |
+
+`X-Robots-Tag: noindex` keeps previews out of search results. It's set only when
+**both** are true: the response is HTML (`Content-Type: text/html`, which
+includes the built-in 404 page), **and** the release's environment is not
+`production`. A **production** release carries no `X-Robots-Tag` at all, so it's
+indexable; any other environment value — a PR's `pr-<n>`, a `preview`, or
+anything else — is served `noindex`. Non-HTML assets (CSS, JS, images) never get
+the header.
+
+The environment is set at publish time and **defaults to `production`**, so an
+ordinary site is indexable with no configuration and previews stay out of search
+engines automatically:
+
+- A push to your default branch (the [GitHub action](/automation/deploy-from-github/))
+  and a plain `deploys site deploy` both publish as `production` — **indexable**.
+- A pull-request deployment (`<name>-pr-<number>`) and `deploys site preview`
+  publish a non-production environment — **`noindex`**.
+
 ## Per-release immutable URLs
 
 A static deployment is reachable at **two** hostnames:
@@ -202,8 +231,8 @@ not as a permanent archive.
 
 A static site opened in a **pull request** gets its own preview deployment
 (`<name>-pr-<number>`) with a public URL and a sticky PR comment, deleted when
-the PR closes. Preview releases are served with `X-Robots-Tag: noindex` so
-search engines never index them. See
+the PR closes. Preview releases are served `noindex` so search engines never
+index them — see [Response headers](#response-headers). See also
 [Deploy from GitHub → pull requests](/automation/deploy-from-github/#what-happens-on-a-pull-request).
 
 The same throwaway-preview loop is available to **any caller** — a local agent,
