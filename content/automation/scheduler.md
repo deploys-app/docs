@@ -90,7 +90,7 @@ secret blank to keep the stored one; set it to replace it.
 
 Scheduled requests are sent with a default `User-Agent: deploys-scheduler/1.0`
 so they can be allowlisted at a firewall. If a job targets one of your own
-Deploys.app deployments protected by a [WAF zone](/networking/firewall/), allow
+Deploys.app deployments protected by a [WAF zone](/networking/waf/), allow
 that User-Agent in your zone. You can override it by setting your own
 `User-Agent` header on the job.
 
