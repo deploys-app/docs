@@ -108,7 +108,7 @@ deploys deployment list --project acme
 deploys deployment get --project acme --location gke.cluster-rcf2 --name web
 
 # pause a deployment
-deploys deployment delete --project acme --location gke.cluster-rcf2 --name old-worker
+deploys deployment pause --project acme --location gke.cluster-rcf2 --name old-worker
 ```
 
 `deployment list` returns only each deployment's name, type, status and other

@@ -24,8 +24,8 @@ For some resources a `list` item is a **reduced, non-sensitive projection** of
 what `get` returns, not the full resource — `list` is an index, `get` is the
 detail. Most notably `deployment.list` omits the environment, mounted files,
 command/args, annotations and the signed log URLs (read them with
-`deployment.get`), and `envGroup.list` returns a variable *count* rather than
-the values (read them with `envGroup.get`). This is an authorization boundary:
+`deployment.get`), and `envgroup.list` returns a variable *count* rather than
+the values (read them with `envgroup.get`). This is an authorization boundary:
 `deployment.list`/`envgroup.list` can be granted without exposing secrets. See
 [Roles & permissions](/access/roles/).
 
@@ -120,7 +120,7 @@ The big picture. Each row is a fully-qualified API function.
 | `registry.getManifests` / `.deleteManifest` | Manifest inspection and deletion |
 | `registry.metrics` / `.getProjectStorage` | Storage usage |
 | `registry.gc` | Garbage-collect manifests no deployment uses (dry-run supported) |
-| `pullSecret.list` / `.get` / `.create` / `.delete` | Pull-secret CRUD |
+| `pullsecret.list` / `.get` / `.create` / `.delete` | Pull-secret CRUD |
 
 ### Access
 
@@ -130,11 +130,11 @@ The big picture. Each row is a fully-qualified API function.
 | `role.bind` | Set the role list for a principal |
 | `role.users` | Who has access to this project |
 | `role.permissions` | The catalog of permission strings |
-| `serviceAccount.list` / `.get` / `.create` / `.update` / `.delete` | Account CRUD |
-| `serviceAccount.createKey` / `.deleteKey` | Key lifecycle |
-| `workloadIdentity.list` / `.get` / `.create` / `.delete` | GCP federation CRUD |
-| `envGroup.list` / `.get` / `.create` / `.update` / `.delete` | Env group CRUD |
-| `auditLog.list` | Audit entries with filters |
+| `serviceaccount.list` / `.get` / `.create` / `.update` / `.delete` | Account CRUD |
+| `serviceaccount.createKey` / `.deleteKey` | Key lifecycle |
+| `workloadidentity.list` / `.get` / `.create` / `.delete` | GCP federation CRUD |
+| `envgroup.list` / `.get` / `.create` / `.update` / `.delete` | Env group CRUD |
+| `auditlog.list` | Audit entries with filters |
 
 ### Billing
 

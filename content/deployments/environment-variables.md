@@ -31,7 +31,7 @@ An **env group** is a named bag of variables you can attach to multiple
 deployments. Changing the group's values stores them but does **not** restart
 anything by default — each deployment picks the new values up on its next deploy.
 
-To roll the change out immediately, set `redeploy: true` on `envGroup.update`
+To roll the change out immediately, set `redeploy: true` on `envgroup.update`
 and every deployment that uses the group is redeployed to a new revision. In the
 console this is the **Update and redeploy** button (the plain **Update** button
 just stores the values). Paused deployments are left untouched and pick up the
@@ -44,7 +44,7 @@ caller that holds only `envgroup.update` can still change the stored values
 
 ```bash
 # create or update a group (replaces its contents)
-curl https://api.deploys.app/envGroup.create \
+curl https://api.deploys.app/envgroup.create \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{ "project": "acme", "name": "shared",
         "env": { "LOG_LEVEL": "info", "REGION": "apac" } }'
@@ -129,8 +129,8 @@ is a non-sensitive index:** it returns each deployment's name, type, status,
 image, replicas and other metadata, but **never** `env`, `mountData`,
 `command`/`args`, annotations, or the signed log URLs. To read the environment
 of a deployment you must call `deployment.get` on it. The same split applies to
-env groups: **`envGroup.list` returns only the group names and a count of
-variables** (`envCount`), never the values — call `envGroup.get` to read them.
+env groups: **`envgroup.list` returns only the group names and a count of
+variables** (`envCount`), never the values — call `envgroup.get` to read them.
 So a role with `deployment.list`/`envgroup.list` but not the matching `.get`
 can enumerate deployments and env groups without seeing any secret.
 

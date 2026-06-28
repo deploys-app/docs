@@ -52,7 +52,7 @@ The Audit Logs page lets you narrow by:
 - **Date range** — today, last 7 days, last 30 days, last 90 days, last year,
   or a custom range.
 
-The `auditLog.list` function takes the same filters — plus an `actor` filter the
+The `auditlog.list` function takes the same filters — plus an `actor` filter the
 console doesn't expose — and a `limit`. `resourceType`, `channel`, and `outcome`
 match exactly, and the resource type is **lowercase** (`deployment`, not
 `Deployment`). The time window is `after` / `before` (RFC 3339). There is no
@@ -60,7 +60,7 @@ match exactly, and the resource type is **lowercase** (`deployment`, not
 entry.
 
 ```bash
-curl https://api.deploys.app/auditLog.list \
+curl https://api.deploys.app/auditlog.list \
   -H "Authorization: Bearer $DEPLOYS_TOKEN" \
   -d '{
     "project": "acme",
@@ -102,7 +102,7 @@ out on the same one-year clock.
 
 Two patterns work well:
 
-- **Pull periodically.** A small service account with `auditLog.list` polls
+- **Pull periodically.** A small service account with `auditlog.list` polls
   every few minutes for new entries (filter by `after` ≥ last-seen
   `createdAt`) and forwards to your aggregator.
 - **Pull at quarter-of-the-hour cadence** if you only need rough
