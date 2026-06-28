@@ -57,6 +57,61 @@ export DEPLOYS_TOKEN=$(gcloud auth print-access-token \
 deploys me get
 ```
 
+## Logging in
+
+For interactive use, sign in through the browser instead of managing tokens by
+hand:
+
+```bash
+deploys login
+```
+
+This runs an OAuth authorization-code flow (PKCE, over a loopback redirect): it
+opens your browser, you approve, and the CLI stores the resulting credential
+under your config dir (override the location with `DEPLOYS_CONFIG_DIR`). Later
+commands pick it up automatically — it's the **stored login** in the precedence
+list above, so it applies only when neither `DEPLOYS_AUTH_USER` /
+`DEPLOYS_AUTH_PASS` nor `DEPLOYS_TOKEN` is set. A local login therefore doesn't
+interfere with CI, which keeps using the env vars.
+
+`login` and `logout` are top-level aliases for `deploys auth login` /
+`deploys auth logout`; the rest of account management lives under `deploys auth`.
+
+### Multiple accounts
+
+Stored credentials are keyed by `(endpoint, email)`, so you can stay logged in as
+several accounts at once and switch between them:
+
+```bash
+deploys auth list                        # stored accounts, grouped by endpoint
+deploys auth switch -account me@acme.com  # set the active account for the endpoint
+deploys deployment list -account me@acme.com  # …or pick one per command
+```
+
+`DEPLOYS_ACCOUNT` does the same as `-account` for a whole shell session. See
+which credential is in effect — and when it expires — with `deploys auth status`.
+
+Sessions are time-limited; the CLI prints a warning as expiry approaches, so run
+`deploys login` again to renew. To sign out:
+
+```bash
+deploys logout        # the active account for this endpoint
+deploys logout -all   # every stored account
+```
+
+### Remote and headless hosts
+
+On a remote or SSH host with no local browser, pass `-no-browser` and forward the
+printed callback port back to your workstation:
+
+```bash
+deploys login -no-browser
+```
+
+For a script that needs the raw bearer token of the stored login (e.g. to call
+the API with `curl`), print it with `deploys auth token`. In CI, prefer a
+[service account](/access/service-accounts/) over an interactive login.
+
 ## Command shape
 
 ```text
