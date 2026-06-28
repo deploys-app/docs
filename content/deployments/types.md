@@ -81,7 +81,7 @@ The form accepts the same cron expression — e.g. `0 3 * * *` for "every day at
 
 {{< callout type="tip" >}}
 Need a job that runs once and exits — not on a schedule? Use a Worker with a
-[`ttl`](/deployments/configuration/#ttl-and-one-shot-jobs) so the platform
+[`ttl`](/deployments/configuration/#ttl-and-one-shot-jobs--ttl) so the platform
 auto-deletes it after the duration you set.
 {{< /callout >}}
 
