@@ -21,15 +21,20 @@ chmod +x ./deploys && sudo mv ./deploys /usr/local/bin/
 
 ## Authenticate
 
-The CLI accepts authentication three ways, in this order of precedence:
+The CLI accepts authentication four ways, in this order of precedence:
 
-1. **`DEPLOYS_TOKEN`** — a Bearer token. Useful for short-lived personal use, and
-   for a [Google Cloud service-account](/api/overview/#authentication) access
-   token (see below).
-2. **`DEPLOYS_AUTH_USER` + `DEPLOYS_AUTH_PASS`** — a [service account](/access/service-accounts/)
+1. **`DEPLOYS_AUTH_USER` + `DEPLOYS_AUTH_PASS`** — a [service account](/access/service-accounts/)
    email and key, sent as HTTP Basic. The right choice for CI.
-3. **Google default credentials**. If neither of the above is set, the CLI
-   falls back to Application Default Credentials — `gcloud auth login` or a
+2. **`DEPLOYS_TOKEN`** — a Bearer token (an empty value is treated as unset).
+   Useful for short-lived personal use, and for a
+   [Google Cloud service-account](/api/overview/#authentication) access token
+   (see below).
+3. **A stored login** — sign in interactively with `deploys login`, which opens a
+   browser to authorize and saves the account under your config dir; later
+   commands reuse it automatically. Manage stored accounts with `deploys auth`
+   (`status`, `list`, `switch`, `logout`).
+4. **Google default credentials**. If none of the above is set, the CLI falls
+   back to Application Default Credentials — `gcloud auth login` or a
    workload-identity environment.
 
 You can also point the CLI at a non-default API endpoint via
@@ -66,17 +71,20 @@ full list of namespaces and their actions.
 
 | Namespace | Aliases | Actions |
 |---|---|---|
-| `me` | — | `get`, `authorized` |
+| `auth` | — | `login`, `logout`, `status`, `list`, `switch`, `token` |
+| `me` | — | `get`, `authorized`, `permissions`, `generate-token`, `list-tokens`, `revoke-token` |
 | `billing` | — | `create`, `list`, `get`, `update`, `delete`, `report`, `skus`, `project`, `invoices`, `invoice`, `downloadinvoice`, `downloadreceipt` |
 | `location` | — | `list`, `get` |
 | `project` | — | `create`, `list`, `get`, `update`, `delete`, `usage` |
-| `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind` |
-| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `errors`, `set image` |
+| `role` | — | `create`, `list`, `get`, `delete`, `grant`, `revoke`, `users`, `bind`, `permissions` |
+| `deployment` | `deploy`, `d` | `list`, `get`, `deploy`, `delete`, `revisions`, `pause`, `resume`, `restart`, `rollback`, `metrics`, `status`, `logs`, `extend-ttl`, `set` |
+| `error` | `errors` | `list`, `get`, `update`, `report` |
 | `site` | — | `publish`, `deploy`, `preview` |
 | `domain` | — | `create`, `get`, `list`, `delete`, `purgecache` |
 | `route` | — | `create`, `get`, `list`, `delete` |
 | `waf` | — | `get`, `list`, `set`, `delete`, `metrics`, `limitmetrics` |
-| `disk` | — | `create`, `get`, `list`, `update`, `delete` |
+| `cache` | — | `get`, `list`, `set`, `delete`, `metrics` |
+| `disk` | — | `create`, `get`, `list`, `update`, `delete`, `metrics` |
 | `pullsecret` | `ps` | `create`, `get`, `list`, `delete` |
 | `workloadidentity` | `wi` | `create`, `get`, `list`, `delete` |
 | `serviceaccount` | `sa` | `create`, `get`, `list`, `update`, `delete`, `createkey`, `deletekey` |
@@ -84,9 +92,10 @@ full list of namespaces and their actions.
 | `registry` | — | `list`, `get`, `tags`, `manifests`, `storage`, `delete`, `deletemanifest`, `untag`, `gc`, `metrics` |
 | `envgroup` | `eg` | `create`, `get`, `list`, `update`, `delete` |
 | `auditlog` | — | `list` |
-| `dropbox` | — | `list`, `metrics`, `upload` |
+| `dropbox` | — | `list`, `metrics`, `upload`, `upload-url` |
 | `github` | — | `link`, `unlink`, `update`, `list` |
 | `scheduler` | — | `create`, `get`, `list`, `update`, `delete`, `pause`, `resume`, `trigger`, `logs` |
+| `notification` | — | `create`, `get`, `list`, `update`, `delete`, `test`, `deliveries`, `pull` |
 
 For `billing`, `create` / `update` take a `-type individual|company` flag (a
 company prints "Head Office (สำนักงานใหญ่)" on its tax documents).
