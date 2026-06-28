@@ -36,9 +36,9 @@ deploys role create \
 
 The `--permissions` flag takes a comma-separated list of permission strings.
 A permission is `<namespace>.<action>`, and unlike the API function names it is
-**always lowercase** — the `serviceAccount.createKey` call, for example, is
+**always lowercase** — the `serviceaccount.createKey` call, for example, is
 guarded by the `serviceaccount.key.create` permission. Matching is exact, so the
-casing matters: `serviceAccount.createKey` in a role grants nothing. The
+casing matters: `serviceaccount.createKey` in a role grants nothing. The
 authoritative list is whatever `role.permissions` returns; the most useful ones:
 
 | Group | Permissions |
