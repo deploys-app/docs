@@ -22,7 +22,7 @@ platform's static gateway serves it directly. That makes a few things true:
   replicas, resources, or environment variables — there's no process to
   configure. The only things you set on a static deployment are
   [access control](/deployments/access/) and an optional
-  [auto-delete TTL](/deployments/configuration/#ttl-and-one-shot-jobs).
+  [auto-delete TTL](/deployments/configuration/#ttl-and-one-shot-jobs--ttl).
 
 Static sites still get a managed hostname, work with custom
 [domains](/networking/domains/) and [routes](/networking/routes/), and get
