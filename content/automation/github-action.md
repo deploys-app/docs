@@ -81,7 +81,7 @@ deploy can pass just `image` and leave the rest as configured.
 | `location` | yes | Location ID (e.g. `gke.cluster-rcf2`) |
 | `name` | yes | Deployment name |
 | `image` | for containers | Container image with tag or digest |
-| `type` | no | [Deployment type](/deployments/types/) — `WebService`, `Worker`, `CronJob`, `TCPService`, `InternalTCPService`, `Static` |
+| `type` | no | [Deployment type](/deployments/types/) — `WebService`, `Worker`, `CronJob`, `InternalTCPService`, `Static` |
 | `site` | for `Static` | Static release reference (`site://…@<sha>`); leave `image` empty |
 | `siteManifestDigest` | no | Manifest digest for the static release |
 
@@ -89,7 +89,7 @@ deploy can pass just `image` and leave the rest as configured.
 
 | Input | Description |
 |---|---|
-| `port` | Port the container listens on (`WebService`/`TCPService`) |
+| `port` | Port the container listens on (`WebService`/`InternalTCPService`) |
 | `protocol` | WebService protocol — `http`, `https`, or `h2c` |
 | `internal` | Run a WebService as internal-only (`true`/`false`) |
 | `minReplicas` / `maxReplicas` | Autoscale bounds (0–20) |

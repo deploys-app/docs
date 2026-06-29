@@ -55,7 +55,7 @@ inherits that location's domain suffix.
 | **Web service** | Internet-facing HTTP apps and APIs, with autoscaling and a managed hostname. |
 | **Worker** | Long-running background processes with no inbound traffic. |
 | **Scheduled job** | Cron-style tasks that run on a schedule and exit. |
-| **TCP service** | Non-HTTP protocols, exposed internally or externally. |
+| **Internal TCP service** | Non-HTTP protocols, reachable from inside your cluster. |
 
 See [Deployment types](/deployments/types/) for the full breakdown.
 

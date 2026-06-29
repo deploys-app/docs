@@ -20,7 +20,7 @@ It applies to the web-facing types only:
 - **[Static site](/deployments/static-sites/)** — gates the site (with a
   [caching trade-off](#the-static-caching-trade-off)).
 
-Workers, cron jobs, and TCP services have no public HTTP URL, so access control
+Workers, cron jobs, and internal TCP services have no public HTTP URL, so access control
 doesn't apply to them.
 
 ## Who gets in
