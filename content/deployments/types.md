@@ -2,8 +2,8 @@
 title: 'Deployment types'
 linkTitle: 'Types'
 weight: 2
-description: 'Web services, static sites, workers, scheduled jobs, and TCP services — and when to use each.'
-lead: 'Deploys.app runs six kinds of workloads. The type you pick decides whether the platform gives you a public URL, opens a TCP port, runs you on a cron schedule, serves prebuilt files from the edge, or just keeps you running quietly in the background.'
+description: 'Web services, static sites, workers, scheduled jobs, and internal TCP services — and when to use each.'
+lead: 'Deploys.app runs five kinds of workloads. The type you pick decides whether the platform gives you a public URL, opens an in-cluster TCP port, runs you on a cron schedule, serves prebuilt files from the edge, or just keeps you running quietly in the background.'
 ---
 
 ## At a glance
@@ -14,7 +14,6 @@ lead: 'Deploys.app runs six kinds of workloads. The type you pick decides whethe
 | **Static site** | `Static` | HTTPS on a managed hostname | None — served from object storage | Prebuilt static sites (SPAs, docs, marketing) |
 | **Worker** | `Worker` | None | Autoscales between replica bounds | Background processors, queue consumers |
 | **Cron job** | `CronJob` | None | Cron schedule, exits when done | Periodic tasks (cleanup, sync, snapshot) |
-| **TCP service** | `TCPService` | Raw TCP on an external port | Autoscales between replica bounds | Non-HTTP protocols you need exposed |
 | **Internal TCP service** | `InternalTCPService` | TCP inside the cluster only | Autoscales between replica bounds | Databases, caches, and other in-cluster traffic |
 
 ## Web service
@@ -85,18 +84,13 @@ Need a job that runs once and exits — not on a schedule? Use a Worker with a
 auto-deletes it after the duration you set.
 {{< /callout >}}
 
-## TCP service
-
-Use for protocols that aren't HTTP — game servers, custom binary protocols.
-You pick the port; the platform exposes it on an external load balancer.
-[Routes](/networking/routes/) don't apply (those are HTTP-only); clients
-connect directly to the service's address.
-
 ## Internal TCP service
 
-Same as TCP service, but reachable only from inside your project's cluster
-(other deployments in the same location). Useful for self-hosting datastores
-that should never be exposed publicly.
+Raw TCP for protocols that aren't HTTP, reachable only from inside your project's
+cluster (other deployments in the same location). You pick the port; clients
+connect directly to the service's in-cluster address. [Routes](/networking/routes/)
+don't apply (those are HTTP-only). Useful for self-hosting datastores that should
+never be exposed publicly.
 
 ```bash
 deploys deployment deploy \

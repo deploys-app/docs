@@ -23,7 +23,7 @@ which can span multiple projects.
 |---|---|---|
 | **Project** | A workspace that owns all your resources | — |
 | **Location** | A managed cluster you can deploy to (e.g. `gke.cluster-rcf2`) | — |
-| **Deployment** | A running workload — web service, worker, cron job, or TCP service | Project + Location |
+| **Deployment** | A running workload — web service, worker, cron job, or internal TCP service | Project + Location |
 | **Revision** | A historical snapshot of a deployment, kept for rollbacks | Deployment |
 | **Domain** | A custom hostname attached to your project | Project + Location |
 | **Route** | A `(domain, path)` → deployment mapping | Project + Location |

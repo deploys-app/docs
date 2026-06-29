@@ -229,7 +229,7 @@ for the build inputs and examples.
 | `dockerfile` | no | Path to the Dockerfile |
 | `buildArgs` | no | Docker build args, one `KEY=VALUE` per line |
 | `port` | no | Port the container listens on (default `8080`) |
-| `type` | no | [Deployment type](/deployments/types/) — `WebService` (default), `Worker`, `TCPService`, `InternalTCPService` |
+| `type` | no | [Deployment type](/deployments/types/) — `WebService` (default), `Worker`, `InternalTCPService` |
 | `protocol` | no | WebService protocol — `http` (default), `https`, or `h2c` |
 | `env` | no | Environment variables, one `KEY=VALUE` per line |
 | `envGroups` | no | [Env groups](/deployments/environment-variables/) to attach, one per line or comma-separated |

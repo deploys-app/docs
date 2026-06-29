@@ -42,7 +42,7 @@ If the image is in a private third-party registry, attach a
 
 `type` decides what shape the deployment takes — see
 [Deployment types](/deployments/types/) for the full list of strings. The other
-three only apply to web services and TCP services:
+three only apply to web services and internal TCP services:
 
 - **`port`** — the container port your app listens on (e.g. `8080`).
 - **`protocol`** — for `WebService` only. One of `http`, `https`, or `h2c`
