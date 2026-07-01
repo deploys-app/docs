@@ -94,6 +94,35 @@ curl https://api.deploys.app/billing.downloadReceipt \
   -d '{ "id": "inv_…" }'        # paid invoices only; returns the receipt PDF
 ```
 
+## Paying an invoice
+
+Invoices are settled by bank transfer. On the **Billing → Invoices** page, open
+an `open` invoice and press **Pay**: the dialog shows the seller's bank account
+and a PromptPay QR (for THB invoices) for the amount due. Transfer the amount,
+then upload your **bank transfer slip** as proof. An operator verifies the slip
+against the payment and marks the invoice **paid** — at which point it is
+assigned its receipt number and its receipt / tax-invoice PDF becomes available.
+
+### Withholding tax (หัก ณ ที่จ่าย)
+
+If your billing account is a **company** (a juristic person), you can withhold
+**3% tax** on the payment, as Thai law requires for service payments. In the
+**Pay** dialog, tick **Withhold 3% tax**:
+
+- The withheld amount is **3% of the pre-VAT subtotal** (the service value,
+  before VAT) — not of the gross total.
+- Transfer the **net** amount the dialog shows: `Total − withholding`. For
+  example, a ฿1,070 invoice (฿1,000 subtotal + 7% VAT) withholds ฿30, so you
+  transfer ฿1,040.
+- Optionally attach your **withholding tax certificate** (หนังสือรับรองการหักภาษี
+  ณ ที่จ่าย, "50 ทวิ") alongside the slip. You can also send it separately later.
+
+The invoice is still **settled in full** — the withheld 3% is remitted to the
+Revenue Department on the seller's behalf, so it is a tax credit, not an unpaid
+balance. The **receipt** shows the deduction explicitly (`Less withholding tax
+(3%)`) and the net amount received. Withholding is a company-only option;
+individual accounts pay the full total.
+
 ## Where to watch your costs
 
 Two places:
