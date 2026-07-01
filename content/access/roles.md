@@ -83,8 +83,9 @@ dashboards, inventory tooling, or a CI step that only needs to know what exists.
 The wildcard `*` matches everything, and each namespace has a `<namespace>.*`
 (for example `domain.*`) covering that namespace's actions.
 
-Billing access isn't a project permission: billing calls are authorized by
-**ownership of the billing account**, not by a role in the project.
+Billing access isn't a project permission: billing calls are authorized by the
+**billing account** — its owner and any [members](/billing/members/) you invite
+— not by a role in the project.
 
 ## Binding roles
 
