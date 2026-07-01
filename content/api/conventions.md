@@ -146,6 +146,7 @@ The big picture. Each row is a fully-qualified API function.
 | `billing.listInvoices` / `.getInvoice` / `.downloadInvoice` | Invoices. An invoice carries `taxEntityType` (buyer entity, snapshotted) and, once paid, a `receiptNumber` (`DPLY-RC-YYYYMM-NNNN`) separate from `number`, plus `withholdingTaxRate`/`withholdingTaxAmount` when a company buyer withheld tax |
 | `billing.downloadReceipt` | Download the receipt / tax-invoice PDF of a **paid** invoice; shows any withholding-tax deduction |
 | `billing.uploadTransferSlip` | Submit a bank-transfer slip (multipart). A company buyer may set `withholdingTax` to declare a 3% deduction and attach the withholding-tax certificate (`whtCert`) |
+| `billing.uploadWHTCertificate` | Attach a withholding-tax certificate (`whtCert`, multipart) to an invoice **later** — company invoices only, allowed even after the invoice is paid |
 
 ### GitHub
 

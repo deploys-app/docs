@@ -115,7 +115,9 @@ If your billing account is a **company** (a juristic person), you can withhold
   example, a ฿1,070 invoice (฿1,000 subtotal + 7% VAT) withholds ฿30, so you
   transfer ฿1,040.
 - Optionally attach your **withholding tax certificate** (หนังสือรับรองการหักภาษี
-  ณ ที่จ่าย, "50 ทวิ") alongside the slip. You can also send it separately later.
+  ณ ที่จ่าย, "50 ทวิ") alongside the slip — or **later**, from the invoice page's
+  **Attach WHT certificate** button (certificates commonly arrive a few days
+  after the transfer).
 
 The invoice is still **settled in full** — the withheld 3% is remitted to the
 Revenue Department on the seller's behalf, so it is a tax credit, not an unpaid
