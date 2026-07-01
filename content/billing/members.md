@@ -28,7 +28,8 @@ details and payment current.
   account** — that stays with the owner alone.
 - **Accountant** — finance-only. Views invoices and receipts, reads the
   [usage report](/billing/usage-reports/), and pays (uploads a transfer slip).
-  An accountant **cannot** change tax details or manage members.
+  An accountant **cannot** change tax details, manage members, or bill a
+  project to the account.
 
 ### Capability matrix
 
@@ -39,6 +40,7 @@ details and payment current.
 | Pay (upload transfer slip) | ✓ | ✓ | ✓ |
 | Edit tax details | ✓ | ✓ | |
 | Manage members (add / remove) | ✓ | ✓ | |
+| Bill a project to this account (project create / update) | ✓ | ✓ | |
 | Delete the billing account | ✓ | | |
 
 The role a member holds is returned as `role` on the billing account (from
