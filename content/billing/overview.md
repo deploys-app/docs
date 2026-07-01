@@ -54,6 +54,11 @@ every invoice and receipt.
 Manage billing accounts at **Billing → Accounts** in the console, or via the
 `billing.create`, `billing.update`, `billing.list` API functions.
 
+An account has one **owner** and can invite others to help manage it — an admin
+to co-run the account or an accountant who only pays invoices. See
+[Members & roles](/billing/members/) for the roles and how to invite or remove
+people.
+
 ## Invoices
 
 At the close of each billing period, the platform issues an **invoice** for
