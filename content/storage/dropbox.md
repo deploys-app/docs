@@ -3,7 +3,7 @@ title: 'Dropbox'
 linkTitle: 'Dropbox'
 weight: 2
 description: 'Temporary file storage — upload a file, get a short-lived public download URL.'
-lead: 'Dropbox is temporary file storage for a project. Upload a file and you get back a public, signed download URL that expires on its own — a day by default, up to seven. Good for handing someone a build artifact, sharing a generated report, or staging an archive to publish — without standing up a bucket or minting long-lived credentials.'
+lead: 'Dropbox is temporary file storage for a project. Upload a file and you get back a public, signed download URL that expires on its own — a day by default, up to a year. Good for handing someone a build artifact, sharing a generated report, or staging an archive to publish — without standing up a bucket or minting long-lived credentials.'
 ---
 
 ## When to reach for it
@@ -18,9 +18,14 @@ to *get out* of the platform briefly and then forget about.
 - **Stage a static-site archive** — upload a `.tar.gz`, then point
   [static-site publishing](/deployments/static-sites/) at the returned URL.
 
-Every file carries a **TTL of 1–7 days** (default 1). Once it expires the link
+Every file carries a **TTL of 1–365 days** (default 1). Once it expires the link
 stops working and the bytes are reclaimed — there's no manual delete and no way
 to extend a TTL. If you need a file to live longer, re-upload it.
+
+Stored files are billed as `dropbox_storage` — a daily snapshot of the bytes you
+hold, metered in GiB-months at the same rate as [SSD Disk](/billing/overview/#how-pricing-works),
+with no free tier. Egress (bytes downloaded) is billed separately as
+`dropbox_egress`.
 
 The download URL is signed: a tampered or made-up token is rejected before it
 ever touches storage, so a link only works if it came from a real upload. But
@@ -60,7 +65,7 @@ curl -fsS -X POST \
 | Query param | | Description |
 |---|---|---|
 | `project` | required | Project sid (the stable slug, e.g. `acme`) — or the numeric project ID — the upload is authorized and billed against |
-| `ttl` | optional | Lifetime in days, 1–7 (default 1) |
+| `ttl` | optional | Lifetime in days, 1–365 (default 1) |
 | `filename` | optional | Name recorded in `Content-Disposition` for the download |
 
 The same values can be passed as `param-project` / `param-ttl` / `param-filename`
@@ -91,7 +96,7 @@ res, err := c.DropboxUpload(ctx, &client.DropboxUploadOptions{
     Project:  "acme",
     Content:  content,        // the file bytes
     Filename: "build.tar.gz", // optional
-    TTLDays:  3,              // 1–7, default 1
+    TTLDays:  3,              // 1–365, default 1
 })
 // res.DownloadURL, res.ExpiresAt, res.Size
 ```
@@ -144,7 +149,7 @@ curl -fsS -X PUT "<uploadUrl>" \
 | Body field | | Description |
 |---|---|---|
 | `project` | required | Project sid (or numeric ID) the upload is authorized and billed against |
-| `ttl` | optional | Download lifetime in days, 1–7 (default 1); the clock starts when the file is `PUT` |
+| `ttl` | optional | Download lifetime in days, 1–365 (default 1); the clock starts when the file is `PUT` |
 | `filename` | optional | Name recorded in `Content-Disposition` for the download |
 | `contentType` | optional | If set, the `PUT` must send this exact `Content-Type` |
 | `minSize` / `maxSize` | optional | Byte bounds enforced on the `PUT` — min floors at 1 (empty uploads are refused), max clamps to the service cap (default 5 GiB) |
@@ -164,7 +169,7 @@ res, err := c.DropboxCreateUploadURL(ctx, &client.DropboxCreateUploadURLOptions{
     Filename:    "build.tar.gz",     // optional
     ContentType: "application/gzip", // optional, enforced on the PUT
     MaxSize:     100 << 20,          // optional byte cap
-    TTLDays:     3,                  // 1–7, default 1
+    TTLDays:     3,                  // 1–365, default 1
     Expires:     900,                // upload-URL lifetime in seconds
 })
 // res.UploadURL (hand off), res.DownloadURL (where it lands), res.UploadExpiresAt
