@@ -15,6 +15,10 @@
 	backdrop-filter: saturate(140%) blur(12px);
 	border-bottom: 1px solid var(--color-ink-line);
 	color: var(--color-content-inv);
+	/* Own view-transition snapshot: the app shell stays put while the page
+	 * crossfades (_base.scss). The backdrop blur isn't part of the element's
+	 * own paint, so it drops out for the 120ms transition — imperceptible. */
+	view-transition-name: navbar;
 }
 
 .navbar-brand {
@@ -143,6 +147,9 @@ html.dark .navbar-theme-toggle .icon-moon { display: inline-block; }
 	padding: 1.75rem 0.75rem 3rem 1.25rem;
 	border-right: 1px solid var(--color-line);
 	background-color: var(--color-base);
+	/* Own view-transition snapshot: stays put during page changes; only the
+	 * active item crossfades. */
+	view-transition-name: sidebar;
 }
 .sidebar-mobile-nav {
 	display: none;
