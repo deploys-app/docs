@@ -105,6 +105,47 @@ async function shotDeployForm (ctx, suffix) {
 	}
 }
 
+/**
+ * The firewall Test panel (waf.test dry run) only shows results after an
+ * interaction: expand the collapsed panel on the manage page, describe a
+ * sample request that the seed zone's block-admin rule matches, run it, and
+ * capture the outcome banner + per-rule/per-limit result rows.
+ *
+ * The mock's dry-run evaluator only understands the visual builder's own
+ * double-quoted CEL forms (anything else silently reports "not matched"), so
+ * a "Blocked" outcome here requires the console seed zone's expressions to be
+ * in that form — e.g. `request.path.startsWith("/admin")`, not `'/admin'`.
+ * @param {import('@playwright/test').BrowserContext} ctx
+ * @param {string} suffix
+ */
+async function shotWafTest (ctx, suffix) {
+	const page = await ctx.newPage()
+	try {
+		await page.setViewportSize({ width: 1440, height: 1150 })
+		await page.goto(BASE + `/waf/manage?${P}&${LOC}`, { waitUntil: 'networkidle' })
+		await page.waitForTimeout(500)
+		await page.locator('.test-toggle').click()
+		await page.fill('#waf-test-path', '/admin')
+		await page.fill('#waf-test-host', 'app.example.com')
+		await page.fill('#waf-test-ip', '198.51.100.24')
+		await page.getByRole('button', { name: 'Run test' }).click()
+		await page.locator('.outcome-banner').waitFor({ timeout: 10000 })
+		await page.waitForTimeout(400)
+		// Bring the whole panel (toggle through limit results) into the frame.
+		await page.locator('.test-toggle').evaluate((el) => {
+			el.closest('.panel')?.scrollIntoView({ block: 'start' })
+			window.scrollBy(0, -16)
+		})
+		await page.waitForTimeout(200)
+		await page.screenshot({ path: `${OUT}/waf-test${suffix}.png` })
+		console.log(`ok   waf-test${suffix} (dry run)`)
+	} catch (e) {
+		console.log(`FAIL waf-test${suffix}`, String(e).split('\n')[0])
+	} finally {
+		await page.close()
+	}
+}
+
 // Warm up every route once before the timed captures. The dev server compiles
 // routes on first visit; without this the first (light) pass pays that cost
 // inside each capture's timeout — most visibly on the deploy form, whose
@@ -113,7 +154,7 @@ async function shotDeployForm (ctx, suffix) {
 {
 	const warm = await browser.newContext()
 	const page = await warm.newPage()
-	for (const [, path] of [...screens, ['deploy-form', `/deployment/deploy?${P}`]]) {
+	for (const [, path] of [...screens, ['deploy-form', `/deployment/deploy?${P}`], ['waf-test', `/waf/manage?${P}&${LOC}`]]) {
 		try {
 			await page.goto(BASE + path, { waitUntil: 'networkidle', timeout: 60000 })
 		} catch { /* a slow warm-up visit is fine; the timed pass re-navigates */ }
@@ -136,6 +177,7 @@ for (const theme of /** @type {const} */ (['light', 'dark'])) {
 		console.log(`ok   ${name}${suffix}`)
 	}
 	await shotDeployForm(ctx, suffix)
+	await shotWafTest(ctx, suffix)
 	await ctx.close()
 }
 

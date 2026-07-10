@@ -105,6 +105,7 @@ The big picture. Each row is a fully-qualified API function.
 | `domain.purgeCache` | CDN cache purge for a domain |
 | `route.list` / `.create` / `.createV2` / `.delete` | Route CRUD |
 | `waf.list` / `.get` / `.set` / `.delete` | Firewall zone CRUD (rules + rate limits) |
+| `waf.test` | [Dry-run](/networking/waf/#test-rules-dry-run) a zone draft or expression against a sample request |
 | `waf.metrics` / `.limitMetrics` | Firewall match counts and rate-limit decisions over time |
 | `cache.list` / `.get` / `.set` / `.delete` | Cache-override zone CRUD |
 | `cache.metrics` | Cache-override decision counts over time |
