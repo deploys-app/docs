@@ -265,7 +265,17 @@ Typical uses: an office/VPN allowlist shared across every location, a botnet
 block list too big for an inline expression, or exempting your monitoring
 ranges from a rate limit.
 
+Lists have their own permission family — `wafList.list`, `wafList.get`,
+`wafList.set`, `wafList.delete` (camelCase, unlike most permissions) — which an
+existing `waf.*` grant does **not** cover. Grant `wafList.*` alongside `waf.*`
+for [roles](/access/roles/#custom-roles) that manage the firewall, or the
+lists page and the list picker stay permission-blocked.
+
 ### Creating a list
+
+In the console, the **IP lists** button on the Firewall page opens the lists
+page — a table of the project's lists with entry counts and the zones
+referencing each, plus create/edit and delete. The same operations via the CLI:
 
 ```bash
 deploys wafList set \
@@ -350,6 +360,7 @@ changes anywhere.
 
 | Limit | Value |
 |---|---|
+| List name | 3–26 chars; lowercase letters, digits, and hyphens, starting with a letter and ending with a letter or digit |
 | Lists per project | 20 |
 | Entries per list | 1000 |
 | Entry length | 64 chars |

@@ -35,10 +35,12 @@ deploys role create \
 ```
 
 The `--permissions` flag takes a comma-separated list of permission strings.
-A permission is `<namespace>.<action>`, and unlike the API function names it is
-**always lowercase** — the `serviceaccount.createKey` call, for example, is
-guarded by the `serviceaccount.key.create` permission. Matching is exact, so the
-casing matters: `serviceaccount.createKey` in a role grants nothing. The
+A permission is `<namespace>.<action>`, and its name doesn't always match the
+API function name — the `serviceaccount.createKey` call, for example, is
+guarded by the `serviceaccount.key.create` permission. Matching is exact and
+**case-sensitive**, so copy the string from the table below character for
+character: most permissions are all-lowercase, but `wafList.*` is camelCase,
+and `serviceaccount.createKey` or `waflist.set` in a role grants nothing. The
 authoritative list is whatever `role.permissions` returns; the most useful ones:
 
 | Group | Permissions |
@@ -48,6 +50,7 @@ authoritative list is whatever `role.permissions` returns; the most useful ones:
 | Domain | `domain.list`, `domain.get`, `domain.create`, `domain.delete`, `domain.purgecache` |
 | Route | `route.list`, `route.get`, `route.create`, `route.delete` |
 | Firewall (WAF) | `waf.list`, `waf.get`, `waf.set`, `waf.delete` |
+| Firewall IP lists | `wafList.list`, `wafList.get`, `wafList.set`, `wafList.delete` — **not** covered by `waf.*`; grant alongside it for roles that manage the firewall |
 | Cache | `cache.list`, `cache.get`, `cache.set`, `cache.delete` |
 | Disk | `disk.list`, `disk.get`, `disk.create`, `disk.update`, `disk.delete` |
 | Registry | `registry.list`, `registry.get`, `registry.pull`, `registry.push` |
