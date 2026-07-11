@@ -175,3 +175,65 @@ curl https://api.deploys.app/waf.limitMetrics \
   -d '{ "project": "acme", "location": "gke.cluster-rcf2",
         "timeRange": "1d" }'
 ```
+
+## Firewall events
+
+Metrics tell you *how often* a rule fired; events show you *what it caught*.
+The metrics page keeps a table of recent match samples under the charts — each
+row is one concrete request a rule matched: the time, the action taken (and
+the response status for blocks), the rule, the client IP and its country, and
+the request method, host, and path. That's usually enough to go from "this
+rule matched 4,000 times" to "it's blocking `POST /wp-login.php` from one
+network" without any log access.
+
+<!-- TODO(screenshot): capture the events table via scripts/screenshots/refresh.sh
+     once the console ships the section, then uncomment:
+{{</* shot src="/img/waf-events.png" url="console.deploys.app/waf/metrics?project=acme" alt="Recent events table listing sampled firewall matches with time, action, rule, IP, country, method, host, and path" caption="Recent events — sampled matches under the metrics charts, filterable by rule and action." */>}}
+-->
+
+Filter the table by rule or by action (`block`, `log`, `allow`), and page
+back through history with **Load more**.
+
+### Sampling and retention
+
+Events are **samples, not a request log**. Each ingress instance keeps at
+most **10 events per minute per rule** — blocked requests are exempt from
+that per-rule cap, since blocks are what you came to inspect — and at most
+**60 events per minute per firewall zone**, which bounds everything,
+blocks included. Under a flood you still get enough examples to recognize
+the pattern (same IP? same path? same country?) without recording every
+request.
+
+Because events are sampled, **never count them** — the metrics charts above
+count every match and remain the source of truth; events are the examples.
+
+Events are kept for **3 days**, then deleted.
+
+{{< callout type="note" >}}
+**Privacy.** An event carries the client IP, which is personal data. That is
+why retention is deliberately short — 3 days, versus 30 for the anonymous
+match counters — and why events never include query strings, request headers,
+cookies, or bodies: only the method, host, and path are recorded.
+{{< /callout >}}
+
+### API and CLI
+
+The table is served by `waf.events` — newest first, with optional `ruleId`
+and `action` filters:
+
+```bash
+curl https://api.deploys.app/waf.events \
+  -H "Authorization: Bearer $DEPLOYS_TOKEN" \
+  -d '{ "project": "acme", "location": "gke.cluster-rcf2",
+        "action": "block" }'
+```
+
+The result carries up to `limit` items (default 50, max 200) and a `next`
+cursor; pass it back as `before` to fetch the next page, until `next` comes
+back empty.
+
+The same data from the CLI:
+
+```bash
+deploys waf events --project acme --location gke.cluster-rcf2
+```
