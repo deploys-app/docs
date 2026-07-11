@@ -180,14 +180,16 @@ curl https://api.deploys.app/waf.limitMetrics \
 
 Metrics tell you *how often* a rule fired; events show you *what it caught*.
 The metrics page keeps a table of recent match samples under the charts — each
-row is one concrete request a rule matched: the time, the action taken (and
-the response status for blocks), the rule, the client IP and its country, and
-the request method, host, and path. That's usually enough to go from "this
+row is one concrete request a rule matched: the time, the action taken, the
+rule, the client IP and its country, and the request method, host, and path. That's usually enough to go from "this
 rule matched 4,000 times" to "it's blocking `POST /wp-login.php` from one
 network" without any log access.
 
-<!-- TODO(screenshot): capture the events table via scripts/screenshots/refresh.sh
-     once the console ships the section, then uncomment:
+<!-- TODO(screenshot): once the console's events section is merged, run
+     scripts/screenshots/refresh.sh (capture.mjs already has the waf-events
+     entry) and replace this whole comment with the shot line below — also
+     removing the /* and */ markers, which only stop Hugo from executing the
+     shortcode while it sits inside this comment:
 {{</* shot src="/img/waf-events.png" url="console.deploys.app/waf/metrics?project=acme" alt="Recent events table listing sampled firewall matches with time, action, rule, IP, country, method, host, and path" caption="Recent events — sampled matches under the metrics charts, filterable by rule and action." */>}}
 -->
 
