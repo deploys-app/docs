@@ -145,7 +145,7 @@ A rule that touches a protected header is rejected as invalid.
 A rule's `filter` is a small boolean over the request — the **same expression
 language as the [Firewall](/networking/waf/#the-expression-language)** and
 [cache overrides](/networking/cache/#the-filter-expression): `request.path`,
-`request.method`, `request.host`, `request.ip`, `request.headers['name']`, the
+`request.method`, `request.host`, `request.remote_ip`, `request.headers['name']`, the
 operators `==`, `!=`, `&&`, `||`, `!`, and the helpers `.startsWith(s)`,
 `.endsWith(s)`, `.contains(s)`. An empty filter applies the rule to every
 request.
