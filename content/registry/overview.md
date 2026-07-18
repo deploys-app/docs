@@ -175,7 +175,8 @@ curl https://api.deploys.app/registry.deleteManifest \
 `registry.gc` removes manifests in the project's repositories that **no
 deployment references** — neither the current revision nor any revision in a
 deployment's history, whether referenced by tag or by digest. A referenced
-manifest is kept entirely (all of its tags survive); an unreferenced one is
+manifest is kept entirely (all of its tags survive), and multi-arch image
+indexes also keep their platform child manifests; an unreferenced one is
 removed along with its tags, and its now-orphaned blobs are reclaimed by the
 registry's background blob cleanup.
 
