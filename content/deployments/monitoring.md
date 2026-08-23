@@ -8,10 +8,13 @@ lead: 'Every deployment has a dashboard with the three signals you reach for whe
 
 ## Metrics
 
-The Metric tab plots CPU, memory, request rate, and egress for the deployment.
-Both **usage** and **allocated** (request) lines are shown — the gap between
-them tells you whether you're under- or over-provisioned. The time-range
-selector spans **1 hour aggregate**, **1 day**, **7 days**, and **30 days**.
+The Metric tab plots CPU, memory, replicas, request count, and egress for the
+deployment. Both **usage** and **allocated** (request) lines are shown — the
+gap between them tells you whether you're under- or over-provisioned. The
+Replicas chart is available replica count (HPA scale, crash-loop drop); it is
+hidden for Static and CronJob deployments, which have no k8s Deployment.
+The time-range selector spans **1 hour aggregate**, **1 day**, **7 days**, and
+**30 days**.
 
 {{< shot src="/img/deployment-metrics.png" url="console.deploys.app/deployment/metrics?project=acme&location=gke.cluster-rcf2&name=web" alt="Live CPU, memory, request rate, and egress charts for the web deployment" caption="Solid lines are real usage; dashed lines are the request you've allocated." >}}
 
@@ -69,6 +72,7 @@ collects passively — there's nothing to instrument inside your container.
 | Signal | Source |
 |---|---|
 | CPU / memory usage | Pod cgroups, scraped at 60 s intervals |
+| Replicas | kube-state-metrics available replica count, scraped at 60 s |
 | Request rate / egress | The ingress and routing layer |
 | Logs | Container `stdout` / `stderr`, streamed via the events channel |
 | Events | Native Kubernetes events for the deployment's pods |
