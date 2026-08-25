@@ -2,8 +2,8 @@
 title: 'Scoped tokens'
 linkTitle: 'Scoped tokens'
 weight: 4
-description: 'Short-lived, least-privilege bearer tokens — the recommended credential for agents and automation.'
-lead: 'A scoped token is a bearer token confined to one project and an explicit subset of permissions, with a TTL of at most an hour and the ability to list and revoke. Unlike a service account key, it is ephemeral by design — mint one for a task, hand it to an agent or script, and let it expire (or revoke it) when the task is done.'
+description: 'Least-privilege bearer tokens with a TTL of up to a year — the recommended credential for agents and automation.'
+lead: 'A scoped token is a bearer token confined to one project and an explicit subset of permissions, with a TTL of at most one year (15 minutes by default) and the ability to list and revoke. Unlike a service account key, it is limited by design — mint one for a task, hand it to an agent or script, and let it expire (or revoke it) when the task is done.'
 ---
 
 ## Scoped tokens vs. service accounts
@@ -14,9 +14,10 @@ Both are non-human credentials, but they answer different needs:
   keys you rotate yourself, and is the right choice for CI pipelines, exporters,
   and back-end integrations that run indefinitely. See
   [Service accounts](/access/service-accounts/).
-- **Scoped token** — an *ephemeral* credential. It carries a hand-picked subset
-  of the minter's own permissions, dies on a short TTL, and is revocable on
-  demand. It is the recommended credential for **agents and one-off automation**:
+- **Scoped token** — a *narrow* credential. It carries a hand-picked subset of
+  the minter's own permissions, expires on a TTL you choose (15 minutes by
+  default, at most one year), and is revocable on demand. It is the recommended
+  credential for **agents and one-off automation**:
   an AI agent running a task, a CI step that only needs to upload one artifact,
   any code you'd rather not hand a full key.
 
@@ -43,9 +44,9 @@ of non-delegatable classes:
 The delegation rule is a *denylist*: anything you hold that isn't in one of the
 classes above is delegatable, including new permissions added in the future. That
 is safe because a scoped token is **contained regardless** — it can never exceed
-the permissions you granted it, it is confined to one project, it dies within an
-hour, and you can revoke it at any time. The denylist only blocks the few classes
-that would escape that containment.
+the permissions you granted it, it is confined to one project, it expires on the
+TTL you set (at most a year), and you can revoke it at any time. The denylist
+only blocks the few classes that would escape that containment.
 {{< /callout >}}
 
 ## Create a scoped token
@@ -59,8 +60,9 @@ deploys me generate-token \
 ```
 
 - `--permissions` is a comma-separated list — exactly what the task needs.
-- `--ttl` is seconds, clamped to **60–3600** (default 900). There is no
-  long-lived scoped token; use a service account for that.
+- `--ttl` is seconds, clamped to **60–31536000** (1 year; default 900). Prefer a
+  short TTL for one-off tasks; use a service account when the credential needs
+  its own durable identity.
 - `--label` is optional but recommended: a short tag for the agent session that
   shows up in the [audit log](/access/audit-log/) so you can tell which agent did
   what.
@@ -94,13 +96,13 @@ deploys me revoke-token --project acme --id tok_a1b2c3d4e5
 
 The token value is never shown in the list — only a non-secret `id` you use to
 revoke. Revocation takes effect on the **next** request (an in-flight request
-finishes); for a token that lives at most an hour that window is negligible.
-Tokens also disappear on their own when the TTL passes — revoke is for cleaning
-up early. The console's **Scoped Tokens** page lists and revokes the same tokens.
+finishes). Tokens also disappear on their own when the TTL passes — revoke is
+for cleaning up early, and matters more the longer the TTL. The console's
+**Scoped Tokens** page lists and revokes the same tokens.
 
 {{< callout type="warning" >}}
 A scoped token is still a credential — treat it like a password and never commit
-it. It is lower-risk than a long-lived key (short TTL, narrow scope, revocable),
+it. It is lower-risk than a long-lived key (narrow scope, revocable, expires),
 which is exactly why it suits agents — but a leaked token is usable until it
 expires or you revoke it.
 {{< /callout >}}
@@ -119,7 +121,8 @@ caller-set free text and is never used for authorization.
 
 - **It can't exceed you.** A scoped token holds a subset of your permissions and
   is re-checked on every request — it is strictly weaker than the minter.
-- **It's confined to one project** and dies within an hour.
+- **It's confined to one project** and expires on a TTL you choose (default 15
+  minutes, at most one year).
 - **It can't manage tokens.** A scoped token cannot mint, list, or revoke tokens
   — so an agent credential can't bootstrap a wider or longer-lived one. Only a
   human or service account does that.
@@ -134,5 +137,5 @@ caller-set free text and is never used for authorization.
   for a publisher.
 - **Reach for a service account for anything durable.** If a credential needs to
   live across runs (a CI pipeline, an exporter), use a
-  [service account](/access/service-accounts/) key instead — scoped tokens are
-  deliberately short-lived.
+  [service account](/access/service-accounts/) key instead — keep scoped-token
+  TTLs short when the credential should die with the task.
