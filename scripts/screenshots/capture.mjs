@@ -48,6 +48,7 @@ const screens = [
 	['billing-report',        `/billing/report`],
 	['project-list',          `/project`],
 	['waf-list',              `/waf?${P}`],
+	['waf-events',            `/waf/metrics?${P}&${LOC}`, { h: 1500 }],
 	['cache-list',            `/cache?${P}`],
 	['cache-manage',          `/cache/manage?${P}&${LOC}`, { h: 1150 }],
 	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }],
