@@ -6,11 +6,6 @@ description: 'A rule-based firewall in front of your project — block, log, or 
 lead: 'The Firewall is an ordered list of rules that run for every request matching a route in the project. Each rule has an expression and an action — block, log, or allow.'
 ---
 
-{{< callout type="note" >}}
-The Firewall is currently in **preview** and rolls out per location. The
-console shows a "Preview" badge in the sidebar when it's available.
-{{< /callout >}}
-
 ## The Firewall page
 
 The Firewall tab lists every zone in the project (one per location), with its
