@@ -100,9 +100,10 @@ curl https://api.deploys.app/billing.downloadReceipt \
 Invoices are settled by bank transfer. On the **Billing → Invoices** page, open
 an `open` invoice and press **Pay**: the dialog shows the seller's bank account
 and a PromptPay QR (for THB invoices) for the amount due. Transfer the amount,
-then upload your **bank transfer slip** as proof. An operator verifies the slip
-against the payment and marks the invoice **paid** — at which point it is
-assigned its receipt number and its receipt / tax-invoice PDF becomes available.
+then upload your **bank transfer slip** as proof. The invoice status becomes
+**pending** while an operator verifies the slip and marks it **paid** — at which
+point it is assigned its receipt number and its receipt / tax-invoice PDF becomes
+available.
 
 ### Withholding tax (หัก ณ ที่จ่าย)
 
