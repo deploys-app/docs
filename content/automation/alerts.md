@@ -23,6 +23,8 @@ lead: 'An alert rule watches one metric on one deployment and fires when it stay
 
 ## Create a rule
 
+{{< shot src="/img/alert-list.png" url="console.deploys.app/alert?project=acme" alt="The alert rules list with ok, firing, nodata, and disabled statuses" caption="Each rule shows its target, condition, status, and last evaluated value." >}}
+
 From the console, open **Alerts** and click **Create rule**. Or use the CLI:
 
 ```bash
@@ -56,6 +58,8 @@ minute is tolerated — see [When a rule fires](#when-a-rule-fires).
 | **For** | How many minutes (1–60) the condition must hold, evaluated as a rolling window — see [When a rule fires](#when-a-rule-fires). |
 | **Renotify** | Re-send `alert.trigger` every N minutes while still firing. `0` disables it (notify only on transitions) — see [Renotify](#renotify). |
 | **Disabled** | A disabled rule keeps its config but stops evaluating. Saving any edit — including disabling — resets the rule's status to `ok`, so it starts fresh when re-enabled. |
+
+{{< shot src="/img/alert-create.png" url="console.deploys.app/alert/create?project=acme" alt="The create-alert-rule form" caption="Pick a deployment, a metric, a threshold, and how long it must hold. Delivery is configured on notification channels, not on the rule." >}}
 
 ## Metric vocabulary
 
@@ -112,7 +116,11 @@ sample doesn't flap it straight back to firing.
 | `nodata` | Not enough recent data to evaluate — the deployment is stopped or deleted, or (for `cpu`/`memory`) has no limit set. Does not notify, and does not resolve an active `firing` alert. |
 
 The console list and detail pages show a rule's current status, last evaluated
-value, and — while firing — how long it's been firing. From the CLI:
+value, and — while firing — how long it's been firing:
+
+{{< shot src="/img/alert-detail.png" url="console.deploys.app/alert/detail?project=acme&name=api-memory-high" alt="An alert rule detail page while firing, with evaluator state and transition history" caption="The detail page shows the current value, how long the rule has been firing, and the 30-day transition history." >}}
+
+From the CLI:
 
 ```bash
 deploys alert list --project acme
