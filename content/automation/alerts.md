@@ -11,7 +11,7 @@ lead: 'An alert rule watches one metric on one deployment and fires when it stay
 - **Threshold rules** — condition on `cpu`, `memory`, `requests`, or `egress` for
   a deployment: metric, comparison, threshold, and how long it must hold.
 - **Rolling-window evaluation** — a rule fires only once the condition has held
-  continuously for its window, not on a single noisy sample.
+  for its window, not on a single noisy sample.
 - **Three states** — `ok`, `firing`, or `nodata`, so a missing deployment or a
   gap in metrics is never confused with a real breach.
 - **Renotify** — get pinged again on a schedule while a rule is still firing,
@@ -38,9 +38,10 @@ deploys alert create \
   --renotify 60
 ```
 
-This watches the `web` deployment's CPU usage and fires once it has averaged
-**≥ 90% of its limit for 10 straight minutes**, re-notifying every 60 minutes
-while it stays firing.
+This watches the `web` deployment's CPU usage and fires once every present
+one-minute sample in a **10-minute window** is **≥ 90% of its limit**,
+re-notifying every 60 minutes while it stays firing. A missed collector
+minute is tolerated — see [When a rule fires](#when-a-rule-fires).
 
 ### Fields
 
@@ -83,10 +84,11 @@ minutes, not a single instant:
 
 - **firing** — every one-minute bucket present in the window satisfies the
   condition (`metric <op> threshold`), **and** at least 80% of the expected
-  buckets are present. A single missed collector minute doesn't reset the
-  clock.
-- **nodata** — fewer than 20% of the expected buckets are present — the
-  deployment is stopped, deleted, or (for `cpu`/`memory`) has no limit set.
+  buckets are present (rounded up). A single missed collector minute doesn't
+  reset the clock.
+- **nodata** — fewer than 20% of the expected buckets are present (rounded
+  up) — the deployment is stopped, deleted, or (for `cpu`/`memory`) has no
+  limit set.
 - **ok** — otherwise.
 
 `nodata` never fires and never resolves an active alert: a rule that's already
@@ -97,9 +99,9 @@ job — from double-paging the same incident, and keeps a flaky collector minute
 from silently clearing a real one.
 
 Because evaluation is windowed, resolving a firing alert takes one extra tick
-after the first good minute enters the window — a small amount of built-in
-hysteresis so a single clean sample mid-incident doesn't flap the alert closed
-and back open.
+after the first good minute enters the window. The rule then stays `ok` until
+the window is once again a quorum of breaching buckets, so a single clean
+sample doesn't flap it straight back to firing.
 
 ## Status
 
