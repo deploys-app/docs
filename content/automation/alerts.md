@@ -69,6 +69,8 @@ minute is tolerated — see [When a rule fires](#when-a-rule-fires).
 | `memory` | Memory usage as a share of the deployment's limit, averaged across pods | percent (same headroom as `cpu`) | avg per minute |
 | `requests` | Request rate, summed across pods | requests/min | sum per minute |
 | `egress` | Egress traffic, summed across pods | bytes/min | sum per minute |
+| `value` | A [custom metric](/deployments/custom-metrics/) gauge (kind=custom) | the series unit | avg per minute |
+| `rate` | A custom-metric counter's per-minute increase (kind=custom) | series unit / min | max−min per minute |
 
 `cpu` and `memory` are computed the same way the Metric tab's chart lines are —
 `avg(usage) / avg(limit)` per one-minute bucket — so the threshold you set lines
