@@ -79,10 +79,17 @@ collects passively — there's nothing to instrument inside your container.
 
 ## Alerting
 
-The platform doesn't ship its own alerting. The recommended pattern is to
-poll `deployment.metrics` from your own monitoring system (Grafana,
-Datadog, Honeycomb, …) and define alerts there — usage data is the same
-underlying time-series the dashboard reads.
+The platform ships its own metric alert rules — set a threshold on CPU,
+memory, request rate, or egress, and get notified once it holds for a
+sustained window, delivered through your existing
+[notification channels](/automation/notification-channels/) (webhook, Discord,
+or pull). See [Alerts](/automation/alerts/) to set one up.
+
+For anything beyond that — longer-range analysis, cross-service correlation,
+or a monitoring stack you already run — poll `deployment.metrics` from your
+own system (Grafana, Datadog, Honeycomb, …) and define alerts there; it's the
+same underlying time-series both the dashboard and the platform's own alert
+rules read.
 
 A small [service account](/access/service-accounts/) with read-only
 permissions is the right principal for this:
