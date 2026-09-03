@@ -14,7 +14,8 @@ gap between them tells you whether you're under- or over-provisioned. The
 Replicas chart is available replica count (HPA scale, crash-loop drop); it is
 hidden for Static and CronJob deployments, which have no k8s Deployment.
 The time-range selector spans **1 hour aggregate**, **1 day**, **7 days**, and
-**30 days**.
+**30 days**. To chart series from your own Prometheus `/metrics` endpoint, add
+a [custom metric source](/deployments/custom-metrics/).
 
 {{< shot src="/img/deployment-metrics.png" url="console.deploys.app/deployment/metrics?project=acme&location=gke.cluster-rcf2&name=web" alt="Live CPU, memory, request rate, and egress charts for the web deployment" caption="Solid lines are real usage; dashed lines are the request you've allocated." >}}
 

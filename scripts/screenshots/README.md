@@ -33,9 +33,12 @@ Prereqs:
 
 - The console repo is cloned alongside this one: `~/Projects/deploys-app/console`
   (or wherever your deploys-app workspace lives — the script resolves it as
-  `../console`).
-- The console repo's working tree on `src/lib/server/mock.js` is clean (the
-  script refuses to run otherwise so it never clobbers your own edits).
+  `../console`). From a docs git worktree set `CONSOLE_DIR` to the console
+  checkout that has `node_modules` (e.g. `.worktrees/console-custom-metrics`).
+- The console repo's working tree on `src/lib/server/mock.ts` (or `mock.js`)
+  is clean (the script refuses to run otherwise so it never clobbers your own
+  edits). If `mock-enrichment.patch` does not apply, capture still runs against
+  the stock mock fixtures.
 - `bun` is on PATH for `bun dev:mock`.
 - Playwright Chromium is installed in the console repo (`bunx playwright install`
   if not — the console already ships `@playwright/test`).

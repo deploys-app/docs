@@ -258,6 +258,38 @@ auto-detected failure.
 See [Monitoring → react to failures without polling](/deployments/monitoring/)
 for the end-to-end agent loop this enables.
 
+## Metric alerts: `alert.trigger` and `alert.resolve`
+
+A [metric alert rule](/automation/alerts/) has no delivery config of its own —
+it reuses these channels. When the rule's rolling window becomes a breach, or
+clears, the platform emits a notification (not an audit row), the same
+notify-only path as `deployment.health`:
+
+| Event | Fires when | Outcome |
+|---|---|---|
+| `alert.trigger` | the rule's window is a breach, or a renotify while it is still firing | `failure` (red in Discord) |
+| `alert.resolve` | the metric is back inside the threshold | `success` (green in Discord) |
+
+Subscribe a channel to those two names, or to `alert.*` (which also matches
+audited rule create / update / delete):
+
+```bash
+deploys notification create --project acme --name alerts-discord \
+  --type discord \
+  --url https://discord.com/api/webhooks/123/abc \
+  --event alert.trigger --event alert.resolve
+```
+
+`alert.trigger` / `alert.resolve` are written by the **system**, not a user, so
+they carry an **empty actor** (`actorType` `user`, no email). The `message` is
+a one-line summary of the condition and the value that crossed it, e.g.
+`web: cpu >= 90% for 10m (current 94.2%)`. A project with no matching channel
+still evaluates the rule and still shows `firing` in the console — it just has
+nowhere to send the page.
+
+See [Alerts](/automation/alerts/) for the metric vocabulary, window semantics,
+and how to create a rule.
+
 ## Test and the delivery log
 
 Use **Send test** (console) or `notification test` to deliver a synthetic change

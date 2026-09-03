@@ -52,7 +52,10 @@ const screens = [
 	['cache-manage',          `/cache/manage?${P}&${LOC}`, { h: 1150 }],
 	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }],
 	['scheduler-list',        `/scheduler?${P}`],
-	['scheduler-detail',      `/scheduler/detail?${P}&name=daily-health-check`, { h: 1150 }]
+	['scheduler-detail',      `/scheduler/detail?${P}&name=daily-health-check`, { h: 1150 }],
+	['alert-list',            `/alert?${P}`],
+	['alert-create',          `/alert/create?${P}`, { h: 1150 }],
+	['alert-detail',          `/alert/detail?${P}&name=api-memory-high`, { h: 1150 }]
 ]
 
 const browser = await chromium.launch()
