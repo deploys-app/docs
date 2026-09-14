@@ -395,6 +395,136 @@ Remove or rewrite those rules first, then delete. There's no rename — the name
 is the reference key — so renaming is delete + recreate, which the same guard
 keeps honest.
 
+## Managed rules (OWASP Core Rule Set)
+
+Your rules catch exactly what you write them to catch. **Managed rules** add
+the generic attack long tail: one toggle enables the
+[OWASP Core Rule Set](https://coreruleset.org/) for the zone — curated
+signatures for SQL injection, cross-site scripting, path traversal and file
+inclusion, protocol violations, and scanner/bot fingerprints — maintained and
+updated by the platform. Keep your own rules for business logic (geo blocks,
+header gates, path allow-lists); let managed rules handle the attacks nobody
+writes by hand.
+
+Managed rules evaluate **after your rules and before rate limits**:
+
+```text
+request → your rules (block / log / allow) → managed rules → rate limits → deployment
+```
+
+A request blocked by one of your rules never reaches the managed ruleset, and
+a request blocked by managed rules is rejected before rate-limit accounting —
+it never consumes rate budget. An `allow` rule skips only your *remaining*
+rules — managed rules (and rate limits) still evaluate the request. So
+allow-listing a scanner's IP does not exempt it from the managed ruleset; if
+it trips a signature, exclude that rule id (see below) rather than expecting
+the `allow` to cover it.
+
+Matching is **anomaly-scored** rather than first-match: every signature that
+matches adds to the request's anomaly score (a critical signature scores 5),
+and the request is rejected with a `403` once the total reaches the
+**anomaly threshold** (default 5). At the defaults, one critical match blocks.
+Signatures inspect the request line, query string, and headers on every
+request, and request bodies up to a platform-configured size limit.
+
+### Turning it on
+
+Managed rules live on the zone, next to `rules` and `limits`, as a
+`managedRules` object on `waf.set`:
+
+```json
+"managedRules": {
+  "enabled": true,
+  "mode": "enforce",
+  "paranoiaLevel": 1,
+  "anomalyThreshold": 5,
+  "excludedRules": []
+}
+```
+
+| Field | | Meaning |
+|---|---|---|
+| `enabled` | required | Turn the managed ruleset on or off for the zone. |
+| `mode` | optional | `enforce` (default) rejects over-threshold requests with `403`; `detect` evaluates and records matches but never blocks — see the note below before relying on it. |
+| `paranoiaLevel` | optional | `1`–`4`, default `1`. How aggressive the ruleset is — see below. |
+| `anomalyThreshold` | optional | `1`–`100`, default `5`. Total anomaly score at which a request is rejected; each critical match scores 5, so lower = stricter. |
+| `excludedRules` | optional | CRS rule ids (`911100`–`948999`) to disable, up to 50 — false-positive relief, see below. |
+
+{{< callout type="warning" >}}
+**`waf.set` replaces the whole zone — `managedRules` included.** A `waf.set`
+that omits the field turns managed rules **off and discards the tuning**.
+Scripts must `waf.get`, edit, and re-`set` the full zone. To pause enforcement
+without losing a curated exclusion list, set `"enabled": false` instead of
+omitting the field — a disabled block keeps its tuning and round-trips through
+`waf.get` intact.
+{{< /callout >}}
+
+### Paranoia levels
+
+The paranoia level selects how much of the ruleset is active:
+
+| Level | Character |
+|---|---|
+| `1` | Baseline. Covers the classic attacks with minimal false positives — engineered to be safe on ordinary production traffic. |
+| `2` | Adds stricter variants; occasional false positives on unusual-but-legitimate payloads (e.g. raw SQL fragments in form fields). |
+| `3` | Strict. Expect false positives without tuning. |
+| `4` | Paranoid. For high-security targets; substantial tuning required. |
+
+**Start at level 1** — it's the default, and at level 1 enforcement is safe
+for almost all applications. Only raise the level once you have a way to see
+what would match (per-project match metrics — see the note below) and a
+workflow to exclude the false positives it surfaces.
+
+{{< callout type="note" >}}
+**Match visibility is limited in this release.** There is no per-project chart
+of managed-rule matches yet — `detect` mode records matches, but they are
+currently visible to platform operators only, so a detect soak tells *you*
+nothing on its own. If you hit an unexpected `403` (or want a report of what
+`detect` recorded), contact support: operators can list the exact rule ids
+that fired for your zone. Per-project match metrics on this page's charts are
+planned as a follow-up.
+{{< /callout >}}
+
+### Excluding a rule (false positives)
+
+Every CRS signature has a numeric rule id. When a legitimate request gets
+blocked, the fix is to exclude the offending rule — not to lower the paranoia
+level or turn the whole ruleset off:
+
+1. Reproduce the blocked request and note the time and path.
+2. Get the matching rule id(s) — in this release, ask support for the zone's
+   match report (see the note above).
+3. Add the id to `excludedRules` and re-`set` the zone.
+
+```json
+"managedRules": {
+  "enabled": true,
+  "excludedRules": [942100, 920420]
+}
+```
+
+Only detection rules (`911100`–`948999`) can be excluded; the ruleset's setup
+and scoring machinery cannot. Excluding a rule only weakens *your* zone —
+nothing you exclude affects other projects.
+
+### Availability
+
+Like the rest of the Firewall, managed rules roll out **per location**.
+`location.get` reports the flag under `features.waf.managedRules`; in the
+console, the card shows *"Not available in this location"* when the zone's
+location doesn't support it yet. `waf.set` with `managedRules` enabled on an
+unsupported location is rejected.
+
+<!-- TODO(screenshot): once the console's managed-rules card is merged,
+     uncomment the waf-managed-rules entry in scripts/screenshots/capture.mjs,
+     run scripts/screenshots/refresh.sh to generate the asset, and replace this
+     whole comment with the shot line below — also removing the /* and */
+     markers, which only stop Hugo from executing the shortcode while it sits
+     inside this comment. Do not uncomment the shot line without re-running the
+     capture: an asset captured before the card merged shows no card at all:
+{{</* shot src="/img/waf-managed-rules.png" url="console.deploys.app/waf/manage?project=acme" alt="Managed rules card with the enabled toggle, enforce/detect mode, paranoia level picker, anomaly threshold, and excluded rules list" caption="Managed rules — OWASP Core Rule Set coverage for the zone, tuned with a handful of typed knobs." */>}}
+-->
+
 ## Metrics
 
 The Firewall metrics page plots matches per (rule, action) over a selectable

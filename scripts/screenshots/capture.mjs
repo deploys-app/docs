@@ -48,6 +48,10 @@ const screens = [
 	['billing-report',        `/billing/report`],
 	['project-list',          `/project`],
 	['waf-list',              `/waf?${P}`],
+	// TODO(waf-managed-rules): uncomment once the console's managed-rules card
+	// is merged — capturing before then shoots /waf/manage without the card,
+	// and the docs page's commented-out shot would ship a wrong screenshot.
+	// ['waf-managed-rules',     `/waf/manage?${P}&${LOC}`, { h: 1150 }],
 	['cache-list',            `/cache?${P}`],
 	['cache-manage',          `/cache/manage?${P}&${LOC}`, { h: 1150 }],
 	['cache-metrics',         `/cache/metrics?${P}&${LOC}`, { h: 1150 }],
