@@ -70,8 +70,8 @@ serving — you don't get a broken deployment because of a bad image.
 
 ## Automatic error cleanup
 
-A deployment that *should* keep pods running but has **no ready pod for 15
-minutes** is automatically marked **error** and its workload is torn down. This
+A deployment that *should* keep pods running but has **no ready pod for 6
+hours** is automatically marked **error** and its workload is torn down. This
 catches a deployment that applied cleanly but then can't stay up — a
 crash-looping image, an image that never pulls, or a readiness probe that never
 passes — so a dead deployment doesn't sit consuming a slot indefinitely.
