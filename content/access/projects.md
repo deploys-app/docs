@@ -61,12 +61,19 @@ Returns the project's current monthly usage rolled up by resource type. The
 same data drives the project dashboard and feeds the
 [billing report](/billing/usage-reports/).
 
-For charts rather than a single rollup, two API functions return time-series
-over a `timeRange` (`7d`, `30d`, or `90d`):
+For charts rather than a single rollup, these API functions return time-series:
 
 - **`project.metrics`** — CPU, memory, disk, egress, replica, and static-storage
-  usage over time, the series behind the project dashboard.
-- **`project.storageMetrics`** — static-site storage held over time.
+  usage over time (`timeRange` `7d`, `30d`, or `90d`), the series behind the
+  project dashboard.
+- **`project.metricsByDeployment`** — daily CPU, memory, pod egress, requests,
+  and static storage, one series per current deployment. It reads the
+  per-deployment samples already collected for deployment charts, so `timeRange`
+  is `7d` or `30d` (that history is kept for 30 days). Disk, replicas, cache
+  egress, and WAF egress stay on `project.metrics`; they are not recorded per
+  deployment.
+- **`project.storageMetrics`** — static-site storage held over time (`timeRange`
+  `7d`, `30d`, or `90d`).
 
 ```bash
 curl https://api.deploys.app/project.metrics \
@@ -74,7 +81,7 @@ curl https://api.deploys.app/project.metrics \
   -d '{ "project": "acme", "timeRange": "30d" }'
 ```
 
-Both need only `project.get`.
+These need only `project.get`.
 
 ## Deleting a project
 
