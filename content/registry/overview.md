@@ -3,7 +3,7 @@ title: 'Registry overview'
 linkTitle: 'Overview'
 weight: 1
 description: 'A private container registry at registry.deploys.app, one namespace per project.'
-lead: 'Every project gets a private slice of registry.deploys.app for its own application images. Push from CI, pull from your deployments — no extra credentials to plumb around.'
+lead: 'Every project gets a private slice of registry.deploys.app for its own application images. Push from CI. A deployment in the same project still needs a pull secret to pull them.'
 ---
 
 ## The Registry page
@@ -93,15 +93,15 @@ repository implicitly. There's no separate "create repository" step.
 
 ## Pulling from a deployment
 
-Deployments in the same project pull from `registry.deploys.app` automatically
-— the platform injects the right credentials at deploy time. You set
-`image: registry.deploys.app/<project>/<name>:<tag>` in the deploy config and
-that's it.
+A same-project image still needs a pull secret. On the deploy form, New creates
+the registry-pull account and secret for the selected location. Set the image
+and select that secret:
 
 ```json
 {
   "name": "api",
-  "image": "registry.deploys.app/acme/api:v1.8.0"
+  "image": "registry.deploys.app/acme/api:v1.8.0",
+  "pullSecret": "registry-pull"
 }
 ```
 

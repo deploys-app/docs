@@ -11,7 +11,8 @@ lead: 'A pull secret holds the credentials a deployment uses to pull an image fr
 Three cases:
 
 - Image in **`registry.deploys.app/<project>/...`** within the *same* project →
-  no pull secret needed.
+  a pull secret is still required. On the deploy form, New creates the
+  registry-pull account and secret for the selected location.
 - Image in `registry.deploys.app/<otherProject>/...` → create a pull secret
   with credentials that have read access to that project's registry.
 - Image in a **third-party registry** (Docker Hub private, GHCR, GCR, ECR,
