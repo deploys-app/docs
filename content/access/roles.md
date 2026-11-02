@@ -69,9 +69,9 @@ Some actions don't have their own permission — they ride on a broader one.
 `deployment.metrics`, `deployment.revisions`, `deployment.rollback`,
 `deployment.pause`, and `deployment.resume` are all covered by `deployment.get`
 or `deployment.deploy`; `registry.delete` / `deleteManifest` / `untag` are
-covered by `registry.push`; `project.usage` and `project.metrics` by
-`project.get`. Granting the made-up string does nothing — grant the broader
-permission instead.
+covered by `registry.push`; `project.usage`, `project.metrics`, and
+`project.metricsByDeployment` by `project.get`. Granting the made-up string
+does nothing — grant the broader permission instead.
 
 `.list` and `.get` differ in **what data they return**, not just scope:
 `deployment.list` is a non-sensitive index — it returns each deployment's name,
